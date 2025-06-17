@@ -2,10 +2,10 @@
 
 namespace Laravel\AiAssistant\Mcp\Tools;
 
+use Generator;
 use Laravel\Mcp\Tools\Tool;
 use Laravel\Mcp\Tools\ToolInputSchema;
 use Laravel\Mcp\Tools\ToolResponse;
-use Generator;
 
 class LogReader extends Tool
 {
@@ -39,8 +39,6 @@ class LogReader extends Tool
 
     /**
      * Execute the tool call.
-     *
-     * @return ToolResponse|Generator
      */
     public function handle(array $arguments): ToolResponse|Generator
     {
@@ -70,8 +68,6 @@ class LogReader extends Tool
      * Efficiently read the last N lines from a file handle.
      *
      * @param  resource  $handle
-     * @param  int  $lines
-     * @return string
      */
     protected function tail($handle, int $lines): string
     {

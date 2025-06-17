@@ -2,9 +2,9 @@
 
 namespace Laravel\AiAssistant;
 
-use Laravel\AiAssistant\Mcp\AiAssistant;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Laravel\AiAssistant\Mcp\AiAssistant;
 use Laravel\Mcp\Facades\Mcp;
 
 class AiAssistantServiceProvider extends ServiceProvider
