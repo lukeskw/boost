@@ -1,11 +1,13 @@
 <?php
 
-namespace Laravel\Package;
+namespace Laravel\AiAssistant;
 
+use Laravel\AiAssistant\Mcp\AiAssistant;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Mcp\Facades\Mcp;
 
-class LaravelPackageServiceProvider extends ServiceProvider
+class AiAssistantServiceProvider extends ServiceProvider
 {
     /**
      * Register any package services.
@@ -15,7 +17,7 @@ class LaravelPackageServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(
-            __DIR__.'/../config/laravel-package.php', 'laravel-package'
+            __DIR__.'/../config/ai-assistant.php', 'ai-assistant'
         );
     }
 
@@ -26,6 +28,8 @@ class LaravelPackageServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        Mcp::local('laravel-ai-assistant', AiAssistant::class);
+
         $this->registerRoutes();
         $this->registerResources();
         $this->registerPublishing();
@@ -40,10 +44,10 @@ class LaravelPackageServiceProvider extends ServiceProvider
     protected function registerRoutes()
     {
         Route::group([
-            'domain' => config('laravel-package.domain', null),
-            'middleware' => config('laravel-package.middleware', 'web'),
-            'namespace' => 'Laravel\Package\Http\Controllers',
-            'prefix' => config('laravel-package.path'),
+            'domain' => config('ai-assistant.domain', null),
+            'middleware' => config('ai-assistant.middleware', 'web'),
+            'namespace' => 'Laravel\AiAssistant\Http\Controllers',
+            'prefix' => config('ai-assistant.path'),
         ], function () {
             $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         });
@@ -56,7 +60,7 @@ class LaravelPackageServiceProvider extends ServiceProvider
      */
     protected function registerResources()
     {
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'laravel-package');
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'ai-assistant');
     }
 
     /**
@@ -69,15 +73,15 @@ class LaravelPackageServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->publishesMigrations([
                 __DIR__.'/../database/migrations' => database_path('migrations'),
-            ], 'laravel-package-migrations');
+            ], 'ai-assistant-migrations');
 
             $this->publishes([
-                __DIR__.'/../public' => public_path('vendor/laravel-package'),
-            ], ['laravel-package-assets', 'laravel-assets']);
+                __DIR__.'/../public' => public_path('vendor/ai-assistant'),
+            ], ['ai-assistant-assets', 'laravel-assets']);
 
             $this->publishes([
-                __DIR__.'/../config/laravel-package.php' => config_path('laravel-package.php'),
-            ], 'laravel-package-config');
+                __DIR__.'/../config/ai-assistant.php' => config_path('ai-assistant.php'),
+            ], 'ai-assistant-config');
         }
     }
 

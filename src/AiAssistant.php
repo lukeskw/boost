@@ -1,20 +1,20 @@
 <?php
 
-namespace Laravel\Package;
+namespace Laravel\AiAssistant;
 
 use Closure;
 
-class LaravelPackage
+class AiAssistant
 {
     /**
-     * The callback that should be used to authenticate LaravelPackage users.
+     * The callback that should be used to authenticate AiAssistant users.
      *
      * @var \Closure
      */
     public static $authUsing;
 
     /**
-     * Determine if the given request can access the LaravelPackage dashboard.
+     * Determine if the given request can access the AiAssistant dashboard.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return bool
@@ -27,7 +27,7 @@ class LaravelPackage
     }
 
     /**
-     * Set the callback that should be used to authenticate LaravelPackage users.
+     * Set the callback that should be used to authenticate AiAssistant users.
      *
      * @return static
      */

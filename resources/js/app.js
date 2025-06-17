@@ -8,6 +8,6 @@ if (token) {
     axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
 }
 
-moment.tz.setDefault(window.LaravelPackage.timezone);
+moment.tz.setDefault(window.AiAssistant.timezone);
 
-window.LaravelPackage.basePath = '/' + window.LaravelPackage.path;
+window.AiAssistant.basePath = '/' + window.AiAssistant.path;

@@ -16,4 +16,4 @@ Route::prefix('api')->group(function () {
 });
 
 // Catch-all Route...
-Route::get('/{view?}', 'HomeController@index')->where('view', '(.*)')->name('laravel-package.index');
+Route::get('/{view?}', 'HomeController@index')->where('view', '(.*)')->name('ai-assistant.index');

@@ -1,6 +1,6 @@
 <?php
 
-namespace Laravel\Package\Console;
+namespace Laravel\AiAssistant\Console;
 
 use Illuminate\Console\Command;
 
@@ -11,14 +11,14 @@ class InstallCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'laravel-package:install';
+    protected $signature = 'ai-assistant:install';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Install LaravelPackage';
+    protected $description = 'Install AiAssistant';
 
     /**
      * Execute the console command.
@@ -27,6 +27,6 @@ class InstallCommand extends Command
      */
     public function handle()
     {
-        $this->info('LaravelPackage installed successfully.');
+        $this->info('AiAssistant installed successfully.');
     }
 }

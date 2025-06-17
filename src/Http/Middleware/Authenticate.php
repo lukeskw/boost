@@ -1,8 +1,8 @@
 <?php
 
-namespace Laravel\Package\Http\Middleware;
+namespace Laravel\AiAssistant\Http\Middleware;
 
-use Laravel\Package\LaravelPackage;
+use Laravel\AiAssistant\AiAssistant;
 
 class Authenticate
 {
@@ -15,6 +15,6 @@ class Authenticate
      */
     public function handle($request, $next)
     {
-        return LaravelPackage::check($request) ? $next($request) : abort(403);
+        return AiAssistant::check($request) ? $next($request) : abort(403);
     }
 }

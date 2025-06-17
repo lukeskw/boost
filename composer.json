@@ -1,12 +1,12 @@
 {
-    "name": "laravel/package-template",
-    "description": "Laravel Package ...",
-    "keywords": ["laravel"],
-    "homepage": "https://github.com/laravel/package-template",
+    "name": "laravel/ai-assistant",
+    "description": "An AI Assistant for Laravel to level up your AI agents.",
+    "keywords": ["laravel", "ai", "assistant"],
+    "homepage": "https://github.com/laravel/ai-assistant",
     "license": "MIT",
     "support": {
-        "issues": "https://github.com/laravel/package-template/issues",
-        "source": "https://github.com/laravel/package-template"
+        "issues": "https://github.com/laravel/ai-assistant/issues",
+        "source": "https://github.com/laravel/ai-assistant"
     },
     "authors": [
         {
@@ -14,12 +14,19 @@
             "email": "taylor@laravel.com"
         }
     ],
+    "repositories": [
+        {
+            "type": "path",
+            "url": "/Users/petersuhm/Code/mcp"
+        }
+    ],
     "require": {
         "php": "^8.2",
-        "illuminate/contracts": "^11.0|^12.0",
         "illuminate/console": "^11.0|^12.0",
+        "illuminate/contracts": "^11.0|^12.0",
+        "illuminate/routing": "^11.0|^12.0",
         "illuminate/support": "^11.0|^12.0",
-        "illuminate/routing": "^11.0|^12.0"
+        "laravel/mcp": "dev-main"
     },
     "require-dev": {
         "mockery/mockery": "^1.6",
@@ -29,8 +36,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Laravel\\Package\\": "src/",
-            "Laravel\\Package\\Database\\Factories\\": "database/factories"
+            "Laravel\\AiAssistant\\": "src/",
+            "Laravel\\AiAssistant\\Database\\Factories\\": "database/factories"
         }
     },
     "autoload-dev": {
@@ -44,7 +51,7 @@
         },
         "laravel": {
             "providers": [
-                "Laravel\\Package\\LaravelPackageServiceProvider"
+                "Laravel\\AiAssistant\\AiAssistantServiceProvider"
             ]
         }
     },

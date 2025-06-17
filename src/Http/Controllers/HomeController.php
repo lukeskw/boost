@@ -1,10 +1,10 @@
 <?php
 
-namespace Laravel\Package\Http\Controllers;
+namespace Laravel\AiAssistant\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\App;
-use Laravel\Package\Http\Middleware\Authenticate;
+use Laravel\AiAssistant\Http\Middleware\Authenticate;
 
 class HomeController extends Controller
 {
@@ -25,10 +25,10 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('laravel-package::layout', [
+        return view('ai-assistant::layout', [
             'isDownForMaintenance' => App::isDownForMaintenance(),
             'scriptVariables' => [
-                'path' => config('laravel-package.path'),
+                'path' => config('ai-assistant.path'),
                 'timezone' => config('app.timezone'),
             ],
         ]);

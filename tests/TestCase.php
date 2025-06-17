@@ -3,22 +3,22 @@
 namespace Tests;
 
 use Illuminate\Support\Facades\Artisan;
-use Laravel\Package\LaravelPackage;
-use Laravel\Package\LaravelPackageServiceProvider;
+use Laravel\AiAssistant\AiAssistant;
+use Laravel\AiAssistant\AiAssistantServiceProvider;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
 abstract class TestCase extends OrchestraTestCase
 {
     protected function defineEnvironment($app)
     {
-        Artisan::call('vendor:publish', ['--tag' => 'laravel-package-assets']);
+        Artisan::call('vendor:publish', ['--tag' => 'ai-assistant-assets']);
     }
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        LaravelPackage::$authUsing = function () {
+        AiAssistant::$authUsing = function () {
             return true;
         };
     }
@@ -27,11 +27,11 @@ abstract class TestCase extends OrchestraTestCase
     {
         parent::tearDown();
 
-        LaravelPackage::$authUsing = null;
+        AiAssistant::$authUsing = null;
     }
 
     protected function getPackageProviders($app)
     {
-        return [LaravelPackageServiceProvider::class];
+        return [AiAssistantServiceProvider::class];
     }
 }
