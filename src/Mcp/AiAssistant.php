@@ -2,6 +2,10 @@
 
 namespace Laravel\AiAssistant\Mcp;
 
+use Laravel\AiAssistant\Mcp\Resources\LaravelBestPractices;
+use Laravel\AiAssistant\Mcp\Resources\ListResources;
+use Laravel\AiAssistant\Mcp\Resources\ReadResource;
+use Laravel\AiAssistant\Mcp\Tools\LaravelBestPractices as LaravelBestPracticesTool;
 use Laravel\AiAssistant\Mcp\Tools\LogReader;
 use Laravel\Mcp\Server;
 
@@ -26,6 +30,25 @@ class AiAssistant extends Server
      * The available tools.
      */
     public array $tools = [
+        LaravelBestPracticesTool::class,
         LogReader::class,
     ];
+
+    /**
+     * The available resources.
+     */
+    public array $resources = [
+        LaravelBestPractices::class,
+    ];
+
+    public function boot()
+    {
+        $this->addMethod('resources/list', ListResources::class);
+        $this->resolveMethodUsing(ListResources::class, fn () => new ListResources($this->resources));
+
+        $this->addMethod('resources/read', ReadResource::class);
+        $this->resolveMethodUsing(ReadResource::class, fn () => new ReadResource($this->resources));
+
+        $this->addCapability('resources');
+    }
 }
