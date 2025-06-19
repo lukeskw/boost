@@ -3,9 +3,8 @@
 namespace Laravel\AiAssistant\Mcp\Tools;
 
 use Laravel\AiAssistant\Mcp\Resources\LaravelBestPractices as LaravelBestPracticesResource;
-use Laravel\AiAssistant\Mcp\Tools\ToolResourceResponse;
-use Laravel\Mcp\Tools\ToolInputSchema;
 use Laravel\Mcp\Tools\Tool;
+use Laravel\Mcp\Tools\ToolInputSchema;
 
 class LaravelBestPractices extends Tool
 {
@@ -26,6 +25,6 @@ class LaravelBestPractices extends Tool
 
     public function handle(array $arguments): ToolResourceResponse
     {
-        return new ToolResourceResponse(new LaravelBestPracticesResource());
+        return new ToolResourceResponse(new LaravelBestPracticesResource);
     }
 }

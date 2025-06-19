@@ -10,9 +10,7 @@ class ToolResourceResponse extends ToolResponse
     /**
      * Create a new tool resource response.
      */
-    public function __construct(private Resource $resource)
-    {
-    }
+    public function __construct(private Resource $resource) {}
 
     /**
      * Convert the response to an array.

@@ -26,6 +26,6 @@ class LaravelBestPractices extends Resource
 
     public function read(): string
     {
-        return file_get_contents(__DIR__ . '/../../../resources/mcp_resources/laravel-best-practices.md');
+        return file_get_contents(__DIR__.'/../../../resources/mcp_resources/laravel-best-practices.md');
     }
 }
