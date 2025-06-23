@@ -11,13 +11,6 @@ use Illuminate\Support\Str;
 
 class DatabaseSchema extends Tool
 {
-    protected Connection $connection;
-
-    public function __construct()
-    {
-        $this->connection = app(Connection::class);
-    }
-
     public function description(): string
     {
         return 'Use this tool to read the database schema for the application.';
