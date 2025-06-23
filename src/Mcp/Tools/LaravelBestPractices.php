@@ -8,11 +8,6 @@ use Laravel\Mcp\Tools\ToolInputSchema;
 
 class LaravelBestPractices extends Tool
 {
-    public function name(): string
-    {
-        return 'Laravel Best Practices';
-    }
-
     public function description(): string
     {
         return 'Always include these instructions when writing Laravel code.';

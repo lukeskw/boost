@@ -10,14 +10,6 @@ use Laravel\Mcp\Tools\ToolResponse;
 class LogReader extends Tool
 {
     /**
-     * The name of the tool.
-     */
-    public function name(): string
-    {
-        return 'Laravel Log Reader';
-    }
-
-    /**
      * A description of the tool.
      */
     public function description(): string
