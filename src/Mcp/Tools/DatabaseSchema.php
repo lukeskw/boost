@@ -5,7 +5,6 @@ namespace Laravel\AiAssistant\Mcp\Tools;
 use Laravel\Mcp\Tools\ToolResponse;
 use Laravel\Mcp\Tools\ToolInputSchema;
 use Laravel\Mcp\Tools\Tool;
-use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
 
