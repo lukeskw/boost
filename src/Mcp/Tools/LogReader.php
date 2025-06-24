@@ -3,6 +3,8 @@
 namespace Laravel\AiAssistant\Mcp\Tools;
 
 use Generator;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Process;
 use Laravel\Mcp\Tools\Tool;
 use Laravel\Mcp\Tools\ToolInputSchema;
 use Laravel\Mcp\Tools\ToolResponse;
@@ -14,7 +16,7 @@ class LogReader extends Tool
      */
     public function description(): string
     {
-        return 'Use this tool to access the Laravel log for the development environment.';
+        return 'Use this tool to tail and grep the local Laravel logs.';
     }
 
     /**
@@ -22,9 +24,15 @@ class LogReader extends Tool
      */
     public function schema(ToolInputSchema $schema): ToolInputSchema
     {
-        $schema->string('number_of_lines')
+        $schema->integer('lines')
             ->description('The number of lines to read from the end of the log.')
             ->required();
+
+        $schema->string('log_path')
+            ->description('Optional path to the log file. Defaults to storage/logs/laravel.log if not provided.');
+
+        $schema->string('grep')
+            ->description('Optional grep pattern to filter log entries. Leave empty to get all lines.');
 
         return $schema;
     }
@@ -34,50 +42,51 @@ class LogReader extends Tool
      */
     public function handle(array $arguments): ToolResponse|Generator
     {
-        $numberOfLines = (int) $arguments['number_of_lines'];
-        $logPath = storage_path('logs/laravel.log');
+        $numberOfLines = $arguments['lines'];
+        $grepPattern = $arguments['grep'] ?? null;
 
-        if (! file_exists($logPath) || ! is_readable($logPath)) {
-            return new ToolResponse('Log file not found or is not readable.');
+        $logPath = isset($arguments['log_path']) && $arguments['log_path'] !== ''
+            ? $arguments['log_path']
+            : storage_path('logs/laravel.log');
+
+        if (! str_starts_with($logPath, '/')) {
+            $logPath = base_path($logPath);
         }
 
-        $handle = fopen($logPath, 'rb');
-
-        if (! $handle) {
-            return new ToolResponse('Unable to open log file.');
+        if (! $this->logFileExistsAndIsReadable($logPath)) {
+            return new ToolResponse("Log file not found or is not readable: {$logPath}");
         }
 
-        try {
-            $output = $this->tail($handle, $numberOfLines);
-        } finally {
-            fclose($handle);
+        if ($grepPattern) {
+            $command = ['sh', '-c', "grep ".escapeshellarg($grepPattern)." ".escapeshellarg($logPath)." | tail -n {$numberOfLines}"];
+        } else {
+            $command = ['tail', '-n', (string) $numberOfLines, $logPath];
         }
 
-        return new ToolResponse($output);
+        $result = Process::run($command);
+
+        if (! $result->successful()) {
+            return new ToolResponse("Failed to read log file. Error: ".trim($result->errorOutput()));
+        }
+
+        $output = $result->output();
+
+        if (trim($output) === '') {
+            if ($grepPattern) {
+                return new ToolResponse("No log entries found matching pattern: {$grepPattern}");
+            } else {
+                return new ToolResponse('Log file is empty or no entries found.');
+            }
+        }
+
+        return new ToolResponse(trim($output));
     }
 
     /**
-     * Efficiently read the last N lines from a file handle.
-     *
-     * @param  resource  $handle
+     * Check if the log file exists and is readable.
      */
-    protected function tail($handle, int $lines): string
+    private function logFileExistsAndIsReadable(string $logPath): bool
     {
-        fseek($handle, 0, SEEK_END);
-        $position = ftell($handle);
-        $output = '';
-        $lineCount = 0;
-        $bufferSize = 4096;
-
-        while ($position > 0 && $lineCount <= $lines) {
-            $seek = min($position, $bufferSize);
-            fseek($handle, $position - $seek, SEEK_SET);
-            $chunk = fread($handle, $seek);
-            $output = $chunk.$output;
-            $position -= $seek;
-            $lineCount = substr_count($output, "\n");
-        }
-
-        return implode("\n", array_slice(explode("\n", $output), -$lines));
+        return File::exists($logPath) && File::isReadable($logPath);
     }
 }

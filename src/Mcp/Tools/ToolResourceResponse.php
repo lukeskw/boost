@@ -18,7 +18,7 @@ class ToolResourceResponse extends ToolResponse
     public function toArray(): array
     {
         return [
-            'contents' => [
+            'content' => [
                 [
                     'type' => 'resource',
                     'resource' => [
