@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 use Laravel\Mcp\Tools\Tool;
 use Laravel\Mcp\Tools\ToolInputSchema;
-use Laravel\Mcp\Tools\ToolResponse;
+use Laravel\Mcp\Tools\ToolResult;
 
 class LogReader extends Tool
 {
@@ -40,7 +40,7 @@ class LogReader extends Tool
     /**
      * Execute the tool call.
      */
-    public function handle(array $arguments): ToolResponse|Generator
+    public function handle(array $arguments): ToolResult|Generator
     {
         $numberOfLines = $arguments['lines'];
         $grepPattern = $arguments['grep'] ?? null;
@@ -54,7 +54,7 @@ class LogReader extends Tool
         }
 
         if (! $this->logFileExistsAndIsReadable($logPath)) {
-            return new ToolResponse("Log file not found or is not readable: {$logPath}");
+            return ToolResult::error("Log file not found or is not readable: {$logPath}");
         }
 
         if ($grepPattern) {
@@ -66,20 +66,20 @@ class LogReader extends Tool
         $result = Process::run($command);
 
         if (! $result->successful()) {
-            return new ToolResponse("Failed to read log file. Error: ".trim($result->errorOutput()));
+            return ToolResult::error("Failed to read log file. Error: ".trim($result->errorOutput()));
         }
 
         $output = $result->output();
 
         if (trim($output) === '') {
             if ($grepPattern) {
-                return new ToolResponse("No log entries found matching pattern: {$grepPattern}");
+                return ToolResult::error("No log entries found matching pattern: {$grepPattern}");
             } else {
-                return new ToolResponse('Log file is empty or no entries found.');
+                return ToolResult::error('Log file is empty or no entries found.');
             }
         }
 
-        return new ToolResponse(trim($output));
+        return ToolResult::text(trim($output));
     }
 
     /**

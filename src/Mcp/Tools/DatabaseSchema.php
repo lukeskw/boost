@@ -2,7 +2,7 @@
 
 namespace Laravel\AiAssistant\Mcp\Tools;
 
-use Laravel\Mcp\Tools\ToolResponse;
+use Laravel\Mcp\Tools\ToolResult;
 use Laravel\Mcp\Tools\ToolInputSchema;
 use Laravel\Mcp\Tools\Tool;
 use Illuminate\Support\Facades\Artisan;
@@ -20,7 +20,7 @@ class DatabaseSchema extends Tool
         return $schema;
     }
 
-    public function handle(array $arguments): ToolResponse
+    public function handle(array $arguments): ToolResult
     {
         $filename = 'tmp_' . Str::random(40) . '.sql';
         $path = database_path("schema/{$filename}");
@@ -31,6 +31,6 @@ class DatabaseSchema extends Tool
 
         unlink($path);
 
-        return new ToolResponse($schema);
+        return ToolResult::text($schema);
     }
 }

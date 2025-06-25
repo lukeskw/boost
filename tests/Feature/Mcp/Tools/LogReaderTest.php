@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 use Laravel\AiAssistant\Mcp\Tools\LogReader;
-use Laravel\Mcp\Tools\ToolResponse;
+use Laravel\Mcp\Tools\ToolResult;
 
 it('calls process with the correct log path when one is provided', function () {
     Process::fake([
@@ -15,7 +15,7 @@ it('calls process with the correct log path when one is provided', function () {
 
     $tool = new LogReader();
 
-    $tool->handle([
+    $result =$tool->handle([
         'lines' => 10,
         'log_path' => 'my/custom/log.log',
     ]);
@@ -114,7 +114,7 @@ it('returns an error if the log file does not exist', function () {
     ]);
 
     $logPath = storage_path('logs/laravel.log');
-    expect($response)->toEqual(new ToolResponse("Log file not found or is not readable: {$logPath}"));
+    expect($response)->toEqual(ToolResult::error("Log file not found or is not readable: {$logPath}"));
 });
 
 it('returns an error if the log file is not readable', function () {
@@ -127,7 +127,7 @@ it('returns an error if the log file is not readable', function () {
     ]);
 
     $logPath = storage_path('logs/laravel.log');
-    expect($response)->toEqual(new ToolResponse("Log file not found or is not readable: {$logPath}"));
+    expect($response)->toEqual(ToolResult::error("Log file not found or is not readable: {$logPath}"));
 });
 
 it('returns an error if the process fails', function () {
@@ -147,7 +147,7 @@ it('returns an error if the process fails', function () {
         'lines' => 10,
     ]);
 
-    expect($response)->toEqual(new ToolResponse("Failed to read log file. Error: Something went wrong"));
+    expect($response)->toEqual(ToolResult::error("Failed to read log file. Error: Something went wrong"));
 });
 
 it('returns a message if no log entries match the grep pattern', function () {
@@ -164,7 +164,7 @@ it('returns a message if no log entries match the grep pattern', function () {
         'grep' => 'non_existent_pattern',
     ]);
 
-    expect($response)->toEqual(new ToolResponse("No log entries found matching pattern: non_existent_pattern"));
+    expect($response)->toEqual(ToolResult::error("No log entries found matching pattern: non_existent_pattern"));
 });
 
 it('returns a message if the log file is empty', function () {
@@ -180,7 +180,7 @@ it('returns a message if the log file is empty', function () {
         'lines' => 10,
     ]);
 
-    expect($response)->toEqual(new ToolResponse('Log file is empty or no entries found.'));
+    expect($response)->toEqual(ToolResult::error('Log file is empty or no entries found.'));
 });
 
 it('returns the log content on success', function () {
@@ -196,5 +196,5 @@ it('returns the log content on success', function () {
         'lines' => 10,
     ]);
 
-    expect($response)->toEqual(new ToolResponse("log line 1 \n log line 2"));
+    expect($response)->toEqual(ToolResult::text("log line 1 \n log line 2"));
 });
