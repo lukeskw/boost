@@ -6,7 +6,9 @@ use Laravel\AiAssistant\Mcp\Resources\LaravelBestPractices as LaravelBestPractic
 use Laravel\Mcp\Tools\Tool;
 use Laravel\Mcp\Tools\ToolResult;
 use Laravel\Mcp\Tools\ToolInputSchema;
+use Laravel\Mcp\Tools\Annotations\IsReadOnly;
 
+#[IsReadOnly()]
 class LaravelBestPractices extends Tool
 {
     public function description(): string

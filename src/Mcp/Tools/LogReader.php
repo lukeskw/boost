@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Process;
 use Laravel\Mcp\Tools\Tool;
 use Laravel\Mcp\Tools\ToolInputSchema;
 use Laravel\Mcp\Tools\ToolResult;
+use Laravel\Mcp\Tools\Annotations\IsReadOnly;
 
+#[IsReadOnly()]
 class LogReader extends Tool
 {
     /**

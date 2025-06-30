@@ -2,12 +2,14 @@
 
 namespace Laravel\AiAssistant\Mcp\Tools;
 
+use Laravel\Mcp\Tools\Annotations\IsReadOnly;
 use Laravel\Mcp\Tools\ToolResult;
 use Laravel\Mcp\Tools\ToolInputSchema;
 use Laravel\Mcp\Tools\Tool;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
 
+#[IsReadOnly()]
 class DatabaseSchema extends Tool
 {
     public function description(): string
