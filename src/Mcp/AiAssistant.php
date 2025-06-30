@@ -2,6 +2,7 @@
 
 namespace Laravel\AiAssistant\Mcp;
 
+use Laravel\AiAssistant\Mcp\Resources\ApplicationInfo;
 use Laravel\AiAssistant\Mcp\Resources\LaravelBestPractices;
 use Laravel\AiAssistant\Mcp\Resources\ListResources;
 use Laravel\AiAssistant\Mcp\Resources\ReadResource;
@@ -41,6 +42,7 @@ class AiAssistant extends Server
      */
     public array $resources = [
         LaravelBestPractices::class,
+        ApplicationInfo::class,
     ];
 
     public function boot()
