@@ -1,12 +1,16 @@
 {
-    "name": "laravel/ai-assistant",
-    "description": "An AI Assistant for Laravel to level up your AI agents.",
-    "keywords": ["laravel", "ai", "assistant"],
-    "homepage": "https://github.com/laravel/ai-assistant",
+    "name": "laravel/boost",
+    "description": "Laravel AI Assistant to give you a boost",
+    "keywords": [
+        "dev",
+        "laravel",
+        "ai"
+    ],
+    "homepage": "https://github.com/laravel/boost",
     "license": "MIT",
     "support": {
-        "issues": "https://github.com/laravel/ai-assistant/issues",
-        "source": "https://github.com/laravel/ai-assistant"
+        "issues": "https://github.com/laravel/boost/issues",
+        "source": "https://github.com/laravel/boost"
     },
     "authors": [
         {
@@ -17,7 +21,7 @@
     "repositories": [
         {
             "type": "path",
-            "url": "/Users/petersuhm/Code/mcp"
+            "url": "../mcp"
         }
     ],
     "require": {
@@ -29,6 +33,7 @@
         "laravel/mcp": "dev-main"
     },
     "require-dev": {
+        "laravel/pint": "^1.23",
         "mockery/mockery": "^1.6",
         "orchestra/testbench": "^9.0|^10.0",
         "pestphp/pest": "^3.0",
@@ -36,8 +41,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Laravel\\AiAssistant\\": "src/",
-            "Laravel\\AiAssistant\\Database\\Factories\\": "database/factories"
+            "Laravel\\Boost\\": "src/"
         }
     },
     "autoload-dev": {
@@ -51,7 +55,7 @@
         },
         "laravel": {
             "providers": [
-                "Laravel\\AiAssistant\\AiAssistantServiceProvider"
+                "Laravel\\Boost\\BoostServiceProvider"
             ]
         }
     },

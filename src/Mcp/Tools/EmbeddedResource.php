@@ -1,18 +1,16 @@
 <?php
 
-namespace Laravel\AiAssistant\Mcp\Tools;
+namespace Laravel\Boost\Mcp\Tools;
 
-use Laravel\AiAssistant\Mcp\Resources\Resource;
-use Laravel\Mcp\Contracts\Tools\Content;
+use Laravel\Mcp\Server\Contracts\Tools\Content;
+use Laravel\Mcp\Server\Resource;
 
 class EmbeddedResource implements Content
 {
     /**
      * Create a new text content item.
      */
-    public function __construct(public readonly Resource $resource)
-    {
-    }
+    public function __construct(public readonly Resource $resource) {}
 
     /**
      * Convert the content to an array.

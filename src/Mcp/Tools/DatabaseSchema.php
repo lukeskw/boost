@@ -1,13 +1,13 @@
 <?php
 
-namespace Laravel\AiAssistant\Mcp\Tools;
+namespace Laravel\Boost\Mcp\Tools;
 
-use Laravel\Mcp\Tools\Annotations\IsReadOnly;
-use Laravel\Mcp\Tools\ToolResult;
-use Laravel\Mcp\Tools\ToolInputSchema;
-use Laravel\Mcp\Tools\Tool;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
+use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
+use Laravel\Mcp\Server\Tools\ToolInputSchema;
+use Laravel\Mcp\Server\Tools\ToolResult;
 
 #[IsReadOnly()]
 class DatabaseSchema extends Tool
@@ -24,7 +24,7 @@ class DatabaseSchema extends Tool
 
     public function handle(array $arguments): ToolResult
     {
-        $filename = 'tmp_' . Str::random(40) . '.sql';
+        $filename = 'tmp_'.Str::random(40).'.sql';
         $path = database_path("schema/{$filename}");
 
         Artisan::call('schema:dump', ['--path' => $path]);

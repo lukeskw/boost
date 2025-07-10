@@ -1,6 +1,6 @@
 <?php
 
-namespace Laravel\AiAssistant\Console;
+namespace Laravel\Boost\Console;
 
 use Illuminate\Console\Command;
 
@@ -11,14 +11,14 @@ class InstallCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'ai-assistant:install';
+    protected $signature = 'boost:install';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Install AiAssistant';
+    protected $description = 'Install Laravel Boost';
 
     /**
      * Execute the console command.
@@ -27,6 +27,6 @@ class InstallCommand extends Command
      */
     public function handle()
     {
-        $this->info('AiAssistant installed successfully.');
+        $this->info('Laravel Boost installed successfully.');
     }
 }

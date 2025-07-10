@@ -1,14 +1,14 @@
 <?php
 
-namespace Laravel\AiAssistant\Mcp\Tools;
+namespace Laravel\Boost\Mcp\Tools;
 
 use Generator;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
-use Laravel\Mcp\Tools\Tool;
-use Laravel\Mcp\Tools\ToolInputSchema;
-use Laravel\Mcp\Tools\ToolResult;
-use Laravel\Mcp\Tools\Annotations\IsReadOnly;
+use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
+use Laravel\Mcp\Server\Tools\ToolInputSchema;
+use Laravel\Mcp\Server\Tools\ToolResult;
 
 #[IsReadOnly()]
 class LogReader extends Tool
@@ -60,7 +60,7 @@ class LogReader extends Tool
         }
 
         if ($grepPattern) {
-            $command = ['sh', '-c', "grep ".escapeshellarg($grepPattern)." ".escapeshellarg($logPath)." | tail -n {$numberOfLines}"];
+            $command = ['sh', '-c', 'grep '.escapeshellarg($grepPattern).' '.escapeshellarg($logPath)." | tail -n {$numberOfLines}"];
         } else {
             $command = ['tail', '-n', (string) $numberOfLines, $logPath];
         }
@@ -68,7 +68,7 @@ class LogReader extends Tool
         $result = Process::run($command);
 
         if (! $result->successful()) {
-            return ToolResult::error("Failed to read log file. Error: ".trim($result->errorOutput()));
+            return ToolResult::error('Failed to read log file. Error: '.trim($result->errorOutput()));
         }
 
         $output = $result->output();

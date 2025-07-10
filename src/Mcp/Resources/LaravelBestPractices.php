@@ -1,6 +1,8 @@
 <?php
 
-namespace Laravel\AiAssistant\Mcp\Resources;
+namespace Laravel\Boost\Mcp\Resources;
+
+use Laravel\Mcp\Server\Resource;
 
 class LaravelBestPractices extends Resource
 {

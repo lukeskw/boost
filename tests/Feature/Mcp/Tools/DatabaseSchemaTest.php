@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
-use Laravel\AiAssistant\Mcp\Tools\DatabaseSchema;
+use Laravel\Boost\Mcp\Tools\DatabaseSchema;
 
 beforeEach(function () {
     // Switch the default connection to a file-backed SQLite DB.

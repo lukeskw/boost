@@ -2,8 +2,8 @@
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
-use Laravel\AiAssistant\Mcp\Tools\LogReader;
-use Laravel\Mcp\Tools\ToolResult;
+use Laravel\Boost\Mcp\Tools\LogReader;
+use Laravel\Mcp\Server\Tools\ToolResult;
 
 it('calls process with the correct log path when one is provided', function () {
     Process::fake([
@@ -13,9 +13,9 @@ it('calls process with the correct log path when one is provided', function () {
     File::shouldReceive('exists')->andReturn(true);
     File::shouldReceive('isReadable')->andReturn(true);
 
-    $tool = new LogReader();
+    $tool = new LogReader;
 
-    $result =$tool->handle([
+    $result = $tool->handle([
         'lines' => 10,
         'log_path' => 'my/custom/log.log',
     ]);
@@ -33,7 +33,7 @@ it('calls process with the correct log path when an absolute path is provided', 
     File::shouldReceive('exists')->andReturn(true);
     File::shouldReceive('isReadable')->andReturn(true);
 
-    $tool = new LogReader();
+    $tool = new LogReader;
     $absolutePath = '/var/logs/my-app.log';
     $tool->handle([
         'lines' => 10,
@@ -53,7 +53,7 @@ it('calls process with the default log path when none is provided', function () 
     File::shouldReceive('exists')->andReturn(true);
     File::shouldReceive('isReadable')->andReturn(true);
 
-    $tool = new LogReader();
+    $tool = new LogReader;
     $tool->handle([
         'lines' => 10,
     ]);
@@ -71,7 +71,7 @@ it('calls process with the default log path when an empty string is provided', f
     File::shouldReceive('exists')->andReturn(true);
     File::shouldReceive('isReadable')->andReturn(true);
 
-    $tool = new LogReader();
+    $tool = new LogReader;
     $tool->handle([
         'lines' => 10,
         'log_path' => '',
@@ -90,7 +90,7 @@ it('calls process with grep pattern when provided', function () {
     File::shouldReceive('exists')->andReturn(true);
     File::shouldReceive('isReadable')->andReturn(true);
 
-    $tool = new LogReader();
+    $tool = new LogReader;
     $tool->handle([
         'lines' => 10,
         'grep' => 'error',
@@ -108,7 +108,7 @@ it('calls process with grep pattern when provided', function () {
 it('returns an error if the log file does not exist', function () {
     File::shouldReceive('exists')->andReturn(false);
 
-    $tool = new LogReader();
+    $tool = new LogReader;
     $response = $tool->handle([
         'lines' => 10,
     ]);
@@ -121,7 +121,7 @@ it('returns an error if the log file is not readable', function () {
     File::shouldReceive('exists')->andReturn(true);
     File::shouldReceive('isReadable')->andReturn(false);
 
-    $tool = new LogReader();
+    $tool = new LogReader;
     $response = $tool->handle([
         'lines' => 10,
     ]);
@@ -142,12 +142,12 @@ it('returns an error if the process fails', function () {
     File::shouldReceive('exists')->andReturn(true);
     File::shouldReceive('isReadable')->andReturn(true);
 
-    $tool = new LogReader();
+    $tool = new LogReader;
     $response = $tool->handle([
         'lines' => 10,
     ]);
 
-    expect($response)->toEqual(ToolResult::error("Failed to read log file. Error: Something went wrong"));
+    expect($response)->toEqual(ToolResult::error('Failed to read log file. Error: Something went wrong'));
 });
 
 it('returns a message if no log entries match the grep pattern', function () {
@@ -158,13 +158,13 @@ it('returns a message if no log entries match the grep pattern', function () {
     File::shouldReceive('exists')->andReturn(true);
     File::shouldReceive('isReadable')->andReturn(true);
 
-    $tool = new LogReader();
+    $tool = new LogReader;
     $response = $tool->handle([
         'lines' => 10,
         'grep' => 'non_existent_pattern',
     ]);
 
-    expect($response)->toEqual(ToolResult::error("No log entries found matching pattern: non_existent_pattern"));
+    expect($response)->toEqual(ToolResult::error('No log entries found matching pattern: non_existent_pattern'));
 });
 
 it('returns a message if the log file is empty', function () {
@@ -175,7 +175,7 @@ it('returns a message if the log file is empty', function () {
     File::shouldReceive('exists')->andReturn(true);
     File::shouldReceive('isReadable')->andReturn(true);
 
-    $tool = new LogReader();
+    $tool = new LogReader;
     $response = $tool->handle([
         'lines' => 10,
     ]);
@@ -191,7 +191,7 @@ it('returns the log content on success', function () {
     File::shouldReceive('exists')->andReturn(true);
     File::shouldReceive('isReadable')->andReturn(true);
 
-    $tool = new LogReader();
+    $tool = new LogReader;
     $response = $tool->handle([
         'lines' => 10,
     ]);

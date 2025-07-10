@@ -1,12 +1,12 @@
 <?php
 
-namespace Laravel\AiAssistant\Mcp\Tools;
+namespace Laravel\Boost\Mcp\Tools;
 
-use Laravel\AiAssistant\Mcp\Resources\LaravelBestPractices as LaravelBestPracticesResource;
-use Laravel\Mcp\Tools\Tool;
-use Laravel\Mcp\Tools\ToolResult;
-use Laravel\Mcp\Tools\ToolInputSchema;
-use Laravel\Mcp\Tools\Annotations\IsReadOnly;
+use Laravel\Boost\Mcp\Resources\LaravelBestPractices as LaravelBestPracticesResource;
+use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
+use Laravel\Mcp\Server\Tools\ToolInputSchema;
+use Laravel\Mcp\Server\Tools\ToolResult;
 
 #[IsReadOnly()]
 class LaravelBestPractices extends Tool

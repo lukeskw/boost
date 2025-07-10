@@ -1,8 +1,9 @@
 <?php
 
-namespace Laravel\AiAssistant\Mcp\Resources;
+namespace Laravel\Boost\Mcp\Resources;
 
 use Illuminate\Support\Facades\File;
+use Laravel\Mcp\Server\Resource;
 
 class ApplicationInfo extends Resource
 {

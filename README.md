@@ -1,26 +1,26 @@
-<p align="center"><img src="/art/logo.svg" alt="Logo Laravel AI Assistant"></p>
+<p align="center"><img src="/art/logo.svg" alt="Logo Laravel Boost"></p>
 
 <p align="center">
-<a href="https://github.com/ai-assistant/actions"><img src="https://github.com/ai-assistant/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/ai-assistant"><img src="https://img.shields.io/packagist/dt/ai-assistant" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/ai-assistant"><img src="https://img.shields.io/packagist/v/ai-assistant" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/ai-assistant"><img src="https://img.shields.io/packagist/l/ai-assistant" alt="License"></a>
+<a href="https://github.com/laravel/boost/actions"><img src="https://github.com/laravel/boost/workflows/tests/badge.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/boost"><img src="https://img.shields.io/packagist/dt/boost" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/boost"><img src="https://img.shields.io/packagist/v/boost" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/boost"><img src="https://img.shields.io/packagist/l/boost" alt="License"></a>
 </p>
 
-> This is a template repository for new Laravel AI Assistants. [Start a new repo with this](https://github.com/ai-assistant/generate), clone it locally and search & replace the relevant things below:
+> This is a template repository for new Laravel AI Assistants. [Start a new repo with this](https://github.com/laravel/boost/generate), clone it locally and search & replace the relevant things below:
 >
 > - `Laravel AI Assistant` with the package name (e.g. `Laravel Horizon`)
-> - `ai-assistant` references to the vendor name / GitHub url (e.g. `laravel/horizon`) (*)
-> - `ai-assistant` references to the publishing name (e.g. `horizon`) (*)
-> - `Laravel\AiAssistant` references to the package namespace (e.g. `Laravel\Horizon`) (*)
-> - `AiAssistant` references to the short package name (e.g. `Horizon`) (*)
-> - `AI_ASSISTANT` references to the env variable names (e.g. `HORIZON`) (*)
+> - `boost` references to the vendor name / GitHub url (e.g. `laravel/horizon`) (*)
+> - `boost` references to the publishing name (e.g. `horizon`) (*)
+> - `Laravel\Boost` references to the package namespace (e.g. `Laravel\Horizon`) (*)
+> - `Boost` references to the short package name (e.g. `Horizon`) (*)
+> - `BOOST_` references to the env variable names (e.g. `HORIZON`) (*)
 >
 > (*) Name cannot contain spaces.
 > 
 > After replacing keywords, take the following steps:
 >
-> 1. Rename any `AiAssistant` prefixes in `.php` file names in [`src`](./src) to the package name (e.g. `Horizon`)
+> 1. Rename any `Boost` prefixes in `.php` file names in [`src`](./src) to the package name (e.g. `Horizon`)
 > 2. Remove things you don't need like migrations, routes, resources, etc
 > 3. Fill the package short intro and keywords in the [composer.json](./composer.json) file
 > 4. Set the same short intro and keywords in the GitHub repository sidebar and set the website url to the package docs
@@ -38,11 +38,11 @@ Package introduction...
 
 ## Official Documentation
 
-Documentation for AiAssistant can be found on the [Laravel website](https://laravel.com/docs).
+Documentation for Boost can be found on the [Laravel website](https://laravel.com/docs).
 
 ## Contributing
 
-Thank you for considering contributing to AiAssistant! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Thank you for considering contributing to Boost! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
 ## Code of Conduct
 

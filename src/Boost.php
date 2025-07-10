@@ -1,20 +1,20 @@
 <?php
 
-namespace Laravel\AiAssistant;
+namespace Laravel\Boost;
 
 use Closure;
 
-class AiAssistant
+class Boost
 {
     /**
-     * The callback that should be used to authenticate AiAssistant users.
+     * The callback that should be used to authenticate Boost users.
      *
      * @var \Closure
      */
     public static $authUsing;
 
     /**
-     * Determine if the given request can access the AiAssistant dashboard.
+     * Determine if the given request can access the Boost dashboard.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return bool
@@ -27,7 +27,7 @@ class AiAssistant
     }
 
     /**
-     * Set the callback that should be used to authenticate AiAssistant users.
+     * Set the callback that should be used to authenticate Boost users.
      *
      * @return static
      */
