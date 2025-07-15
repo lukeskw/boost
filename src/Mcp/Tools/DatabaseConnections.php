@@ -2,29 +2,35 @@
 
 namespace Laravel\Boost\Mcp\Tools;
 
-use Laravel\Boost\Mcp\Resources\LaravelBestPractices as LaravelBestPracticesResource;
 use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 use Laravel\Mcp\Server\Tools\ToolInputSchema;
 use Laravel\Mcp\Server\Tools\ToolResult;
 
 #[IsReadOnly()]
-class LaravelBestPractices extends Tool
+class DatabaseConnections extends Tool
 {
     public function description(): string
     {
-        return 'Always include these instructions when writing Laravel code.';
+        return 'List the configured database connection names for this application.';
     }
 
     public function schema(ToolInputSchema $schema): ToolInputSchema
     {
+        // No inputs required for this tool.
         return $schema;
     }
 
+    /**
+     * @param  array<string>  $arguments
+     */
     public function handle(array $arguments): ToolResult
     {
-        return ToolResult::items(
-            new EmbeddedResource(new LaravelBestPracticesResource),
-        );
+        $connections = array_keys(config('database.connections', []));
+
+        return ToolResult::json([
+            'default_connection' => config('database.default'),
+            'connections' => $connections,
+        ]);
     }
 }

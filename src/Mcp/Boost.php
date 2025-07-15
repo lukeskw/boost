@@ -4,9 +4,6 @@ namespace Laravel\Boost\Mcp;
 
 use Laravel\Boost\Mcp\Resources\ApplicationInfo;
 use Laravel\Boost\Mcp\Resources\LaravelBestPractices;
-use Laravel\Boost\Mcp\Tools\DatabaseSchema;
-use Laravel\Boost\Mcp\Tools\LaravelBestPractices as LaravelBestPracticesTool;
-use Laravel\Boost\Mcp\Tools\LogReader;
 use Laravel\Mcp\Server;
 
 class Boost extends Server
@@ -17,26 +14,96 @@ class Boost extends Server
 
     public string $instructions = 'Laravel AI Assistant to give you a boost';
 
-    public array $tools = [
-        // AddRules::class,??
-        // ArtisanHelp
-        // ApplicationInfo::class, ?
-        // telescope?
-        // browser extension, console.log
-
-        // laravel new project --rules (composer)
-        // Inertia
-        // React
-        // Tailwind - does laravel maintain that separately? Or partnership?
-        // Maybe shadcn/radix ui now?
-        // composer require usecroft/laravel
-        LaravelBestPracticesTool::class,
-        LogReader::class,
-        DatabaseSchema::class,
-    ];
-
+    /**
+     * @var string[]
+     */
     public array $resources = [
         LaravelBestPractices::class,
         ApplicationInfo::class,
     ];
+
+    public function boot(): void
+    {
+        $this->discoverTools();
+        $this->discoverResources();
+        $this->discoverPrompts();
+    }
+
+    /**
+     * @return array<string>
+     */
+    protected function discoverTools(): array
+    {
+        $excludedTools = config('boost.mcp.tools.exclude', []);
+        $toolDir = new \DirectoryIterator(__DIR__.DIRECTORY_SEPARATOR.'Tools');
+        foreach ($toolDir as $toolFile) {
+            if ($toolFile->isFile() && $toolFile->getExtension() === 'php') {
+                $fqdn = 'Laravel\\Boost\\Mcp\\Tools\\'.$toolFile->getBasename('.php');
+                if (class_exists($fqdn) && ! in_array($fqdn, $excludedTools, true)) {
+                    $this->addTool($fqdn);
+                }
+            }
+        }
+
+        $extraTools = config('boost.mcp.tools.include', []);
+        foreach ($extraTools as $toolClass) {
+            if (class_exists($toolClass)) {
+                $this->addTool($toolClass);
+            }
+        }
+
+        return $this->registeredTools;
+    }
+
+    /**
+     * @return array<string>
+     */
+    protected function discoverResources(): array
+    {
+        $excludedResources = config('boost.mcp.resources.exclude', []);
+        $resourceDir = new \DirectoryIterator(__DIR__.DIRECTORY_SEPARATOR.'Resources');
+        foreach ($resourceDir as $resourceFile) {
+            if ($resourceFile->isFile() && $resourceFile->getExtension() === 'php') {
+                $fqdn = 'Laravel\\Boost\\Mcp\\Resources\\'.$resourceFile;
+                if (class_exists($fqdn) && ! in_array($fqdn, $excludedResources, true)) {
+                    $this->addResource($fqdn);
+                }
+            }
+        }
+
+        $extraResources = config('boost.mcp.resources.include', []);
+        foreach ($extraResources as $resourceClass) {
+            if (class_exists($resourceClass)) {
+                $this->addResource($resourceClass);
+            }
+        }
+
+        return $this->registeredResources;
+    }
+
+    /**
+     * @return array<string>
+     */
+    protected function discoverPrompts(): array
+    {
+        $excludedPrompts = config('boost.mcp.prompts.exclude', []);
+        $promptDir = new \DirectoryIterator(__DIR__.DIRECTORY_SEPARATOR.'Prompts');
+        foreach ($promptDir as $promptFile) {
+            if ($promptFile->isFile() && $promptFile->getExtension() === 'php') {
+                $fqdn = 'Laravel\\Boost\\Mcp\\Prompts\\'.$promptFile;
+                if (class_exists($fqdn) && ! in_array($fqdn, $excludedPrompts, true)) {
+                    $this->addPrompt($fqdn);
+                }
+            }
+        }
+
+        $extraPrompts = config('boost.mcp.prompts.include', []);
+        foreach ($extraPrompts as $promptClass) {
+            if (class_exists($promptClass)) {
+                $this->addResource($promptClass);
+            }
+        }
+
+        return $this->registeredPrompts;
+    }
 }
