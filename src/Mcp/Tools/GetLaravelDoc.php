@@ -19,7 +19,7 @@ class GetLaravelDoc extends Tool
 
     public function description(): string
     {
-        return 'Fetch the contents of a single Laravel documentation file matching the currently installed major framework version.' . PHP_EOL .
+        return 'Fetch the contents of a single Laravel documentation file matching the currently installed major framework version.'.PHP_EOL.
             'It\'s critical you use this and the list-laravel-docs tool to get the correct documentation for this application.';
     }
 
@@ -33,7 +33,7 @@ class GetLaravelDoc extends Tool
     }
 
     /**
-     * @param array<string> $arguments
+     * @param  array<string>  $arguments
      */
     public function handle(array $arguments): ToolResult
     {
@@ -42,18 +42,18 @@ class GetLaravelDoc extends Tool
             return ToolResult::error('The "filename" argument is required.');
         }
 
-        if (!Str::endsWith($filename, '.md')) {
+        if (! Str::endsWith($filename, '.md')) {
             return ToolResult::error('The "filename" argument must end with ".md".');
         }
 
-        if (!preg_match('/^[a-z0-9-]+\.md$/', $filename)) {
+        if (! preg_match('/^[a-z0-9-]+\.md$/', $filename)) {
             return ToolResult::error('The "filename" argument must be a valid filename (e.g. "installation.md").');
         }
 
         // Determine the major version (e.g. 12.x)
         $version = Application::VERSION; // e.g. "12.6.0" or "12.x-dev"
         $major = Str::before($version, '.');
-        $ref = $major . '.x';
+        $ref = $major.'.x';
 
         $cacheKey = "boost:mcp:laravel-doc:{$ref}:{$filename}";
 
@@ -64,14 +64,14 @@ class GetLaravelDoc extends Tool
             /** @var \Illuminate\Http\Client\Response $response */
             $response = $this->client()->get($url);
 
-            if (!$response->successful()) {
-                return ToolResult::error('Failed to fetch Laravel doc: ' . $response->body());
+            if (! $response->successful()) {
+                return ToolResult::error('Failed to fetch Laravel doc: '.$response->body());
             }
 
             /** @var array<string,mixed> $data */
             $data = json_decode($response->body(), true, 512, JSON_THROW_ON_ERROR);
 
-            if (($data['type'] ?? '') !== 'file' || !isset($data['content'])) {
+            if (($data['type'] ?? '') !== 'file' || ! isset($data['content'])) {
                 return ToolResult::error('Unexpected response structure when fetching Laravel doc.');
             }
 

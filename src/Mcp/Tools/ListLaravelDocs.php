@@ -19,7 +19,7 @@ class ListLaravelDocs extends Tool
 
     public function description(): string
     {
-        return 'List all documentation files available for the currently installed major Laravel framework version.' . PHP_EOL .
+        return 'List all documentation files available for the currently installed major Laravel framework version.'.PHP_EOL.
             'It\'s critical you use this and the get-laravel-doc tool to get the correct documentation for this application.';
     }
 
@@ -30,14 +30,14 @@ class ListLaravelDocs extends Tool
     }
 
     /**
-     * @param array<string> $arguments
+     * @param  array<string>  $arguments
      */
     public function handle(array $arguments): ToolResult
     {
         // Determine the major version (e.g. 12.x)
         $version = Application::VERSION; // e.g. "12.6.0" or "12.x-dev"
         $major = Str::before($version, '.');
-        $ref = $major . '.x';
+        $ref = $major.'.x';
 
         $cacheKey = "boost:mcp:laravel-docs-list:{$ref}";
 
@@ -47,8 +47,8 @@ class ListLaravelDocs extends Tool
             /** @var \Illuminate\Http\Client\Response $response */
             $response = $this->client()->get($url);
 
-            if (!$response->successful()) {
-                return ToolResult::error('Failed to fetch Laravel docs list: ' . $response->body());
+            if (! $response->successful()) {
+                return ToolResult::error('Failed to fetch Laravel docs list: '.$response->body());
             }
 
             /** @var array<int,array<string,mixed>> $data */
@@ -56,7 +56,7 @@ class ListLaravelDocs extends Tool
 
             // Extract only file names (exclude directories)
             return collect($data)
-                ->filter(fn($item) => ($item['type'] ?? '') === 'file')
+                ->filter(fn ($item) => ($item['type'] ?? '') === 'file')
                 ->pluck('name')
                 ->values()
                 ->all();

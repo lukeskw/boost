@@ -3,7 +3,6 @@
 namespace Laravel\Boost\Mcp\Tools;
 
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Boost\Concerns\MakesHttpRequests;
 use Laravel\Mcp\Server\Tool;
@@ -19,13 +18,11 @@ class GetInertiaDoc extends Tool
 {
     use MakesHttpRequests;
 
-    public function __construct(protected Roster $roster)
-    {
-    }
+    public function __construct(protected Roster $roster) {}
 
     public function description(): string
     {
-        return 'Fetch the contents of a single Inertia documentation file matching the installed major Inertia version.' . PHP_EOL .
+        return 'Fetch the contents of a single Inertia documentation file matching the installed major Inertia version.'.PHP_EOL.
             'It\'s critical you use this and the list-inertia-docs tool to get the correct documentation for this application.';
     }
 
@@ -39,7 +36,7 @@ class GetInertiaDoc extends Tool
     }
 
     /**
-     * @param array<string> $arguments
+     * @param  array<string>  $arguments
      */
     public function handle(array $arguments): ToolResult
     {
@@ -48,16 +45,16 @@ class GetInertiaDoc extends Tool
             return ToolResult::error('The "filename" argument is required.');
         }
 
-        if (!Str::endsWith($filename, '.jsx')) {
+        if (! Str::endsWith($filename, '.jsx')) {
             return ToolResult::error('The "filename" argument must end with ".jsx".');
         }
 
-        if (!preg_match('/^[a-z0-9-]+\.jsx$/', $filename)) {
+        if (! preg_match('/^[a-z0-9-]+\.jsx$/', $filename)) {
             return ToolResult::error('The "filename" argument must be a valid filename (e.g. "installation.jsx").');
         }
 
         [$ref, $shouldProceed] = $this->determineVersionRef();
-        if (!$shouldProceed) {
+        if (! $shouldProceed) {
             return ToolResult::error('Inertia is not installed in this project.');
         }
 
@@ -70,14 +67,14 @@ class GetInertiaDoc extends Tool
             /** @var \Illuminate\Http\Client\Response $response */
             $response = $this->client()->get($url);
 
-            if (!$response->successful()) {
-                return ToolResult::error('Failed to fetch Inertia doc: ' . $response->body());
+            if (! $response->successful()) {
+                return ToolResult::error('Failed to fetch Inertia doc: '.$response->body());
             }
 
             /** @var array<string,mixed> $data */
             $data = json_decode($response->body(), true, 512, JSON_THROW_ON_ERROR);
 
-            if (($data['type'] ?? '') !== 'file' || !isset($data['content'])) {
+            if (($data['type'] ?? '') !== 'file' || ! isset($data['content'])) {
                 return ToolResult::error('Unexpected response structure when fetching Inertia doc.');
             }
 
@@ -118,7 +115,7 @@ class GetInertiaDoc extends Tool
             return ['v1', false];
         }
 
-        return ['v' . $package->majorVersion(), true];
+        return ['v'.$package->majorVersion(), true];
     }
 
     public function shouldRegister(): bool

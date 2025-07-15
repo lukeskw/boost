@@ -17,13 +17,11 @@ class ListInertiaDocs extends Tool
 {
     use MakesHttpRequests;
 
-    public function __construct(protected Roster $roster)
-    {
-    }
+    public function __construct(protected Roster $roster) {}
 
     public function description(): string
     {
-        return 'List all Inertia documentation files available for the installed major Inertia version.' . PHP_EOL .
+        return 'List all Inertia documentation files available for the installed major Inertia version.'.PHP_EOL.
             'It\'s critical you use this and the get-inertia-doc tool to get the correct documentation for this application.';
     }
 
@@ -34,12 +32,12 @@ class ListInertiaDocs extends Tool
     }
 
     /**
-     * @param array<string> $arguments
+     * @param  array<string>  $arguments
      */
     public function handle(array $arguments): ToolResult
     {
         [$ref, $shouldProceed] = $this->determineVersionRef();
-        if (!$shouldProceed) {
+        if (! $shouldProceed) {
             return ToolResult::error('Inertia is not installed in this project.');
         }
 
@@ -52,15 +50,15 @@ class ListInertiaDocs extends Tool
             /** @var \Illuminate\Http\Client\Response $response */
             $response = $this->client()->get($url);
 
-            if (!$response->successful()) {
-                return ToolResult::error('Failed to fetch Inertia docs list: ' . $response->body());
+            if (! $response->successful()) {
+                return ToolResult::error('Failed to fetch Inertia docs list: '.$response->body());
             }
 
             /** @var array<int,array<string,mixed>> $data */
             $data = json_decode($response->body(), true, 512, JSON_THROW_ON_ERROR);
 
             return collect($data)
-                ->filter(fn($item) => ($item['type'] ?? '') === 'file')
+                ->filter(fn ($item) => ($item['type'] ?? '') === 'file')
                 ->pluck('name')
                 ->values()
                 ->all();
@@ -93,7 +91,7 @@ class ListInertiaDocs extends Tool
             return ['v1', false];
         }
 
-        return ['v' . $package->majorVersion(), true];
+        return ['v'.$package->majorVersion(), true];
     }
 
     public function shouldRegister(): bool
