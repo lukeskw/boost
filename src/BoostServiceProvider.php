@@ -12,7 +12,7 @@ class BoostServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(
-            __DIR__ . '/../config/boost.php', 'boost'
+            __DIR__.'/../config/boost.php', 'boost'
         );
 
         $this->app->singleton(Roster::class, function () {
@@ -53,7 +53,7 @@ class BoostServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../config/boost.php' => config_path('boost.php'),
+                __DIR__.'/../config/boost.php' => config_path('boost.php'),
             ], 'boost-config');
         }
     }
@@ -63,7 +63,7 @@ class BoostServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 Console\StartCommand::class,
-                Console\InstallCommand::class
+                Console\InstallCommand::class,
             ]);
         }
     }
