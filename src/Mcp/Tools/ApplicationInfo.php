@@ -11,9 +11,7 @@ use Laravel\Roster\Roster;
 #[IsReadOnly]
 class ApplicationInfo extends Tool
 {
-    public function __construct(protected Roster $roster)
-    {
-    }
+    public function __construct(protected Roster $roster) {}
 
     public function description(): string
     {
@@ -26,7 +24,7 @@ class ApplicationInfo extends Tool
     }
 
     /**
-     * @param array<string> $arguments
+     * @param  array<string>  $arguments
      */
     public function handle(array $arguments): ToolResult
     {
