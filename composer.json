@@ -65,6 +65,19 @@
             ]
         }
     },
+    "scripts": {
+        "lint": [
+            "vendor/bin/pint",
+            "vendor/bin/phpstan"
+        ],
+        "test": [
+            "vendor/bin/pest"
+        ],
+        "check": [
+            "@composer lint",
+            "@composer test"
+        ]
+    },
     "config": {
         "sort-packages": true,
         "allow-plugins": {
