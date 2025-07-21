@@ -32,6 +32,7 @@ test('it returns application info with packages', function () {
     expect($content['packages'][0]['version'])->toBe('11.0.0');
     expect($content['packages'][1]['name'])->toBe('PEST');
     expect($content['packages'][1]['version'])->toBe('2.0.0');
+    expect($content['models'])->toBeArray();
 });
 
 test('it returns application info with no packages', function () {
@@ -52,4 +53,5 @@ test('it returns application info with no packages', function () {
     expect($content['laravel_version'])->toBe(app()->version());
     expect($content['database_engine'])->toBe(config('database.default'));
     expect($content['packages'])->toHaveCount(0);
+    expect($content['models'])->toBeArray();
 });
