@@ -30,10 +30,11 @@ class SearchDocs extends Tool
     // TODO: Add tool to get a list of available libraries
     public function handle(array $arguments): ToolResult|Generator
     {
-        $apiUrl = config('boost.hosted.api_url', 'https://boost.laravel.com') . '/api/docs';
+        $apiUrl = config('boost.hosted.api_url', 'https://boost.laravel.com').'/api/docs';
         $queries = array_map('trim', explode(',', $arguments['queries']));
         $packages = array_map(function (string $packageString) {
             $parts = explode('#', trim($packageString));
+
             return ['name' => $parts[0], 'version' => $parts[1]];
         }, explode(',', $arguments['packages']));
         $library = $arguments['library'] ?? null;

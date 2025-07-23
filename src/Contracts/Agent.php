@@ -10,9 +10,6 @@ interface Agent
      * Install the rules into the agent's rules if needed.
      * Should be safe to re-run without causing problems.
      * Should work well with others.
-     *
-     * @param string $rules
-     * @return bool
      */
     public function rules(string $rules): bool;
 }

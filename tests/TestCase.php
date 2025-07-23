@@ -15,7 +15,7 @@ abstract class TestCase extends OrchestraTestCase
     {
         // Set environment to local so commands are registered
         $app['env'] = 'local';
-        
+
         Artisan::call('vendor:publish', ['--tag' => 'boost-assets']);
 
         $app->singleton('mcp', Registrar::class);

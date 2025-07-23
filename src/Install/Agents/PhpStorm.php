@@ -6,7 +6,6 @@ use Laravel\Boost\Contracts\Ide;
 
 class PhpStorm implements Ide
 {
-
     public function install(): bool
     {
         // TODO: Implement install() method.

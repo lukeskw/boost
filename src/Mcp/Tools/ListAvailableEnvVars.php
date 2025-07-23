@@ -32,7 +32,7 @@ class ListAvailableEnvVars extends Tool
     public function handle(array $arguments): ToolResult
     {
         $filename = $arguments['filename'] ?? null;
-        $filePath = !empty($filename) ? base_path($filename) : base_path('.env');
+        $filePath = ! empty($filename) ? base_path($filename) : base_path('.env');
         if (str_contains($filePath, '.env') === false) {
             return ToolResult::error('This tool can only read .env files');
         }
