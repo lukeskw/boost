@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Support\Facades\Route;
 use Laravel\Boost\Mcp\Tools\GetAbsoluteUrl;
 use Laravel\Mcp\Server\Tools\ToolResult;

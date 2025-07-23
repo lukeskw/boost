@@ -7,7 +7,9 @@
 <a href="https://packagist.org/packages/laravel/boost"><img src="https://img.shields.io/packagist/l/boost" alt="License"></a>
 </p>
 
-> This is a template repository for new Laravel AI Assistants. [Start a new repo with this](https://github.com/laravel/boost/generate), clone it locally and search & replace the relevant things below:
+> This is a template repository for new Laravel AI
+> Assistants. [Start a new repo with this](https://github.com/laravel/boost/generate), clone it locally and search &
+> replace the relevant things below:
 >
 > - `Laravel AI Assistant` with the package name (e.g. `Laravel Horizon`)
 > - `boost` references to the vendor name / GitHub url (e.g. `laravel/horizon`) (*)
@@ -17,7 +19,7 @@
 > - `BOOST_` references to the env variable names (e.g. `HORIZON`) (*)
 >
 > (*) Name cannot contain spaces.
-> 
+>
 > After replacing keywords, take the following steps:
 >
 > 1. Rename any `Boost` prefixes in `.php` file names in [`src`](./src) to the package name (e.g. `Horizon`)
@@ -35,6 +37,7 @@
 ## Introduction
 
 Package introduction...
+./artisan vendor:publish --tag=boost-config
 
 ## Official Documentation
 
@@ -42,15 +45,18 @@ Documentation for Boost can be found on the [Laravel website](https://laravel.co
 
 ## Contributing
 
-Thank you for considering contributing to Boost! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Thank you for considering contributing to Boost! The contribution guide can be found in
+the [Laravel documentation](https://laravel.com/docs/contributions).
 
 ## Code of Conduct
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+In order to ensure that the Laravel community is welcoming to all, please review and abide by
+the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
 ## Security Vulnerabilities
 
-Please review [our security policy](https://github.com/laravel/envoy/security/policy) on how to report security vulnerabilities.
+Please review [our security policy](https://github.com/laravel/envoy/security/policy) on how to report security
+vulnerabilities.
 
 ## License
 

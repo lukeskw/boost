@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Laravel\Boost\Mcp\Tools;
 
 use Illuminate\Support\Facades\Artisan;
@@ -15,7 +17,7 @@ class ListRoutes extends Tool
 {
     public function description(): string
     {
-        return 'List all available routes defined in the application';
+        return 'List all available routes defined in the application, including Folio routes if used';
     }
 
     public function schema(ToolInputSchema $schema): ToolInputSchema
@@ -56,7 +58,7 @@ class ListRoutes extends Tool
         ];
 
         foreach ($optionMap as $argKey => $cliOption) {
-            if (array_key_exists($argKey, $arguments) && ! empty($arguments[$argKey])) {
+            if (array_key_exists($argKey, $arguments) && ! empty($arguments[$argKey]) && $arguments[$argKey] !== '*') {
                 $options['--'.$cliOption] = $arguments[$argKey];
             }
         }

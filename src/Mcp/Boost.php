@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Laravel\Boost\Mcp;
 
 use Laravel\Boost\Mcp\Resources\ApplicationInfo;
-use Laravel\Boost\Mcp\Resources\LaravelBestPractices;
+use Laravel\Boost\Mcp\Methods\CallToolWithExecutor;
 use Laravel\Mcp\Server;
 
 class Boost extends Server
@@ -14,11 +16,12 @@ class Boost extends Server
 
     public string $instructions = 'Laravel AI Assistant to give you a boost';
 
+    public int $defaultPaginationLength = 50;
+
     /**
      * @var string[]
      */
     public array $resources = [
-        LaravelBestPractices::class,
         ApplicationInfo::class,
     ];
 
@@ -27,6 +30,9 @@ class Boost extends Server
         $this->discoverTools();
         $this->discoverResources();
         $this->discoverPrompts();
+        
+        // Override the tools/call method to use our ToolExecutor
+        $this->methods['tools/call'] = CallToolWithExecutor::class;
     }
 
     /**
@@ -106,4 +112,5 @@ class Boost extends Server
 
         return $this->registeredPrompts;
     }
+
 }

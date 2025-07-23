@@ -1,13 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 use Laravel\Boost\Mcp\Tools\ApplicationInfo;
 use Laravel\Mcp\Server\Tools\ToolResult;
 use Laravel\Roster\Enums\Packages;
 use Laravel\Roster\Package;
+use Laravel\Roster\PackageCollection;
 use Laravel\Roster\Roster;
 
 test('it returns application info with packages', function () {
-    $packages = collect([
+    $packages = new PackageCollection([
         new Package(Packages::LARAVEL, '11.0.0'),
         new Package(Packages::PEST, '2.0.0'),
     ]);
@@ -37,7 +40,7 @@ test('it returns application info with packages', function () {
 
 test('it returns application info with no packages', function () {
     $roster = Mockery::mock(Roster::class);
-    $roster->shouldReceive('packages')->andReturn(collect([]));
+    $roster->shouldReceive('packages')->andReturn(new PackageCollection([]));
 
     $tool = new ApplicationInfo($roster);
     $result = $tool->handle([]);

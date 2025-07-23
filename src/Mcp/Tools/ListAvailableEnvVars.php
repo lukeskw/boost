@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Laravel\Boost\Mcp\Tools;
 
 use Laravel\Mcp\Server\Tool;
@@ -12,7 +14,7 @@ class ListAvailableEnvVars extends Tool
 {
     public function description(): string
     {
-        return 'List all available environment variable names from a given .env file (default .env).';
+        return '🔧 List all available environment variable names from a given .env file (default .env).';
     }
 
     public function schema(ToolInputSchema $schema): ToolInputSchema
@@ -29,7 +31,8 @@ class ListAvailableEnvVars extends Tool
      */
     public function handle(array $arguments): ToolResult
     {
-        $filePath = $arguments['filename'] ? base_path($arguments['filename']) : base_path('.env');
+        $filename = $arguments['filename'] ?? null;
+        $filePath = !empty($filename) ? base_path($filename) : base_path('.env');
         if (str_contains($filePath, '.env') === false) {
             return ToolResult::error('This tool can only read .env files');
         }

@@ -1,7 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Laravel\Boost;
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Boost\Mcp\Boost;
 use Laravel\Mcp\Server\Facades\Mcp;
@@ -42,11 +48,17 @@ class BoostServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if (! app()->environment('local', 'testing')) {
+            return;
+        }
+
         /* @phpstan-ignore-next-line */
         Mcp::local('laravel-boost', Boost::class);
 
         $this->registerPublishing();
         $this->registerCommands();
+        $this->registerRoutes();
+        //        $this->hookIntoResponses(); // TODO: Only if not disabled in config
     }
 
     protected function registerPublishing(): void
@@ -64,7 +76,95 @@ class BoostServiceProvider extends ServiceProvider
             $this->commands([
                 Console\StartCommand::class,
                 Console\InstallCommand::class,
+                Console\ExecuteToolCommand::class,
+                Console\ChatCommand::class,
             ]);
         }
+    }
+
+    private function registerRoutes()
+    {
+        Route::post('/_boost/browser-logs', function (Request $request) {
+            Log::write($request->input('type'), $request->input('message'));
+
+            return response()->json(['status' => 'logged']);
+        })->name('boost.browser-logs');
+    }
+
+    private function hookIntoResponses()
+    {
+        Response::macro('injectBoostBrowserLogger', function () {
+            $content = $this->getContent();
+
+            if ($this->shouldInject($content)) {
+                $injectedContent = $this->injectScript($content);
+                $this->setContent($injectedContent);
+            }
+
+            return $this;
+        });
+
+        // Register response middleware
+
+        app('router')->pushMiddlewareToGroup('web', function ($request, $next) {
+            $response = $next($request);
+
+            if (method_exists($response, 'injectBoostBrowserLogger')) {
+                $response->injectBoostBrowserLogger();
+            }
+
+            return $response;
+        });
+    }
+
+    private function shouldInject(string $content): bool
+    {
+        // Check if it's HTML
+        if (! str_contains($content, '<html') && ! str_contains($content, '<head')) {
+            return false;
+        }
+
+        // Check if already injected
+        if (str_contains($content, 'browser-logger-active')) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private function injectScript(string $content): string
+    {
+        $script = $this->getBrowserLoggerScript();
+
+        // Try to inject before closing </head>
+        if (str_contains($content, '</head>')) {
+            return str_replace('</head>', $script."\n</head>", $content);
+        }
+
+        // Fallback: inject before closing </body>
+        if (str_contains($content, '</body>')) {
+            return str_replace('</body>', $script."\n</body>", $content);
+        }
+
+        return $content.$script;
+    }
+
+    private function getBrowserLoggerScript(): string
+    {
+        $endpoint = route('boost.browser-logs');
+        $csrfToken = csrf_token();
+
+        return <<<HTML
+<script id="browser-logger-active">
+(function() {
+    const ENDPOINT = '{$endpoint}';
+    const CSRF_TOKEN = '{$csrfToken}';
+
+    // [Same script content as before]
+
+    console.log('🔍 Browser logger active (MCP server detected)');
+})();
+</script>
+HTML;
     }
 }

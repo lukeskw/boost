@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Laravel\Boost\Mcp\Tools\DatabaseConnections;
 use Laravel\Mcp\Server\Tools\ToolResult;
 
