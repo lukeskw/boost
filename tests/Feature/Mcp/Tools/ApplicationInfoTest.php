@@ -11,8 +11,8 @@ use Laravel\Roster\Roster;
 
 test('it returns application info with packages', function () {
     $packages = new PackageCollection([
-        new Package(Packages::LARAVEL, '11.0.0'),
-        new Package(Packages::PEST, '2.0.0'),
+        new Package(Packages::LARAVEL, 'laravel/framework', '11.0.0'),
+        new Package(Packages::PEST, 'pestphp/pest', '2.0.0'),
     ]);
 
     $roster = Mockery::mock(Roster::class);
@@ -31,9 +31,11 @@ test('it returns application info with packages', function () {
     expect($content['laravel_version'])->toBe(app()->version());
     expect($content['database_engine'])->toBe(config('database.default'));
     expect($content['packages'])->toHaveCount(2);
-    expect($content['packages'][0]['name'])->toBe('LARAVEL');
+    expect($content['packages'][0]['roster_name'])->toBe('LARAVEL');
+    expect($content['packages'][0]['package_name'])->toBe('laravel/framework');
     expect($content['packages'][0]['version'])->toBe('11.0.0');
-    expect($content['packages'][1]['name'])->toBe('PEST');
+    expect($content['packages'][1]['roster_name'])->toBe('PEST');
+    expect($content['packages'][1]['package_name'])->toBe('pestphp/pest');
     expect($content['packages'][1]['version'])->toBe('2.0.0');
     expect($content['models'])->toBeArray();
 });

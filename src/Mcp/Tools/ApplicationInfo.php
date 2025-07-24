@@ -17,7 +17,9 @@ use Symfony\Component\Finder\Finder;
 #[IsReadOnly]
 class ApplicationInfo extends Tool
 {
-    public function __construct(protected Roster $roster) {}
+    public function __construct(protected Roster $roster)
+    {
+    }
 
     public function description(): string
     {
@@ -30,7 +32,7 @@ class ApplicationInfo extends Tool
     }
 
     /**
-     * @param  array<string>  $arguments
+     * @param array<string> $arguments
      */
     public function handle(array $arguments): ToolResult
     {
@@ -38,7 +40,7 @@ class ApplicationInfo extends Tool
             'php_version' => PHP_VERSION,
             'laravel_version' => app()->version(),
             'database_engine' => config('database.default'),
-            'packages' => $this->roster->packages()->map(fn (Package $package) => ['name' => $package->name(), 'version' => $package->version()]),
+            'packages' => $this->roster->packages()->map(fn(Package $package) => ['roster_name' => $package->name(), 'version' => $package->version(), 'package_name' => $package->rawName()]),
             'models' => $this->discoverModels(),
         ]);
     }
@@ -53,8 +55,8 @@ class ApplicationInfo extends Tool
         $models = [];
         $appPath = app_path();
 
-        if (! is_dir($appPath)) {
-            return ['app-path-isnt-a-directory:'.$appPath];
+        if (!is_dir($appPath)) {
+            return ['app-path-isnt-a-directory:' . $appPath];
         }
 
         $finder = Finder::create()
@@ -65,17 +67,17 @@ class ApplicationInfo extends Tool
         foreach ($finder as $file) {
             $relativePath = $file->getRelativePathname();
             $namespace = app()->getNamespace();
-            $className = $namespace.str_replace(
-                ['/', '.php'],
-                ['\\', ''],
-                $relativePath
-            );
+            $className = $namespace . str_replace(
+                    ['/', '.php'],
+                    ['\\', ''],
+                    $relativePath
+                );
 
             try {
                 if (class_exists($className)) {
                     $reflection = new ReflectionClass($className);
-                    if ($reflection->isSubclassOf(Model::class) && ! $reflection->isAbstract()) {
-                        $models[$className] = $appPath.DIRECTORY_SEPARATOR.$relativePath;
+                    if ($reflection->isSubclassOf(Model::class) && !$reflection->isAbstract()) {
+                        $models[$className] = $appPath . DIRECTORY_SEPARATOR . $relativePath;
                     }
                 }
             } catch (\Throwable) {
