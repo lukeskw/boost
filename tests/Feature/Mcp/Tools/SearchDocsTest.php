@@ -26,7 +26,7 @@ test('it searches documentation successfully', function () {
         'results' => [
             ['content' => 'Laravel documentation content'],
             ['content' => 'Pest documentation content'],
-        ]
+        ],
     ]);
 
     $mockClient = Mockery::mock(PendingRequest::class);
@@ -39,10 +39,10 @@ test('it searches documentation successfully', function () {
     $result = $tool->handle(['queries' => 'authentication, testing']);
 
     expect($result)->toBeInstanceOf(ToolResult::class);
-    
+
     $data = $result->toArray();
     expect($data['isError'])->toBeFalse();
-    
+
     $content = json_decode($data['content'][0]['text'], true);
     expect($content['knowledge_count'])->toBe(2);
     expect($content['knowledge'])->toContain('Laravel documentation content');
@@ -73,7 +73,7 @@ test('it handles API error response', function () {
     $result = $tool->handle(['queries' => 'authentication']);
 
     expect($result)->toBeInstanceOf(ToolResult::class);
-    
+
     $data = $result->toArray();
     expect($data['isError'])->toBeTrue();
     expect($data['content'][0]['text'])->toBe('Failed to search documentation: API Error');
@@ -91,10 +91,10 @@ test('it filters empty queries', function () {
 
     $mockClient = Mockery::mock(PendingRequest::class);
     $mockClient->shouldReceive('asJson')->andReturnSelf();
-    $mockClient->shouldReceive('post')->withArgs(function($url, $payload) {
+    $mockClient->shouldReceive('post')->withArgs(function ($url, $payload) {
         return $url === 'https://boost.laravel.com/api/docs' &&
-               $payload['queries'] === ['test'] && 
-               empty($payload['packages']) && 
+               $payload['queries'] === ['test'] &&
+               empty($payload['packages']) &&
                $payload['token_limit'] === 10000;
     })->andReturn($mockResponse);
 
@@ -104,7 +104,7 @@ test('it filters empty queries', function () {
     $result = $tool->handle(['queries' => 'test###  ###*### ']);
 
     expect($result)->toBeInstanceOf(ToolResult::class);
-    
+
     $data = $result->toArray();
     expect($data['isError'])->toBeFalse();
 });
@@ -129,7 +129,7 @@ test('it formats package data correctly', function () {
         Mockery::on(function ($payload) {
             return $payload['packages'] === [
                 ['name' => 'laravel/framework', 'version' => '11.x'],
-                ['name' => 'livewire/livewire', 'version' => '3.x']
+                ['name' => 'livewire/livewire', 'version' => '3.x'],
             ] && $payload['token_limit'] === 10000;
         })
     )->andReturn($mockResponse);
@@ -162,10 +162,10 @@ test('it handles empty results', function () {
     $result = $tool->handle(['queries' => 'nonexistent']);
 
     expect($result)->toBeInstanceOf(ToolResult::class);
-    
+
     $data = $result->toArray();
     expect($data['isError'])->toBeFalse();
-    
+
     $content = json_decode($data['content'][0]['text'], true);
     expect($content['knowledge_count'])->toBe(0);
     expect($content['knowledge'])->toBe('');
