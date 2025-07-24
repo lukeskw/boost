@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Laravel\Boost\Mcp;
 
 use Laravel\Mcp\Server\Tools\ToolResult;
-use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Exception\ProcessTimedOutException;
+use Symfony\Component\Process\Process;
 
 class ToolExecutor
 {
@@ -21,7 +21,7 @@ class ToolExecutor
      */
     public function execute(string $toolClass, array $arguments = []): ToolResult
     {
-        if (!ToolRegistry::isToolAllowed($toolClass)) {
+        if (! ToolRegistry::isToolAllowed($toolClass)) {
             return ToolResult::error("Tool not registered or not allowed: {$toolClass}");
         }
 
@@ -42,31 +42,33 @@ class ToolExecutor
             base_path('artisan'),
             'boost:execute-tool',
             $toolClass,
-            base64_encode(json_encode($arguments))
+            base64_encode(json_encode($arguments)),
         ];
 
         $process = new Process($command);
         $process->setTimeout($this->getTimeout());
-        
+
         try {
             $process->mustRun();
-            
+
             $output = $process->getOutput();
             $decoded = json_decode($output, true);
-            
+
             if (json_last_error() !== JSON_ERROR_NONE) {
-                return ToolResult::error('Invalid JSON output from tool process: ' . json_last_error_msg());
+                return ToolResult::error('Invalid JSON output from tool process: '.json_last_error_msg());
             }
-            
+
             // Reconstruct ToolResult from the JSON output
             return $this->reconstructToolResult($decoded);
-            
+
         } catch (ProcessTimedOutException $e) {
             $process->stop();
+
             return ToolResult::error("Tool execution timed out after {$this->getTimeout()} seconds");
-            
+
         } catch (ProcessFailedException $e) {
             $errorOutput = $process->getErrorOutput();
+
             return ToolResult::error("Tool execution failed: {$errorOutput}");
         }
     }
@@ -78,6 +80,7 @@ class ToolExecutor
     {
         try {
             $tool = app($toolClass);
+
             return $tool->handle($arguments);
         } catch (\Throwable $e) {
             return ToolResult::error("Tool execution failed: {$e->getMessage()}");
@@ -93,7 +96,7 @@ class ToolExecutor
         if (app()->environment('testing')) {
             return false;
         }
-        
+
         return config('boost.process_isolation.enabled', false);
     }
 
@@ -110,35 +113,36 @@ class ToolExecutor
      */
     protected function reconstructToolResult(array $data): ToolResult
     {
-        if (!isset($data['isError']) || !isset($data['content'])) {
+        if (! isset($data['isError']) || ! isset($data['content'])) {
             return ToolResult::error('Invalid tool result format');
         }
 
         if ($data['isError']) {
             // Extract the actual text content from the content array
             $errorText = 'Unknown error';
-            if (is_array($data['content']) && !empty($data['content'])) {
+            if (is_array($data['content']) && ! empty($data['content'])) {
                 $firstContent = $data['content'][0] ?? [];
                 if (is_array($firstContent)) {
                     $errorText = $firstContent['text'] ?? $errorText;
                 }
             }
+
             return ToolResult::error($errorText);
         }
 
         // Handle successful responses - extract text content
-        if (is_array($data['content']) && !empty($data['content'])) {
+        if (is_array($data['content']) && ! empty($data['content'])) {
             $firstContent = $data['content'][0] ?? [];
-            
+
             if (is_array($firstContent)) {
                 $text = $firstContent['text'] ?? '';
-                
+
                 // Try to detect if it's JSON
                 $decoded = json_decode($text, true);
                 if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
                     return ToolResult::json($decoded);
                 }
-                
+
                 return ToolResult::text($text);
             }
         }

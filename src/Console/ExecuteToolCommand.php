@@ -20,15 +20,17 @@ class ExecuteToolCommand extends Command
         $argumentsEncoded = $this->argument('arguments');
 
         // Validate the tool is registered
-        if (!ToolRegistry::isToolAllowed($toolClass)) {
+        if (! ToolRegistry::isToolAllowed($toolClass)) {
             $this->error("Tool not registered or not allowed: {$toolClass}");
+
             return 1;
         }
 
         // Decode arguments
         $arguments = json_decode(base64_decode($argumentsEncoded), true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            $this->error('Invalid arguments format: ' . json_last_error_msg());
+            $this->error('Invalid arguments format: '.json_last_error_msg());
+
             return 1;
         }
 
@@ -39,16 +41,15 @@ class ExecuteToolCommand extends Command
 
             // Output the result as JSON for the parent process
             echo json_encode($result->toArray());
-            
+
             return 0;
 
         } catch (\Throwable $e) {
             // Output error result
             $errorResult = ToolResult::error("Tool execution failed: {$e->getMessage()}");
             echo json_encode($errorResult->toArray());
-            
+
             return 1;
         }
     }
-
 }

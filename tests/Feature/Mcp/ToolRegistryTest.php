@@ -5,7 +5,7 @@ use Laravel\Boost\Mcp\Tools\ApplicationInfo;
 
 test('can discover available tools', function () {
     $tools = ToolRegistry::getAvailableTools();
-    
+
     expect($tools)->toBeArray()
         ->and($tools)->toContain(ApplicationInfo::class);
 });
@@ -17,7 +17,7 @@ test('can check if tool is allowed', function () {
 
 test('can get tool names', function () {
     $tools = ToolRegistry::getToolNames();
-    
+
     expect($tools)->toBeArray()
         ->and($tools)->toHaveKey('ApplicationInfo')
         ->and($tools['ApplicationInfo'])->toBe(ApplicationInfo::class);
@@ -26,12 +26,12 @@ test('can get tool names', function () {
 test('can clear cache', function () {
     // First call caches the results
     $tools1 = ToolRegistry::getAvailableTools();
-    
+
     // Clear cache
     ToolRegistry::clearCache();
-    
+
     // Second call should work fine
     $tools2 = ToolRegistry::getAvailableTools();
-    
+
     expect($tools1)->toEqual($tools2);
 });

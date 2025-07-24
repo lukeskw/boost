@@ -33,28 +33,28 @@ class CallToolWithExecutor implements Method
         } catch (\Throwable $e) {
             return JsonRpcResponse::create(
                 $request->id,
-                ToolResult::error('Error finding tool: ' . $e->getMessage())
+                ToolResult::error('Error finding tool: '.$e->getMessage())
             );
         }
 
         try {
             // Use ToolExecutor instead of calling tool directly
             $executor = app(ToolExecutor::class);
-            
+
             // Safely get arguments
             $arguments = [];
             if (isset($request->params['arguments']) && is_array($request->params['arguments'])) {
                 $arguments = $request->params['arguments'];
             }
-            
+
             $result = $executor->execute(get_class($tool), $arguments);
 
             return JsonRpcResponse::create($request->id, $result);
-            
+
         } catch (\Throwable $e) {
             return JsonRpcResponse::create(
                 $request->id,
-                ToolResult::error('Tool execution error: ' . $e->getMessage())
+                ToolResult::error('Tool execution error: '.$e->getMessage())
             );
         }
     }

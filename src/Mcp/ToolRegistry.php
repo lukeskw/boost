@@ -21,12 +21,12 @@ class ToolRegistry
 
         // Discover tools from the Tools directory
         $excludedTools = config('boost.mcp.tools.exclude', []);
-        $toolDir = new \DirectoryIterator(__DIR__ . DIRECTORY_SEPARATOR . 'Tools');
-        
+        $toolDir = new \DirectoryIterator(__DIR__.DIRECTORY_SEPARATOR.'Tools');
+
         foreach ($toolDir as $toolFile) {
             if ($toolFile->isFile() && $toolFile->getExtension() === 'php') {
-                $fqdn = 'Laravel\\Boost\\Mcp\\Tools\\' . $toolFile->getBasename('.php');
-                if (class_exists($fqdn) && !in_array($fqdn, $excludedTools, true)) {
+                $fqdn = 'Laravel\\Boost\\Mcp\\Tools\\'.$toolFile->getBasename('.php');
+                if (class_exists($fqdn) && ! in_array($fqdn, $excludedTools, true)) {
                     $tools[] = $fqdn;
                 }
             }
@@ -35,7 +35,7 @@ class ToolRegistry
         // Add extra tools from configuration
         $extraTools = config('boost.mcp.tools.include', []);
         foreach ($extraTools as $toolClass) {
-            if (class_exists($toolClass) && !in_array($toolClass, $tools, true)) {
+            if (class_exists($toolClass) && ! in_array($toolClass, $tools, true)) {
                 $tools[] = $toolClass;
             }
         }
