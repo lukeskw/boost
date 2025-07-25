@@ -812,6 +812,7 @@ HEADER;
             // Install Herd MCP if enabled
             if ($this->installingHerdMcp()) {
                 try {
+                    // TODO: SET ENV for site path!
                     $result = $ide->installMcp('herd', PHP_BINARY, [$this->herdMcpPath()]);
 
                     if ($result) {
