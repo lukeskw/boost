@@ -11,9 +11,7 @@ class GuidelineWriter
     public const FAILED = 2;
     public const NOOP = 3;
 
-    public function __construct(protected Agent $agent)
-    {
-    }
+    public function __construct(protected Agent $agent) {}
 
     /**
      * @param string $guidelines
@@ -28,14 +26,14 @@ class GuidelineWriter
         $filePath = $this->agent->guidelinesPath();
 
         $directory = dirname($filePath);
-        if (!is_dir($directory)) {
-            if (!mkdir($directory, 0755, true)) {
+        if (! is_dir($directory)) {
+            if (! mkdir($directory, 0755, true)) {
                 throw new \RuntimeException("Failed to create directory: {$directory}");
             }
         }
 
         $handle = fopen($filePath, 'c+');
-        if (!$handle) {
+        if (! $handle) {
             throw new \RuntimeException("Failed to open file: {$filePath}");
         }
 
@@ -49,7 +47,7 @@ class GuidelineWriter
 
             // Check if guidelines already exist
             $pattern = '/<laravel-boost-guidelines>.*?<\/laravel-boost-guidelines>/s';
-            $replacement = "<laravel-boost-guidelines>\n" . $guidelines . "\n</laravel-boost-guidelines>";
+            $replacement = "<laravel-boost-guidelines>\n".$guidelines."\n</laravel-boost-guidelines>";
             $replaced = false;
 
             if (preg_match($pattern, $content)) {
@@ -61,11 +59,11 @@ class GuidelineWriter
             } else {
                 // No existing guidelines found, append to end
                 $frontMatter = '';
-                if ($this->agent->frontmatter() && !str_contains($content, "\n---\n")) {
+                if ($this->agent->frontmatter() && ! str_contains($content, "\n---\n")) {
                     $frontMatter = "---\nalwaysApply: true\n---\n";
                 }
 
-                $newContent = $frontMatter . rtrim($content) . "\n\n\n" . $replacement;
+                $newContent = $frontMatter.rtrim($content)."\n\n\n".$replacement;
             }
 
             if (ftruncate($handle, 0) === false || fseek($handle, 0) === -1) {
@@ -101,7 +99,7 @@ class GuidelineWriter
             }
 
             // Exponential backoff with jitter
-            $jitter = rand(0, (int)($delay * 0.1));
+            $jitter = rand(0, (int) ($delay * 0.1));
             usleep($delay + $jitter);
             $delay *= 2;
         }

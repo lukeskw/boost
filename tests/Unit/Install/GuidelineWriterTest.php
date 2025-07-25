@@ -16,8 +16,8 @@ test('it returns early when guidelines are empty', function () {
 });
 
 test('it creates directory when it does not exist', function () {
-    $tempDir = sys_get_temp_dir() . '/boost_test_' . uniqid();
-    $filePath = $tempDir . '/subdir/test.md';
+    $tempDir = sys_get_temp_dir().'/boost_test_'.uniqid();
+    $filePath = $tempDir.'/subdir/test.md';
 
     $agent = Mockery::mock(Agent::class);
     $agent->shouldReceive('guidelinesPath')->andReturn($filePath);
@@ -45,7 +45,7 @@ test('it throws exception when directory creation fails', function () {
 
     $writer = new GuidelineWriter($agent);
 
-    expect(fn() => $writer->write('test guidelines'))
+    expect(fn () => $writer->write('test guidelines'))
         ->toThrow(RuntimeException::class, 'Failed to create directory: /root/boost_test');
 });
 
@@ -148,7 +148,7 @@ test('it throws exception when file cannot be opened', function () {
 
     $writer = new GuidelineWriter($agent);
 
-    expect(fn() => $writer->write('test guidelines'))
+    expect(fn () => $writer->write('test guidelines'))
         ->toThrow(RuntimeException::class, "Failed to open file: {$dirPath}");
 });
 
