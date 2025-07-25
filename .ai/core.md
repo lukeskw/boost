@@ -5,4 +5,5 @@ The Laravel Boost Guidelines are specifically curated by Laravel maintainers for
 {project.purpose}
 </purpose-of-this-project>
 
-TODO: Add project structure / relevant models / etc.. ? Kind of like Claude's /init, but for every Laravel developer regardless of IDE ? But if they already have that in Claude.md then that's gonna be doubling up and wasting tokens
+# Conventions
+Follow existing conventions. When creating or editing a file, check sibling files for the correct structure, approach, naming.

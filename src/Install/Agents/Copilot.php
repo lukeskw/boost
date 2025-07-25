@@ -6,7 +6,7 @@ use Laravel\Boost\Contracts\Agent;
 
 class Copilot implements Agent
 {
-    public function path(): string
+    public function guidelinesPath(): string
     {
         // VS Code supports multiple files in .github/instructions/
         // But, other IDEs don't
@@ -15,6 +15,9 @@ class Copilot implements Agent
 
     public function frontmatter(): bool
     {
+        // If we use the multi file approach we can use frontmatter
+        // In VSCode at least https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions?tool=vscode
+        
         return false;
     }
 }

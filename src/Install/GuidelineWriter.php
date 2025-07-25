@@ -6,17 +6,26 @@ use Laravel\Boost\Contracts\Agent;
 
 class GuidelineWriter
 {
+    public const NEW = 0;
+    public const REPLACED = 1;
+    public const FAILED = 2;
+    public const NOOP = 3;
+
     public function __construct(protected Agent $agent)
     {
     }
 
-    public function write(string $guidelines): void
+    /**
+     * @param string $guidelines
+     * @return \Laravel\Boost\Install\GuidelineWriter::NEW|\Laravel\Boost\Install\GuidelineWriter::REPLACED|\Laravel\Boost\Install\GuidelineWriter::FAILED\Laravel\Boost\Install\GuidelineWriter::NOOP
+     */
+    public function write(string $guidelines): int
     {
         if (empty($guidelines)) {
-            return;
+            return self::NOOP;
         }
 
-        $filePath = $this->agent->path();
+        $filePath = $this->agent->guidelinesPath();
 
         $directory = dirname($filePath);
         if (!is_dir($directory)) {
@@ -41,12 +50,14 @@ class GuidelineWriter
             // Check if guidelines already exist
             $pattern = '/<laravel-boost-guidelines>.*?<\/laravel-boost-guidelines>/s';
             $replacement = "<laravel-boost-guidelines>\n" . $guidelines . "\n</laravel-boost-guidelines>";
+            $replaced = false;
 
             if (preg_match($pattern, $content)) {
                 // Replace ALL existing boost guidelines blocks in-place
                 // If the user added guidelines after ours then let's
                 // make sure we keep the flow.
                 $newContent = preg_replace($pattern, $replacement, $content, 1);
+                $replaced = true;
             } else {
                 // No existing guidelines found, append to end
                 $frontMatter = '';
@@ -69,6 +80,8 @@ class GuidelineWriter
         } finally {
             fclose($handle);
         }
+
+        return $replaced ? self::REPLACED : self::NEW;
     }
 
     private function acquireLockWithRetry(mixed $handle, string $filePath, int $maxRetries = 3): void

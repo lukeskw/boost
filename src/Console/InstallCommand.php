@@ -13,6 +13,7 @@ use Laravel\Prompts\Concerns\Colors;
 use Laravel\Roster\Enums\Packages;
 use Laravel\Roster\Roster;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
 use Symfony\Component\Finder\Finder;
 
 use function Laravel\Prompts\intro;
@@ -82,20 +83,28 @@ class InstallCommand extends Command
         //        $this->boostToolsToDisable = $this->boostToolsToDisable(); // Not useful to start
 
         $this->projectPurpose = $this->projectPurpose();
-        $this->enforceTests = $this->shouldEnforceTests(ask: false); // TODO: Only add 'all new code must have a test' guideline if enforced
-        $this->idesToInstallTo = $this->idesToInstallTo(); // To add boost:mcp to the correct file
+        $this->enforceTests = $this->shouldEnforceTests(ask: false);
 
-        // TODO: Only if in $boosttoInstall or whatever
+        $this->idesToInstallTo = $this->idesToInstallTo(); // To add boost:mcp to the correct file
         $this->agentsToInstallTo = $this->agentsToInstallTo(); // AI Guidelines, which file do they go, are they separated, or all in one file?
     }
 
     protected function enact()
     {
-        $composedAiGuidelines = $this->compose();
-        if ($this->installingGuidelines()) {
-            $this->enactGuidelines($composedAiGuidelines);
+        if ($this->installingGuidelines() && !empty($this->agentsToInstallTo)) {
+            $this->enactGuidelines($this->compose());
         }
-//        $this->enactMcp();
+
+        if ($this->installingMcp() && !empty($this->idesToInstallTo)) {
+            echo "\ninstalling mcps now to: ";
+            dump($this->idesToInstallTo);
+        }
+
+        if ($this->installingHerdMcp() && !empty($this->idesToInstallTo)) {
+            echo "\ninstalling herd mcp now to: ";
+            dump($this->idesToInstallTo);
+        }
+
 
         if (in_array('other', $this->idesToInstallTo)) {
             $this->newLine();
@@ -108,6 +117,8 @@ class InstallCommand extends Command
         // TODO: Just move to blade views and compact public properties?
         $composed = collect(['core' => $this->guideline('core.md', [
             '{project.purpose}' => $this->projectPurpose,
+            // TODO: Add package info, php version, laravel version, existing approaches, directory structure, models? General Laravel guidance that applies to all projects somehow? 'Follow existing conventions - if you are creating or editing a file, check sibling files for structure/approach/naming
+//            TODO: Add project structure / relevant models / etc.. ? Kind of like Claude's /init, but for every Laravel developer regardless of IDE ? But if they already have that in Claude.md then that's gonna be doubling up and wasting tokens
         ])]);
 
         if (str_contains(config('app.url'), '.test') && $this->isHerdInstalled()) {
@@ -116,44 +127,61 @@ class InstallCommand extends Command
             ]));
         }
 
-        // TODO: Improve • this is a horrible way to do this
-
-        if ($this->roster->usesVersion(Packages::INERTIA_LARAVEL, '2.0.0', '>=')) {
-            $composed->put('inertiajs-laravel/core', $this->guideline('inertiajs-laravel/core.md', []));
-            $composed->put('inertiajs-laravel/v2', $this->guidelines('inertiajs-laravel/2/'));
+        if ($this->installingStyleGuidelines()) {
+            $composed->put('laravel/style', $this->guideline('laravel/style.md'));
         }
 
-        if ($this->shouldEnforceTests()) {
+        // Add all core.md and version specific docs for Roster supported packages
+        // We don't add guidelines for packages not supported by Roster right now
+        foreach ($this->roster->packages() as $package) {
+            $guidelineDir = str_replace('_', '-', strtolower($package->name()));
+            $coreGuidelines = $this->guideline($guidelineDir . '/core.md'); // Add core
+            if ($coreGuidelines) {
+                $composed->put($guidelineDir . '/core', $coreGuidelines);
+            }
+
+            $composed->put(
+                $guidelineDir . '/v' . $package->majorVersion(),
+                $this->guidelines($guidelineDir . '/' . $package->majorVersion())
+            );
+        }
+
+        if ($this->enforceTests) {
             $composed->put('tests', $this->guideline('enforce-tests.md'));
         }
-        return $composed->map(fn($content, $key) => "# {$key}\n{$content}\n")
+
+        return $composed->whereNotNull()->map(fn($content, $key) => "# {$key}\n{$content}\n")
             ->join("\n\n====\n\n");
     }
 
-    protected function guidelines(string $dirPath, array $replacements = []): string
+    protected function guidelines(string $dirPath, array $replacements = []): ?string
     {
         $dirPath = str_replace('/', DIRECTORY_SEPARATOR, __DIR__ . '/../../.ai/' . $dirPath);
-        $finder = Finder::create()
-            ->files()
-            ->in($dirPath)
-            ->name('*.md');
+        try {
+            $finder = Finder::create()
+                ->files()
+                ->in($dirPath)
+                ->name('*.md');
+        } catch (DirectoryNotFoundException $e) {
+            return null;
+        }
 
         $guidelines = '';
         foreach ($finder as $file) {
-            $guidelines .= $this->guideline($file->getRealPath(), $replacements);
+            $guidelines .= $this->guideline($file->getRealPath(), $replacements) ?? '';
         }
 
         return $guidelines;
     }
 
-    protected function guideline(string $path, array $replacements = []): string
+    protected function guideline(string $path, array $replacements = []): ?string
     {
         if (!file_exists($path)) {
             $path = str_replace('/', DIRECTORY_SEPARATOR, __DIR__ . '/../../.ai/' . $path);
         }
 
         if (!file_exists($path)) {
-            throw new \Exception("$path does not exist");
+            return null;
         }
 
         $contents = file_get_contents($path);
@@ -300,13 +328,13 @@ class InstallCommand extends Command
 HEADER
         );
         intro('✦ Laravel Boost :: Install :: We Must Ship ✦');
-        $this->line(' Let\'s setup Laravel Boost in your IDEs for ' . $this->colors->bgYellow($this->colors->black($this->projectName)));
+        $this->line(' Let\'s give ' . $this->colors->bgYellow($this->colors->black($this->projectName)) . ' a Boost');
     }
 
     protected function projectPurpose(): string
     {
         return text(
-            label: 'What does this project do? (optional)',
+            label: sprintf('What does %s project do? (optional)', $this->projectName),
             placeholder: 'i.e. SaaS platform selling concert tickets, integrates with Stripe and Twilio, lots of CS using Nova backend',
             hint: 'This helps guides AI. How would you explain it to a new developer?'
         );
@@ -431,7 +459,7 @@ HEADER
         ksort($agents);
 
         $selectedAgentClasses = collect(multiselect(
-            label: 'Which agents need AI guidelines?',
+            label: sprintf('Which agents need AI guidelines for %s?', $this->projectName),
             options: $agents,
             default: ['Laravel\\Boost\\Install\\Agents\\ClaudeCode'],//array_keys($agents),
             scroll: 4, // TODO: use detection to auto-select
@@ -496,6 +524,21 @@ HEADER
 
     protected function installingGuidelines(): bool
     {
-        return in_array('ai_guidelines', $this->boostToInstall);
+        return in_array('ai_guidelines', $this->boostToInstall, true);
+    }
+
+    protected function installingStyleGuidelines(): bool
+    {
+        return in_array('style_guidelines', $this->boostToInstall, true);
+    }
+
+    protected function installingMcp(): bool
+    {
+        return in_array('mcp_server', $this->boostToInstall, true);
+    }
+
+    protected function installingHerdMcp(): bool
+    {
+        return in_array('herd_mcp', $this->boostToInstall, true);
     }
 }

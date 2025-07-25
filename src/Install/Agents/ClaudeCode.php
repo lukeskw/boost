@@ -3,11 +3,13 @@
 namespace Laravel\Boost\Install\Agents;
 
 use Laravel\Boost\Contracts\Agent;
-use Laravel\Boost\Contracts\Ide;
+use Laravel\Boost\Install\Agents\ShellMcpIde;
 
-class ClaudeCode implements Agent, Ide
+class ClaudeCode extends ShellMcpIde implements Agent
 {
-    public function path(): string
+    protected string $shellCommand = 'claude mcp add laravel-boost {command} {args}';
+
+    public function guidelinesPath(): string
     {
         return 'CLAUDE.md';
     }
@@ -15,10 +17,5 @@ class ClaudeCode implements Agent, Ide
     public function frontmatter(): bool
     {
         return false;
-    }
-
-    public function installMcp(string $command, array $args): bool
-    {
-        return true;
     }
 }

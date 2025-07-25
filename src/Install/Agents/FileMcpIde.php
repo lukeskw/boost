@@ -4,12 +4,12 @@ namespace Laravel\Boost\Install\Agents;
 
 use Laravel\Boost\Contracts\Ide;
 
-class VsCode extends FileMcpIde
+abstract class FileMcpIde implements Ide
 {
-    protected string $jsonMcpKey = 'servers';
+    protected string $jsonMcpKey = 'mcpServers';
 
     public function mcpPath(): string
     {
-        return '.vscode/mcp.json';
+        throw new \Exception('Override me');
     }
 }

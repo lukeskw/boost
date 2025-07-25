@@ -6,7 +6,7 @@ use Laravel\Boost\Contracts\Agent;
 
 class Junie implements Agent
 {
-    public function path(): string
+    public function guidelinesPath(): string
     {
         return '.junie/guidelines.md';
     }
