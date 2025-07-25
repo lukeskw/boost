@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Mcp\Tools;
 
+// TODO: Allow package filtering? So we can search all docs at once, or allow the client to filter packages on 'inertia' or 'laravel' or 'pennant', etc..
+
 use Generator;
 use Laravel\Boost\Concerns\MakesHttpRequests;
 use Laravel\Mcp\Server\Tool;
