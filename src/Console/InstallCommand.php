@@ -602,7 +602,7 @@ HEADER
             if ($this->installingMcp()) {
                 try {
                     $result = $ide->installMcp('laravel-boost', base_path('artisan'), ['boost:mcp']);
-                    
+
                     if ($result) {
                         $results[] = '✓ Boost';
                     } else {
@@ -619,7 +619,7 @@ HEADER
             if ($this->installingHerdMcp()) {
                 try {
                     $result = $ide->installMcp('herd', PHP_BINARY, [$this->herdMcpPath()]);
-                    
+
                     if ($result) {
                         $results[] = '✓ Herd';
                     } else {
