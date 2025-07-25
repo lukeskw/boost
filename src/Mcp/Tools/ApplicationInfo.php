@@ -54,7 +54,7 @@ class ApplicationInfo extends Tool
         $appPath = app_path();
 
         if (! is_dir($appPath)) {
-            return ['app-path-isnt-a-directory:'.$appPath];
+            return ['app-path-isnt-a-directory' => $appPath];
         }
 
         $finder = Finder::create()

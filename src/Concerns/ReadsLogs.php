@@ -121,9 +121,6 @@ trait ReadsLogs
             }
 
             $content = stream_get_contents($handle);
-            if ($content === false) {
-                return [];
-            }
 
             // Split by beginning-of-entry look-ahead (PSR-3 timestamp pattern).
             $entries = preg_split(self::ENTRY_SPLIT_REGEX, $content, -1, PREG_SPLIT_NO_EMPTY);
