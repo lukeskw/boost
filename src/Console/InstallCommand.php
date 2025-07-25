@@ -18,6 +18,7 @@ use Symfony\Component\Finder\Finder;
 
 use function Laravel\Prompts\intro;
 use function Laravel\Prompts\multiselect;
+use function Laravel\Prompts\outro;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 
@@ -39,7 +40,8 @@ class InstallCommand extends Command
 
     protected bool $enforceTests = true;
 
-    protected array $idesToInstallTo = ['other'];
+    /** @var Collection<int, \Laravel\Boost\Contracts\Ide> */
+    protected Collection $idesToInstallTo;
 
     protected array $boostToInstall = [];
 
@@ -55,6 +57,7 @@ class InstallCommand extends Command
     public function handle(Roster $roster): void
     {
         $this->agentsToInstallTo = collect();
+        $this->idesToInstallTo = collect();
         $this->roster = $roster;
         $this->colors = new class
         {
@@ -65,9 +68,9 @@ class InstallCommand extends Command
 
         $this->intro();
         $this->detect();
-        // TODO: We see these packages installed, we have rules for X, so we'll add them
         $this->query();
         $this->enact();
+        $this->outro();
     }
 
     protected function detect()
@@ -75,6 +78,8 @@ class InstallCommand extends Command
         $this->installedIdes = $this->detectInstalledIdes();
         $this->detectedProjectIdes = $this->detectIdesUsedInProject();
         //        $this->detectedProjectAgents = $this->detectProjectAgents(); // TODO: Roo, Cline, Copilot
+        // TODO: Should we create all agents to start, add a 'detected' prop to them that's set on construct
+        // Maybe add a trait 'DetectsInstalled' and 'DetectsUsed' (in this project)
     }
 
     protected function query()
@@ -90,29 +95,26 @@ class InstallCommand extends Command
         $this->agentsToInstallTo = $this->agentsToInstallTo(); // AI Guidelines, which file do they go, are they separated, or all in one file?
     }
 
-    protected function enact()
+    protected function enact(): void
     {
         if ($this->installingGuidelines() && ! empty($this->agentsToInstallTo)) {
-            $this->enactGuidelines($this->compose());
+            $this->enactGuidelines($this->findGuidelines());
         }
 
-        if ($this->installingMcp() && ! empty($this->idesToInstallTo)) {
-            echo "\ninstalling mcps now to: ";
-            dump($this->idesToInstallTo);
+        if (($this->installingMcp() || $this->installingHerdMcp()) && $this->idesToInstallTo->isNotEmpty()) {
+            $this->enactMcpServers();
         }
 
-        if ($this->installingHerdMcp() && ! empty($this->idesToInstallTo)) {
-            echo "\ninstalling herd mcp now to: ";
-            dump($this->idesToInstallTo);
-        }
+        // Check if any of the selected IDEs is an "other" type IDE
+        $hasOtherIde = true;
 
-        if (in_array('other', $this->idesToInstallTo)) {
+        if ($hasOtherIde) {
             $this->newLine();
             $this->line('Add to your mcp file: ./artisan boost:mcp'); // some ides require absolute
         }
     }
 
-    protected function compose(): string
+    protected function findGuidelines(): Collection
     {
         // TODO: Just move to blade views and compact public properties?
         $composed = collect(['core' => $this->guideline('core.md', [
@@ -132,14 +134,11 @@ class InstallCommand extends Command
         }
 
         // Add all core.md and version specific docs for Roster supported packages
-        // We don't add guidelines for packages not supported by Roster right now
+        // We don't add guidelines for packages unsupported by Roster right now
         foreach ($this->roster->packages() as $package) {
             $guidelineDir = str_replace('_', '-', strtolower($package->name()));
-            $coreGuidelines = $this->guideline($guidelineDir.'/core.md'); // Add core
-            if ($coreGuidelines) {
-                $composed->put($guidelineDir.'/core', $coreGuidelines);
-            }
 
+            $composed->put($guidelineDir.'/core', $this->guideline($guidelineDir.'/core.md')); // Add core
             $composed->put(
                 $guidelineDir.'/v'.$package->majorVersion(),
                 $this->guidelines($guidelineDir.'/'.$package->majorVersion())
@@ -150,7 +149,14 @@ class InstallCommand extends Command
             $composed->put('tests', $this->guideline('enforce-tests.md'));
         }
 
-        return $composed->whereNotNull()->map(fn ($content, $key) => "# {$key}\n{$content}\n")
+        return $composed
+            ->whereNotNull();
+    }
+
+    protected function compose(Collection $composed): string
+    {
+        return $composed
+            ->map(fn ($content, $key) => "# {$key}\n{$content}\n")
             ->join("\n\n====\n\n");
     }
 
@@ -240,7 +246,7 @@ class InstallCommand extends Command
         }
 
         if (file_exists(base_path('CLAUDE.md')) || is_dir(base_path('.claude'))) {
-            $detected[] = 'claude_code';
+            $detected[] = 'claudecode';
         }
 
         $detected[] = 'other';
@@ -295,13 +301,18 @@ class InstallCommand extends Command
 
     protected function isHerdMCPAvailable(): bool
     {
+        return file_exists($this->herdMcpPath());
+    }
+
+    protected function herdMcpPath(): string
+    {
         $isWindows = PHP_OS_FAMILY === 'Windows';
 
         if ($isWindows) {
-            return file_exists($this->getHomePath().'/.config/herd/bin/herd-mcp.phar');
+            return $this->getHomePath().'/.config/herd/bin/herd-mcp.phar';
         }
 
-        return file_exists($this->getHomePath().'/Library/Application Support/Herd/bin/herd-mcp.phar');
+        return $this->getHomePath().'/Library/Application Support/Herd/bin/herd-mcp.phar';
     }
 
     /*
@@ -329,6 +340,11 @@ HEADER
         );
         intro('✦ Laravel Boost :: Install :: We Must Ship ✦');
         $this->line(' Let\'s give '.$this->colors->bgYellow($this->colors->black($this->projectName)).' a Boost');
+    }
+
+    private function outro()
+    {
+        outro('All done. Enjoy the boost 🚀');
     }
 
     protected function projectPurpose(): string
@@ -363,30 +379,6 @@ HEADER
         }
 
         return $enforce;
-    }
-
-    protected function idesToInstallTo(): array
-    {
-        // Limit our surface area for launch. We can support more after
-        $ideOptions = [
-            'claude_code' => 'Claude Code',
-            'cursor' => 'Cursor',
-            'phpstorm' => 'PHPStorm',
-            'vscode' => 'VSCode',
-            'other' => 'Other',
-        ];
-
-        // Tell API which ones?
-        $autoDetectedIdesString = Arr::join(array_map(fn (string $ideKey) => $ideOptions[$ideKey] ?? '', $this->detectedProjectIdes), ', ', ' & ');
-
-        return multiselect(
-            label: sprintf('Which IDEs do you use in %s? (space to select)', $this->projectName),
-            options: $ideOptions,
-            default: $this->detectedProjectIdes,
-            scroll: 5,
-            required: true,
-            hint: sprintf('Auto-detected %s for you', $autoDetectedIdesString)
-        );
     }
 
     protected function boostToInstall(): array
@@ -425,6 +417,61 @@ HEADER
     protected function detectProjectAgents(): array
     {
         return [];
+    }
+
+    /**
+     * @return Collection<int, \Laravel\Boost\Contracts\Ide>
+     */
+    protected function idesToInstallTo(): Collection
+    {
+        $ides = [];
+        if (! $this->installingMcp() && ! $this->installingHerdMcp()) {
+            return collect();
+        }
+
+        $agentDir = implode(DIRECTORY_SEPARATOR, [__DIR__, '..', 'Install', 'Agents']);
+
+        $finder = Finder::create()
+            ->in($agentDir)
+            ->files()
+            ->name('*.php');
+
+        foreach ($finder as $ideFile) {
+            $className = 'Laravel\\Boost\\Install\\Agents\\'.$ideFile->getBasename('.php');
+
+            if (class_exists($className)) {
+                $reflection = new \ReflectionClass($className);
+
+                if ($reflection->implementsInterface(\Laravel\Boost\Contracts\Ide::class) && ! $reflection->isAbstract()) {
+                    $ides[$className] = Str::headline($ideFile->getBasename('.php'));
+                }
+            }
+        }
+
+        ksort($ides);
+        //        $ides['other'] = 'Other'; // TODO: Make 'Other' work now we are working with classes not strings
+
+        // Map detected IDE keys to class names
+        $detectedClasses = [];
+        foreach ($this->detectedProjectIdes as $ideKey) {
+            foreach ($ides as $className => $displayName) {
+                if (strtolower($ideKey) === strtolower(class_basename($className))) {
+                    $detectedClasses[] = $className;
+                    break;
+                }
+            }
+        }
+
+        $selectedIdeClasses = collect(multiselect(
+            label: sprintf('Which IDEs do you use in %s? (space to select)', $this->projectName),
+            options: $ides,
+            default: $detectedClasses,
+            scroll: 5,
+            required: true,
+            hint: sprintf('Auto-detected %s for you', Arr::join(array_map(fn ($c) => class_basename($c), $detectedClasses), ', ', ' & '))
+        ));
+
+        return $selectedIdeClasses->map(fn ($ideClass) => new $ideClass);
     }
 
     /**
@@ -468,7 +515,7 @@ HEADER
         return $selectedAgentClasses->map(fn ($agentClass) => new $agentClass);
     }
 
-    protected function enactGuidelines(string $composedAiGuidelines): void
+    protected function enactGuidelines(Collection $composed): void
     {
         if (! $this->installingGuidelines()) {
             return;
@@ -481,11 +528,13 @@ HEADER
         }
 
         $this->newLine();
-        $this->info('Installing AI guidelines to selected agents...');
+        $this->info(sprintf('Found %d guidelines and adding to your selected agents', $composed->count()));
+        $this->line($composed->keys()->join(', ', ' & '));
         $this->newLine();
 
         $successful = [];
         $failed = [];
+        $composedAiGuidelines = $this->compose($composed);
 
         foreach ($this->agentsToInstallTo as $agent) {
             $agentName = class_basename($agent);
@@ -504,13 +553,6 @@ HEADER
         }
 
         $this->newLine();
-
-        if (count($successful) > 0) {
-            $this->info(sprintf('✓ Successfully installed guidelines to %d agent%s',
-                count($successful),
-                count($successful) === 1 ? '' : 's'
-            ));
-        }
 
         if (count($failed) > 0) {
             $this->error(sprintf('✗ Failed to install guidelines to %d agent%s:',
@@ -541,5 +583,67 @@ HEADER
     protected function installingHerdMcp(): bool
     {
         return in_array('herd_mcp', $this->boostToInstall, true);
+    }
+
+    protected function enactMcpServers(): void
+    {
+        $this->newLine();
+        $this->info('Installing MCP servers to your selected IDEs');
+        $this->newLine();
+
+        $failed = [];
+
+        foreach ($this->idesToInstallTo as $ide) {
+            $ideName = class_basename($ide);
+            $this->output->write("  {$ideName}... ");
+            $results = [];
+
+            // Install Laravel Boost MCP if enabled
+            if ($this->installingMcp()) {
+                try {
+                    $result = $ide->installMcp('laravel-boost', base_path('artisan'), ['boost:mcp']);
+                    
+                    if ($result) {
+                        $results[] = '✓ Boost';
+                    } else {
+                        $results[] = '✗ Boost';
+                        $failed[$ideName]['boost'] = 'Failed to write configuration';
+                    }
+                } catch (\Exception $e) {
+                    $results[] = '✗ Boost';
+                    $failed[$ideName]['boost'] = $e->getMessage();
+                }
+            }
+
+            // Install Herd MCP if enabled
+            if ($this->installingHerdMcp()) {
+                try {
+                    $result = $ide->installMcp('herd', PHP_BINARY, [$this->herdMcpPath()]);
+                    
+                    if ($result) {
+                        $results[] = '✓ Herd';
+                    } else {
+                        $results[] = '✗ Herd';
+                        $failed[$ideName]['herd'] = 'Failed to write configuration';
+                    }
+                } catch (\Exception $e) {
+                    $results[] = '✗ Herd';
+                    $failed[$ideName]['herd'] = $e->getMessage();
+                }
+            }
+
+            $this->line(implode(' ', $results));
+        }
+
+        $this->newLine();
+
+        if (count($failed) > 0) {
+            $this->error(sprintf('✗ Some MCP servers failed to install:'));
+            foreach ($failed as $ideName => $errors) {
+                foreach ($errors as $server => $error) {
+                    $this->line("  - {$ideName} ({$server}): {$error}");
+                }
+            }
+        }
     }
 }

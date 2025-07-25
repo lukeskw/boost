@@ -1,1 +1,2 @@
-- Every new feature must be tested. Write a new test, or update an existing test, then run the tests to make sure they pass.
+- Every change must be programmatically tested. Write a new test, or update an existing test, then run the tests to make sure they pass.
+- Run the individual tests edited to 
