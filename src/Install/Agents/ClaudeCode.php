@@ -3,7 +3,6 @@
 namespace Laravel\Boost\Install\Agents;
 
 use Laravel\Boost\Contracts\Agent;
-use Laravel\Boost\Install\Agents\ShellMcpIde;
 
 class ClaudeCode extends ShellMcpIde implements Agent
 {

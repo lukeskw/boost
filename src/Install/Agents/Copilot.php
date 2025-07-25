@@ -17,7 +17,7 @@ class Copilot implements Agent
     {
         // If we use the multi file approach we can use frontmatter
         // In VSCode at least https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions?tool=vscode
-        
+
         return false;
     }
 }
