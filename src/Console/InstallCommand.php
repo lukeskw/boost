@@ -10,6 +10,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
 use Laravel\Prompts\Concerns\Colors;
+use Laravel\Prompts\Terminal;
 use Laravel\Roster\Enums\Packages;
 use Laravel\Roster\Roster;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -54,8 +55,16 @@ class InstallCommand extends Command
 
     protected Roster $roster;
 
+    private string $greenTick;
+
+    private string $redCross;
+
+    private Terminal $terminal;
+
     public function handle(Roster $roster): void
     {
+        $this->terminal = new Terminal;
+        $this->terminal->initDimensions();
         $this->agentsToInstallTo = collect();
         $this->idesToInstallTo = collect();
         $this->roster = $roster;
@@ -63,6 +72,8 @@ class InstallCommand extends Command
         {
             use Colors;
         };
+        $this->greenTick = $this->colors->green('✓');
+        $this->redCross = $this->colors->red('✗');
 
         $this->projectName = basename(base_path());
 
@@ -110,7 +121,8 @@ class InstallCommand extends Command
 
         if ($hasOtherIde) {
             $this->newLine();
-            $this->line('Add to your mcp file: ./artisan boost:mcp'); // some ides require absolute
+            $this->line('Add Boost MCP manually if needed:'); // some ides require absolute
+            $this->datatable([['Command', base_path('artisan')], ['Args', 'boost:mcp']]);
         }
     }
 
@@ -329,15 +341,18 @@ class InstallCommand extends Command
     private function intro()
     {
         $this->newline();
-        $this->line(<<<'HEADER'
- ██████╗   ██████╗   ██████╗  ███████╗ ████████╗
- ██╔══██╗ ██╔═══██╗ ██╔═══██╗ ██╔════╝ ╚══██╔══╝
- ██████╔╝ ██║   ██║ ██║   ██║ ███████╗    ██║
- ██╔══██╗ ██║   ██║ ██║   ██║ ╚════██║    ██║
- ██████╔╝ ╚██████╔╝ ╚██████╔╝ ███████║    ██║
- ╚═════╝   ╚═════╝   ╚═════╝  ╚══════╝    ╚═╝
-HEADER
-        );
+        $header = <<<HEADER
+ \e[38;2;234;36;16m██████╗   ██████╗   ██████╗  ███████╗ ████████╗
+ \e[38;2;234;42;22m██╔══██╗ ██╔═══██╗ ██╔═══██╗ ██╔════╝ ╚══██╔══╝
+ \e[38;2;234;48;28m██████╔╝ ██║   ██║ ██║   ██║ ███████╗    ██║
+ \e[38;2;234;54;34m██╔══██╗ ██║   ██║ ██║   ██║ ╚════██║    ██║
+ \e[38;2;234;60;40m██████╔╝ ╚██████╔╝ ╚██████╔╝ ███████║    ██║
+ \e[38;2;234;66;46m╚═════╝   ╚═════╝   ╚═════╝  ╚══════╝    ╚═╝\e[0m
+HEADER;
+        foreach (explode(PHP_EOL, $header) as $i => $line) {
+            echo "{$line}\n";
+        }
+
         intro('✦ Laravel Boost :: Install :: We Must Ship ✦');
         $this->line(' Let\'s give '.$this->colors->bgYellow($this->colors->black($this->projectName)).' a Boost');
     }
@@ -345,6 +360,7 @@ HEADER
     private function outro()
     {
         outro('All done. Enjoy the boost 🚀');
+        outro('Get the most out of Boost by visiting https://boost.laravel.com/installed');
     }
 
     protected function projectPurpose(): string
@@ -528,27 +544,29 @@ HEADER
         }
 
         $this->newLine();
-        $this->info(sprintf('Found %d guidelines and adding to your selected agents', $composed->count()));
-        $this->line($composed->keys()->join(', ', ' & '));
+        $this->info(sprintf('Adding %d guidelines to your selected agents', $composed->count()));
+        $this->grid($composed->keys()->toArray());
         $this->newLine();
 
         $successful = [];
         $failed = [];
         $composedAiGuidelines = $this->compose($composed);
 
+        $longestAgentName = max(1, ...$this->agentsToInstallTo->map(fn ($agent) => Str::length(class_basename($agent)))->toArray());
         foreach ($this->agentsToInstallTo as $agent) {
             $agentName = class_basename($agent);
-            $this->output->write("  {$agentName}... ");
+            $displayAgentName = str_pad($agentName, $longestAgentName, ' ', STR_PAD_RIGHT);
+            $this->output->write("  {$displayAgentName}... ");
 
             try {
                 $guidelineWriter = new \Laravel\Boost\Install\GuidelineWriter($agent);
                 $guidelineWriter->write($composedAiGuidelines);
 
                 $successful[] = $agentName;
-                $this->line('✓');
+                $this->line($this->greenTick);
             } catch (\Exception $e) {
                 $failed[$agentName] = $e->getMessage();
-                $this->line('✗');
+                $this->line($this->redCross);
             }
         }
 
@@ -585,6 +603,180 @@ HEADER
         return in_array('herd_mcp', $this->boostToInstall, true);
     }
 
+    protected function datatable(array $data): void
+    {
+        if (empty($data)) {
+            return;
+        }
+
+        // Calculate column widths
+        $columnWidths = [];
+        foreach ($data as $row) {
+            $colIndex = 0;
+            foreach ($row as $cell) {
+                $length = mb_strlen((string) $cell);
+                if (! isset($columnWidths[$colIndex]) || $length > $columnWidths[$colIndex]) {
+                    $columnWidths[$colIndex] = $length;
+                }
+                $colIndex++;
+            }
+        }
+
+        // Add padding
+        $columnWidths = array_map(fn ($width) => $width + 2, $columnWidths);
+
+        // Unicode box drawing characters
+        $topLeft = '╭';
+        $topRight = '╮';
+        $bottomLeft = '╰';
+        $bottomRight = '╯';
+        $horizontal = '─';
+        $vertical = '│';
+        $cross = '┼';
+        $topT = '┬';
+        $bottomT = '┴';
+        $leftT = '├';
+        $rightT = '┤';
+
+        // Draw top border
+        $topBorder = $topLeft;
+        foreach ($columnWidths as $index => $width) {
+            $topBorder .= str_repeat($horizontal, $width);
+            if ($index < count($columnWidths) - 1) {
+                $topBorder .= $topT;
+            }
+        }
+        $topBorder .= $topRight;
+        $this->line($topBorder);
+
+        // Draw rows
+        $rowCount = 0;
+        foreach ($data as $row) {
+            $line = $vertical;
+            $colIndex = 0;
+            foreach ($row as $cell) {
+                $cellStr = ($colIndex === 0) ? "\e[1m".$cell."\e[0m" : $cell;
+                $padding = $columnWidths[$colIndex] - mb_strlen($cell);
+                $line .= ' '.$cellStr.str_repeat(' ', $padding - 1).$vertical;
+                $colIndex++;
+            }
+            $this->line($line);
+
+            // Draw separator between rows (except after last row)
+            if ($rowCount < count($data) - 1) {
+                $separator = $leftT;
+                foreach ($columnWidths as $index => $width) {
+                    $separator .= str_repeat($horizontal, $width);
+                    if ($index < count($columnWidths) - 1) {
+                        $separator .= $cross;
+                    }
+                }
+                $separator .= $rightT;
+                $this->line($separator);
+            }
+            $rowCount++;
+        }
+
+        // Draw bottom border
+        $bottomBorder = $bottomLeft;
+        foreach ($columnWidths as $index => $width) {
+            $bottomBorder .= str_repeat($horizontal, $width);
+            if ($index < count($columnWidths) - 1) {
+                $bottomBorder .= $bottomT;
+            }
+        }
+        $bottomBorder .= $bottomRight;
+        $this->line($bottomBorder);
+    }
+
+    protected function grid(array $items): void
+    {
+        if (empty($items)) {
+            return;
+        }
+
+        // Get terminal width
+        $terminalWidth = $this->terminal->cols() ?? 80;
+
+        // Calculate the longest item length
+        $maxItemLength = max(array_map('mb_strlen', $items));
+
+        // Add padding (2 spaces on each side + 1 for border)
+        $cellWidth = $maxItemLength + 4;
+
+        // Calculate how many cells can fit per row
+        $cellsPerRow = max(1, (int) floor(($terminalWidth - 1) / ($cellWidth + 1)));
+
+        // Unicode box drawing characters
+        $topLeft = '╭';
+        $topRight = '╮';
+        $bottomLeft = '╰';
+        $bottomRight = '╯';
+        $horizontal = '─';
+        $vertical = '│';
+        $cross = '┼';
+        $topT = '┬';
+        $bottomT = '┴';
+        $leftT = '├';
+        $rightT = '┤';
+
+        // Group items into rows
+        $rows = array_chunk($items, $cellsPerRow);
+
+        // Draw top border
+        $topBorder = $topLeft;
+        for ($i = 0; $i < $cellsPerRow; $i++) {
+            $topBorder .= str_repeat($horizontal, $cellWidth);
+            if ($i < $cellsPerRow - 1) {
+                $topBorder .= $topT;
+            }
+        }
+        $topBorder .= $topRight;
+        $this->line($topBorder);
+
+        // Draw rows
+        $rowCount = 0;
+        foreach ($rows as $row) {
+            $line = $vertical;
+            for ($i = 0; $i < $cellsPerRow; $i++) {
+                if (isset($row[$i])) {
+                    $item = $row[$i];
+                    $padding = $cellWidth - mb_strlen($item) - 2;
+                    $line .= ' '.$item.str_repeat(' ', $padding + 1).$vertical;
+                } else {
+                    // Empty cell
+                    $line .= str_repeat(' ', $cellWidth).$vertical;
+                }
+            }
+            $this->line($line);
+
+            // Draw separator between rows (except after last row)
+            if ($rowCount < count($rows) - 1) {
+                $separator = $leftT;
+                for ($i = 0; $i < $cellsPerRow; $i++) {
+                    $separator .= str_repeat($horizontal, $cellWidth);
+                    if ($i < $cellsPerRow - 1) {
+                        $separator .= $cross;
+                    }
+                }
+                $separator .= $rightT;
+                $this->line($separator);
+            }
+            $rowCount++;
+        }
+
+        // Draw bottom border
+        $bottomBorder = $bottomLeft;
+        for ($i = 0; $i < $cellsPerRow; $i++) {
+            $bottomBorder .= str_repeat($horizontal, $cellWidth);
+            if ($i < $cellsPerRow - 1) {
+                $bottomBorder .= $bottomT;
+            }
+        }
+        $bottomBorder .= $bottomRight;
+        $this->line($bottomBorder);
+    }
+
     protected function enactMcpServers(): void
     {
         $this->newLine();
@@ -592,25 +784,27 @@ HEADER
         $this->newLine();
 
         $failed = [];
+        $longestIdeName = max(1, ...$this->idesToInstallTo->map(fn ($ide) => Str::length(class_basename($ide)))->toArray());
 
         foreach ($this->idesToInstallTo as $ide) {
             $ideName = class_basename($ide);
-            $this->output->write("  {$ideName}... ");
+            $ideDisplay = str_pad($ideName, $longestIdeName, ' ', STR_PAD_RIGHT);
+            $this->output->write("  {$ideDisplay}... ");
             $results = [];
 
             // Install Laravel Boost MCP if enabled
             if ($this->installingMcp()) {
                 try {
                     $result = $ide->installMcp('laravel-boost', base_path('artisan'), ['boost:mcp']);
-                    
+
                     if ($result) {
-                        $results[] = '✓ Boost';
+                        $results[] = $this->greenTick.' Boost';
                     } else {
-                        $results[] = '✗ Boost';
+                        $results[] = $this->redCross.' Boost';
                         $failed[$ideName]['boost'] = 'Failed to write configuration';
                     }
                 } catch (\Exception $e) {
-                    $results[] = '✗ Boost';
+                    $results[] = $this->redCross.' Boost';
                     $failed[$ideName]['boost'] = $e->getMessage();
                 }
             }
@@ -619,15 +813,15 @@ HEADER
             if ($this->installingHerdMcp()) {
                 try {
                     $result = $ide->installMcp('herd', PHP_BINARY, [$this->herdMcpPath()]);
-                    
+
                     if ($result) {
-                        $results[] = '✓ Herd';
+                        $results[] = $this->greenTick.' Herd';
                     } else {
-                        $results[] = '✗ Herd';
+                        $results[] = $this->redCross.' Herd';
                         $failed[$ideName]['herd'] = 'Failed to write configuration';
                     }
                 } catch (\Exception $e) {
-                    $results[] = '✗ Herd';
+                    $results[] = $this->redCross.' Herd';
                     $failed[$ideName]['herd'] = $e->getMessage();
                 }
             }
