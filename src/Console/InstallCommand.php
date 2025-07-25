@@ -92,16 +92,16 @@ class InstallCommand extends Command
 
     protected function enact()
     {
-        if ($this->installingGuidelines() && !empty($this->agentsToInstallTo)) {
+        if ($this->installingGuidelines() && ! empty($this->agentsToInstallTo)) {
             $this->enactGuidelines($this->compose());
         }
 
-        if ($this->installingMcp() && !empty($this->idesToInstallTo)) {
+        if ($this->installingMcp() && ! empty($this->idesToInstallTo)) {
             echo "\ninstalling mcps now to: ";
             dump($this->idesToInstallTo);
         }
 
-        if ($this->installingHerdMcp() && !empty($this->idesToInstallTo)) {
+        if ($this->installingHerdMcp() && ! empty($this->idesToInstallTo)) {
             echo "\ninstalling herd mcp now to: ";
             dump($this->idesToInstallTo);
         }
@@ -118,7 +118,7 @@ class InstallCommand extends Command
         $composed = collect(['core' => $this->guideline('core.md', [
             '{project.purpose}' => $this->projectPurpose,
             // TODO: Add package info, php version, laravel version, existing approaches, directory structure, models? General Laravel guidance that applies to all projects somehow? 'Follow existing conventions - if you are creating or editing a file, check sibling files for structure/approach/naming
-//            TODO: Add project structure / relevant models / etc.. ? Kind of like Claude's /init, but for every Laravel developer regardless of IDE ? But if they already have that in Claude.md then that's gonna be doubling up and wasting tokens
+            //            TODO: Add project structure / relevant models / etc.. ? Kind of like Claude's /init, but for every Laravel developer regardless of IDE ? But if they already have that in Claude.md then that's gonna be doubling up and wasting tokens
         ])]);
 
         if (str_contains(config('app.url'), '.test') && $this->isHerdInstalled()) {
@@ -135,14 +135,14 @@ class InstallCommand extends Command
         // We don't add guidelines for packages not supported by Roster right now
         foreach ($this->roster->packages() as $package) {
             $guidelineDir = str_replace('_', '-', strtolower($package->name()));
-            $coreGuidelines = $this->guideline($guidelineDir . '/core.md'); // Add core
+            $coreGuidelines = $this->guideline($guidelineDir.'/core.md'); // Add core
             if ($coreGuidelines) {
-                $composed->put($guidelineDir . '/core', $coreGuidelines);
+                $composed->put($guidelineDir.'/core', $coreGuidelines);
             }
 
             $composed->put(
-                $guidelineDir . '/v' . $package->majorVersion(),
-                $this->guidelines($guidelineDir . '/' . $package->majorVersion())
+                $guidelineDir.'/v'.$package->majorVersion(),
+                $this->guidelines($guidelineDir.'/'.$package->majorVersion())
             );
         }
 
@@ -328,7 +328,7 @@ class InstallCommand extends Command
 HEADER
         );
         intro('✦ Laravel Boost :: Install :: We Must Ship ✦');
-        $this->line(' Let\'s give '.$this->colors->bgYellow($this->colors->black($this->projectName)) . ' a Boost');
+        $this->line(' Let\'s give '.$this->colors->bgYellow($this->colors->black($this->projectName)).' a Boost');
     }
 
     protected function projectPurpose(): string

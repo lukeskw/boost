@@ -2,8 +2,6 @@
 
 namespace Laravel\Boost\Install\Agents;
 
-use Laravel\Boost\Contracts\Ide;
-
 class VsCode extends FileMcpIde
 {
     protected string $jsonMcpKey = 'servers';
