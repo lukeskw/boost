@@ -130,7 +130,7 @@ class InstallCommand extends Command
     {
         // TODO: Just move to blade views and compact public properties?
         $composed = collect(['core' => $this->guideline('core.md', [
-            '{project.purpose}' => $this->projectPurpose,
+            '{project.purpose}' => $this->projectPurpose ?: 'Unknown',
             // TODO: Add package info, php version, laravel version, existing approaches, directory structure, models? General Laravel guidance that applies to all projects somehow? 'Follow existing conventions - if you are creating or editing a file, check sibling files for structure/approach/naming
             //            TODO: Add project structure / relevant models / etc.. ? Kind of like Claude's /init, but for every Laravel developer regardless of IDE ? But if they already have that in Claude.md then that's gonna be doubling up and wasting tokens
         ])]);
@@ -360,7 +360,7 @@ HEADER;
     private function outro()
     {
         outro('All done. Enjoy the boost 🚀');
-        outro('Get the most out of Boost by visiting https://boost.laravel.com/installed');
+        outro('Get the most out of Boost by visiting https://boost.laravel.com/installed'); // TODO: Pass info on what we did so it can show specific help
     }
 
     protected function projectPurpose(): string
