@@ -366,7 +366,7 @@ HEADER;
     protected function projectPurpose(): string
     {
         return text(
-            label: sprintf('What does %s project do? (optional)', $this->projectName),
+            label: sprintf('What does the %s project do? (optional)', $this->projectName),
             placeholder: 'i.e. SaaS platform selling concert tickets, integrates with Stripe and Twilio, lots of CS using Nova backend',
             hint: 'This helps guides AI. How would you explain it to a new developer?'
         );
