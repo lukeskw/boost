@@ -77,7 +77,7 @@ class BoostServiceProvider extends ServiceProvider
                 Console\StartCommand::class,
                 Console\InstallCommand::class,
                 Console\ExecuteToolCommand::class,
-                Console\ChatCommand::class,
+                Console\AssistCommand::class,
             ]);
         }
     }
