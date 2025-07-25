@@ -6,9 +6,12 @@ namespace Laravel\Boost\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
 use Laravel\Prompts\Concerns\Colors;
+use Laravel\Roster\Enums\Packages;
+use Laravel\Roster\Roster;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Finder\Finder;
 
@@ -25,7 +28,7 @@ class InstallCommand extends Command
     // Used for nicer install experience
     protected string $projectName;
 
-    // Used as part of AI Rules
+    // Used as part of AI Guidelines
     protected string $projectPurpose = '';
 
     /** @var string[] */
@@ -43,12 +46,16 @@ class InstallCommand extends Command
 
     protected array $detectedProjectAgents = [];
 
-    protected array $agentsToInstallTo = [];
+    /** @var Collection<int, \Laravel\Boost\Contracts\Agent> */
+    protected Collection $agentsToInstallTo;
 
-    public function handle(): void
+    protected Roster $roster;
+
+    public function handle(Roster $roster): void
     {
-        $this->colors = new class
-        {
+        $this->agentsToInstallTo = collect();
+        $this->roster = $roster;
+        $this->colors = new class {
             use Colors;
         };
 
@@ -56,6 +63,7 @@ class InstallCommand extends Command
 
         $this->intro();
         $this->detect();
+        // TODO: We see these packages installed, we have rules for X, so we'll add them
         $this->query();
         $this->enact();
     }
@@ -69,25 +77,91 @@ class InstallCommand extends Command
 
     protected function query()
     {
-        $this->projectPurpose = $this->projectPurpose();
-        $this->enforceTests = $this->shouldEnforceTests(ask: false); // TODO: Only add 'all new code must have a test' rule if enforced
-        $this->idesToInstallTo = $this->idesToInstallTo(); // To add boost:mcp to the correct file
-        $this->agentsToInstallTo = $this->agentsToInstallTo(); // AI Rules, which file do they go, are they separated, or all in one file?
-
         // Which parts of boost should we install
         $this->boostToInstall = $this->boostToInstall();
         //        $this->boostToolsToDisable = $this->boostToolsToDisable(); // Not useful to start
 
+        $this->projectPurpose = $this->projectPurpose();
+        $this->enforceTests = $this->shouldEnforceTests(ask: false); // TODO: Only add 'all new code must have a test' guideline if enforced
+        $this->idesToInstallTo = $this->idesToInstallTo(); // To add boost:mcp to the correct file
+
+        // TODO: Only if in $boosttoInstall or whatever
+        $this->agentsToInstallTo = $this->agentsToInstallTo(); // AI Guidelines, which file do they go, are they separated, or all in one file?
     }
 
     protected function enact()
     {
-        // AI rules, for now we're only going to support one file, not multiple. Composable AI Rule _file_
-        // For most files we'll wrao in <laravel-boost-injected-rules>, for Cursor we can do .cursor/rules/laravel-boost.mdc
+        $composedAiGuidelines = $this->compose();
+        if ($this->installingGuidelines()) {
+            $this->enactGuidelines($composedAiGuidelines);
+        }
+//        $this->enactMcp();
 
         if (in_array('other', $this->idesToInstallTo)) {
+            $this->newLine();
             $this->line('Add to your mcp file: ./artisan boost:mcp'); // some ides require absolute
         }
+    }
+
+    protected function compose(): string
+    {
+        // TODO: Just move to blade views and compact public properties?
+        $composed = collect(['core' => $this->guideline('core.md', [
+            '{project.purpose}' => $this->projectPurpose,
+        ])]);
+
+        if (str_contains(config('app.url'), '.test') && $this->isHerdInstalled()) {
+            $composed->put('herd/core', $this->guideline('herd/core.md', [
+                '{app.url}' => url('/'),
+            ]));
+        }
+
+        // TODO: Improve • this is a horrible way to do this
+
+        if ($this->roster->usesVersion(Packages::INERTIA_LARAVEL, '2.0.0', '>=')) {
+            $composed->put('inertiajs-laravel/core', $this->guideline('inertiajs-laravel/core.md', []));
+            $composed->put('inertiajs-laravel/v2', $this->guidelines('inertiajs-laravel/2/'));
+        }
+
+        if ($this->shouldEnforceTests()) {
+            $composed->put('tests', $this->guideline('enforce-tests.md'));
+        }
+        return $composed->map(fn($content, $key) => "# {$key}\n{$content}\n")
+            ->join("\n\n====\n\n");
+    }
+
+    protected function guidelines(string $dirPath, array $replacements = []): string
+    {
+        $dirPath = str_replace('/', DIRECTORY_SEPARATOR, __DIR__ . '/../../.ai/' . $dirPath);
+        $finder = Finder::create()
+            ->files()
+            ->in($dirPath)
+            ->name('*.md');
+
+        $guidelines = '';
+        foreach ($finder as $file) {
+            $guidelines .= $this->guideline($file->getRealPath(), $replacements);
+        }
+
+        return $guidelines;
+    }
+
+    protected function guideline(string $path, array $replacements = []): string
+    {
+        if (!file_exists($path)) {
+            $path = str_replace('/', DIRECTORY_SEPARATOR, __DIR__ . '/../../.ai/' . $path);
+        }
+
+        if (!file_exists($path)) {
+            throw new \Exception("$path does not exist");
+        }
+
+        $contents = file_get_contents($path);
+        if ($contents === false) {
+            return '';
+        }
+
+        return trim(str_replace(array_keys($replacements), array_values($replacements), $contents));
     }
 
     /**
@@ -156,7 +230,7 @@ class InstallCommand extends Command
             ->name('*.php');
 
         foreach ($finder as $toolFile) {
-            $fqdn = 'Laravel\\Boost\\Mcp\\Tools\\'.$toolFile->getBasename('.php');
+            $fqdn = 'Laravel\\Boost\\Mcp\\Tools\\' . $toolFile->getBasename('.php');
             if (class_exists($fqdn)) {
                 $tools[$fqdn] = Str::headline($toolFile->getBasename('.php'));
             }
@@ -170,7 +244,7 @@ class InstallCommand extends Command
     public function getHomePath(): string
     {
         if (PHP_OS_FAMILY === 'Windows') {
-            if (! isset($_SERVER['HOME'])) {
+            if (!isset($_SERVER['HOME'])) {
                 $_SERVER['HOME'] = $_SERVER['USERPROFILE'];
             }
 
@@ -184,11 +258,11 @@ class InstallCommand extends Command
     {
         $isWindows = PHP_OS_FAMILY === 'Windows';
 
-        if (! $isWindows) {
+        if (!$isWindows) {
             return file_exists('/Applications/Herd.app/Contents/MacOS/Herd');
         }
 
-        return is_dir($this->getHomePath().'/.config/herd');
+        return is_dir($this->getHomePath() . '/.config/herd');
     }
 
     protected function isHerdMCPAvailable(): bool
@@ -196,10 +270,10 @@ class InstallCommand extends Command
         $isWindows = PHP_OS_FAMILY === 'Windows';
 
         if ($isWindows) {
-            return file_exists($this->getHomePath().'/.config/herd/bin/herd-mcp.phar');
+            return file_exists($this->getHomePath() . '/.config/herd/bin/herd-mcp.phar');
         }
 
-        return file_exists($this->getHomePath().'/Library/Application Support/Herd/bin/herd-mcp.phar');
+        return file_exists($this->getHomePath() . '/Library/Application Support/Herd/bin/herd-mcp.phar');
     }
 
     /*
@@ -226,7 +300,7 @@ class InstallCommand extends Command
 HEADER
         );
         intro('✦ Laravel Boost :: Install :: We Must Ship ✦');
-        $this->line(' Let\'s setup Laravel Boost in your IDEs for '.$this->colors->bgYellow($this->colors->black($this->projectName)));
+        $this->line(' Let\'s setup Laravel Boost in your IDEs for ' . $this->colors->bgYellow($this->colors->black($this->projectName)));
     }
 
     protected function projectPurpose(): string
@@ -239,7 +313,7 @@ HEADER
     }
 
     /**
-     * We shouldn't add an AI rule enforcing tests if they don't have a basic test setup.
+     * We shouldn't add an AI guideline enforcing tests if they don't have a basic test setup.
      * This would likely just create headaches for them, or be a waste of time as they
      * won't have the CI setup to make use of them anyway, so we're just wasting their
      * tokens/money by enforcing them.
@@ -247,17 +321,17 @@ HEADER
     protected function shouldEnforceTests(bool $ask = true): bool
     {
         $enforce = Finder::create()
-            ->in(base_path('tests'))
-            ->files()
-            ->name('*.php')
-            ->count() > 6;
+                ->in(base_path('tests'))
+                ->files()
+                ->name('*.php')
+                ->count() > 6;
 
         if ($enforce === false && $ask === true) {
             $enforce = select(
-                label: 'Should AI always create tests?',
-                options: ['Yes', 'No'],
-                default: 'Yes'
-            ) === 'Yes';
+                    label: 'Should AI always create tests?',
+                    options: ['Yes', 'No'],
+                    default: 'Yes'
+                ) === 'Yes';
         }
 
         return $enforce;
@@ -275,7 +349,7 @@ HEADER
         ];
 
         // Tell API which ones?
-        $autoDetectedIdesString = Arr::join(array_map(fn (string $ideKey) => $ideOptions[$ideKey] ?? '', $this->detectedProjectIdes), ', ', ' & ');
+        $autoDetectedIdesString = Arr::join(array_map(fn(string $ideKey) => $ideOptions[$ideKey] ?? '', $this->detectedProjectIdes), ', ', ' & ');
 
         return multiselect(
             label: sprintf('Which IDEs do you use in %s? (space to select)', $this->projectName),
@@ -289,11 +363,11 @@ HEADER
 
     protected function boostToInstall(): array
     {
-        $defaultToInstallOptions = ['mcp_server', 'ai_rules'];
+        $defaultToInstallOptions = ['mcp_server', 'ai_guidelines'];
         $toInstallOptions = [
             'mcp_server' => 'Boost MCP Server',
-            'ai_rules' => 'Package AI Rules (i.e. Framework, Inertia, Pest)',
-            'style_rules' => 'Laravel Style AI Rules',
+            'ai_guidelines' => 'Package AI Guidelines (i.e. Framework, Inertia, Pest)',
+            'style_guidelines' => 'Laravel Style AI Guidelines',
         ];
 
         if ($this->isHerdMCPAvailable()) {
@@ -306,7 +380,7 @@ HEADER
             options: $toInstallOptions,
             default: $defaultToInstallOptions,
             required: true,
-            hint: 'Style rules are best for new projects',
+            hint: 'Style guidelines are best for new projects',
         );
     }
 
@@ -320,11 +394,108 @@ HEADER
         );
     }
 
-    protected function detectProjectAgents(): array {}
-
-    protected function agentsToInstallTo(): array
+    protected function detectProjectAgents(): array
     {
         return [];
-        // multi select ask
+    }
+
+    /**
+     * @return Collection<int, \Laravel\Boost\Contracts\Agent>
+     */
+    protected function agentsToInstallTo(): Collection
+    {
+        $agents = [];
+        if (!$this->installingGuidelines()) {
+            return collect();
+        }
+
+        $agentDir = implode(DIRECTORY_SEPARATOR, [__DIR__, '..', 'Install', 'Agents']);
+
+        $finder = Finder::create()
+            ->in($agentDir)
+            ->files()
+            ->name('*.php');
+
+        foreach ($finder as $agentFile) {
+            $className = 'Laravel\\Boost\\Install\\Agents\\' . $agentFile->getBasename('.php');
+
+            if (class_exists($className)) {
+                $reflection = new \ReflectionClass($className);
+
+                if ($reflection->implementsInterface(\Laravel\Boost\Contracts\Agent::class)) {
+                    $agents[$className] = Str::headline($agentFile->getBasename('.php'));
+                }
+            }
+        }
+
+        ksort($agents);
+
+        $selectedAgentClasses = collect(multiselect(
+            label: 'Which agents need AI guidelines?',
+            options: $agents,
+            default: ['Laravel\\Boost\\Install\\Agents\\ClaudeCode'],//array_keys($agents),
+            scroll: 4, // TODO: use detection to auto-select
+        ));
+
+        return $selectedAgentClasses->map(fn($agentClass) => new $agentClass());
+    }
+
+    protected function enactGuidelines(string $composedAiGuidelines): void
+    {
+        if (!$this->installingGuidelines()) {
+            return;
+        }
+
+        if ($this->agentsToInstallTo->isEmpty()) {
+            $this->info('No agents selected for guideline installation.');
+            return;
+        }
+
+        $this->newLine();
+        $this->info('Installing AI guidelines to selected agents...');
+        $this->newLine();
+
+        $successful = [];
+        $failed = [];
+
+        foreach ($this->agentsToInstallTo as $agent) {
+            $agentName = class_basename($agent);
+            $this->output->write("  {$agentName}... ");
+
+            try {
+                $guidelineWriter = new \Laravel\Boost\Install\GuidelineWriter($agent);
+                $guidelineWriter->write($composedAiGuidelines);
+
+                $successful[] = $agentName;
+                $this->line('✓');
+            } catch (\Exception $e) {
+                $failed[$agentName] = $e->getMessage();
+                $this->line('✗');
+            }
+        }
+
+        $this->newLine();
+
+        if (count($successful) > 0) {
+            $this->info(sprintf('✓ Successfully installed guidelines to %d agent%s',
+                count($successful),
+                count($successful) === 1 ? '' : 's'
+            ));
+        }
+
+        if (count($failed) > 0) {
+            $this->error(sprintf('✗ Failed to install guidelines to %d agent%s:',
+                count($failed),
+                count($failed) === 1 ? '' : 's'
+            ));
+            foreach ($failed as $agentName => $error) {
+                $this->line("  - {$agentName}: {$error}");
+            }
+        }
+    }
+
+    protected function installingGuidelines(): bool
+    {
+        return in_array('ai_guidelines', $this->boostToInstall);
     }
 }

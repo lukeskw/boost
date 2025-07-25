@@ -18,3 +18,7 @@ You can and should pass multiple queries at once, the most relevant will be retu
 # URLs
 
 - Whenever you create a URL use the `get-absolute-url` tool to ensure you're using the correct scheme, domain/IP, and port.
+
+
+# Artisan
+- Use the `list-artisan-commands` tool when needing to call an artisan command to triple check the available params

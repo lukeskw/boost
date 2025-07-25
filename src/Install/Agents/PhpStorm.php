@@ -6,8 +6,8 @@ use Laravel\Boost\Contracts\Ide;
 
 class PhpStorm implements Ide
 {
-    public function install(): bool
+    public function installMcp(string $command, array $args): bool
     {
-        // TODO: Implement install() method.
+        return true;
     }
 }

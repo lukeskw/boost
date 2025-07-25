@@ -12,5 +12,5 @@ interface Ide
      * Should be safe to re-run.
      * Should work well with others.
      */
-    public function install(string $command, array $args): bool;
+    public function installMcp(string $command, array $args): bool;
 }
