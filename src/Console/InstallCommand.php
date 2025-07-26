@@ -7,14 +7,18 @@ namespace Laravel\Boost\Console;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
+use Laravel\Boost\Install\Cli\DisplayHelper;
+use Laravel\Boost\Install\GuidelineComposer;
+use Laravel\Boost\Install\GuidelineConfig;
+use Laravel\Boost\Install\GuidelineWriter;
+use Laravel\Boost\Install\Herd;
 use Laravel\Prompts\Concerns\Colors;
 use Laravel\Prompts\Terminal;
-use Laravel\Roster\Enums\Packages;
 use Laravel\Roster\Roster;
 use Symfony\Component\Console\Attribute\AsCommand;
-use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
 use Symfony\Component\Finder\Finder;
 
 use function Laravel\Prompts\intro;
@@ -55,19 +59,23 @@ class InstallCommand extends Command
 
     protected Roster $roster;
 
+    protected Herd $herd;
+
     private string $greenTick;
 
     private string $redCross;
 
     private Terminal $terminal;
 
-    public function handle(Roster $roster): void
+    public function handle(Roster $roster, Herd $herd): void
     {
         $this->terminal = new Terminal;
         $this->terminal->initDimensions();
         $this->agentsToInstallTo = collect();
         $this->idesToInstallTo = collect();
         $this->roster = $roster;
+        $this->herd = $herd;
+
         $this->colors = new class
         {
             use Colors;
@@ -109,7 +117,7 @@ class InstallCommand extends Command
     protected function enact(): void
     {
         if ($this->installingGuidelines() && ! empty($this->agentsToInstallTo)) {
-            $this->enactGuidelines($this->findGuidelines());
+            $this->enactGuidelines();
         }
 
         if (($this->installingMcp() || $this->installingHerdMcp()) && $this->idesToInstallTo->isNotEmpty()) {
@@ -122,92 +130,10 @@ class InstallCommand extends Command
         if ($hasOtherIde) {
             $this->newLine();
             $this->line('Add Boost MCP manually if needed:'); // some ides require absolute
-            $this->datatable([['Command', base_path('artisan')], ['Args', 'boost:mcp']]);
-        }
-    }
-
-    protected function findGuidelines(): Collection
-    {
-        // TODO: Just move to blade views and compact public properties?
-        $composed = collect(['core' => $this->guideline('core.md', [
-            '{project.purpose}' => $this->projectPurpose ?: 'Unknown',
-            // TODO: Add package info, php version, laravel version, existing approaches, directory structure, models? General Laravel guidance that applies to all projects somehow? 'Follow existing conventions - if you are creating or editing a file, check sibling files for structure/approach/naming
-            //            TODO: Add project structure / relevant models / etc.. ? Kind of like Claude's /init, but for every Laravel developer regardless of IDE ? But if they already have that in Claude.md then that's gonna be doubling up and wasting tokens
-        ])]);
-
-        if (str_contains(config('app.url'), '.test') && $this->isHerdInstalled()) {
-            $composed->put('herd/core', $this->guideline('herd/core.md', [
-                '{app.url}' => url('/'),
-            ]));
+            DisplayHelper::datatable([['Command', base_path('artisan')], ['Args', 'boost:mcp']], $this->terminal->cols());
         }
 
-        if ($this->installingStyleGuidelines()) {
-            $composed->put('laravel/style', $this->guideline('laravel/style.md'));
-        }
-
-        // Add all core.md and version specific docs for Roster supported packages
-        // We don't add guidelines for packages unsupported by Roster right now
-        foreach ($this->roster->packages() as $package) {
-            $guidelineDir = str_replace('_', '-', strtolower($package->name()));
-
-            $composed->put($guidelineDir.'/core', $this->guideline($guidelineDir.'/core.md')); // Add core
-            $composed->put(
-                $guidelineDir.'/v'.$package->majorVersion(),
-                $this->guidelines($guidelineDir.'/'.$package->majorVersion())
-            );
-        }
-
-        if ($this->enforceTests) {
-            $composed->put('tests', $this->guideline('enforce-tests.md'));
-        }
-
-        return $composed
-            ->whereNotNull();
-    }
-
-    protected function compose(Collection $composed): string
-    {
-        return $composed
-            ->map(fn ($content, $key) => "# {$key}\n{$content}\n")
-            ->join("\n\n====\n\n");
-    }
-
-    protected function guidelines(string $dirPath, array $replacements = []): ?string
-    {
-        $dirPath = str_replace('/', DIRECTORY_SEPARATOR, __DIR__.'/../../.ai/'.$dirPath);
-        try {
-            $finder = Finder::create()
-                ->files()
-                ->in($dirPath)
-                ->name('*.md');
-        } catch (DirectoryNotFoundException $e) {
-            return null;
-        }
-
-        $guidelines = '';
-        foreach ($finder as $file) {
-            $guidelines .= $this->guideline($file->getRealPath(), $replacements) ?? '';
-        }
-
-        return $guidelines;
-    }
-
-    protected function guideline(string $path, array $replacements = []): ?string
-    {
-        if (! file_exists($path)) {
-            $path = str_replace('/', DIRECTORY_SEPARATOR, __DIR__.'/../../.ai/'.$path);
-        }
-
-        if (! file_exists($path)) {
-            return null;
-        }
-
-        $contents = file_get_contents($path);
-        if ($contents === false) {
-            return '';
-        }
-
-        return trim(str_replace(array_keys($replacements), array_values($replacements), $contents));
+        $this->publishAndUpdateConfig();
     }
 
     /**
@@ -287,57 +213,6 @@ class InstallCommand extends Command
         return $tools;
     }
 
-    public function getHomePath(): string
-    {
-        if (PHP_OS_FAMILY === 'Windows') {
-            if (! isset($_SERVER['HOME'])) {
-                $_SERVER['HOME'] = $_SERVER['USERPROFILE'];
-            }
-
-            $_SERVER['HOME'] = str_replace('\\', '/', $_SERVER['HOME']);
-        }
-
-        return $_SERVER['HOME'];
-    }
-
-    protected function isHerdInstalled(): bool
-    {
-        $isWindows = PHP_OS_FAMILY === 'Windows';
-
-        if (! $isWindows) {
-            return file_exists('/Applications/Herd.app/Contents/MacOS/Herd');
-        }
-
-        return is_dir($this->getHomePath().'/.config/herd');
-    }
-
-    protected function isHerdMCPAvailable(): bool
-    {
-        return file_exists($this->herdMcpPath());
-    }
-
-    protected function herdMcpPath(): string
-    {
-        $isWindows = PHP_OS_FAMILY === 'Windows';
-
-        if ($isWindows) {
-            return $this->getHomePath().'/.config/herd/bin/herd-mcp.phar';
-        }
-
-        return $this->getHomePath().'/Library/Application Support/Herd/bin/herd-mcp.phar';
-    }
-
-    /*
-     * {
-  "command": "php",
-  "args": [
-    PATH_TO_HERD_MCP_PHAR
-  ],
-  "env": {
-    "SITE_PATH": BASE_PATH_OF_LARAVEL_APP,
-  }
-}
-     */
     private function intro()
     {
         $this->newline();
@@ -368,6 +243,7 @@ HEADER;
         return text(
             label: sprintf('What does the %s project do? (optional)', $this->projectName),
             placeholder: 'i.e. SaaS platform selling concert tickets, integrates with Stripe and Twilio, lots of CS using Nova backend',
+            default: config('boost.project_purpose') ?? '',
             hint: 'This helps guides AI. How would you explain it to a new developer?'
         );
     }
@@ -406,7 +282,7 @@ HEADER;
             'style_guidelines' => 'Laravel Style AI Guidelines',
         ];
 
-        if ($this->isHerdMCPAvailable()) {
+        if ($this->herd->isMcpAvailable()) {
             $toInstallOptions['herd_mcp'] = 'Herd MCP Server';
             $defaultToInstallOptions[] = 'herd_mcp';
         }
@@ -531,7 +407,7 @@ HEADER;
         return $selectedAgentClasses->map(fn ($agentClass) => new $agentClass);
     }
 
-    protected function enactGuidelines(Collection $composed): void
+    protected function enactGuidelines(): void
     {
         if (! $this->installingGuidelines()) {
             return;
@@ -543,14 +419,20 @@ HEADER;
             return;
         }
 
+        $guidelineConfig = new GuidelineConfig;
+        $guidelineConfig->enforceTests = $this->enforceTests;
+        $guidelineConfig->laravelStyle = $this->installingStyleGuidelines();
+
+        $composer = app(GuidelineComposer::class)->config($guidelineConfig);
+        $guidelines = $composer->guidelines();
+
         $this->newLine();
-        $this->info(sprintf('Adding %d guidelines to your selected agents', $composed->count()));
-        $this->grid($composed->keys()->toArray());
+        $this->info(sprintf('Adding %d guidelines to your selected agents', $guidelines->count()));
+        DisplayHelper::grid($guidelines->keys()->toArray(), $this->terminal->cols());
         $this->newLine();
 
-        $successful = [];
         $failed = [];
-        $composedAiGuidelines = $this->compose($composed);
+        $composedAiGuidelines = $composer->compose();
 
         $longestAgentName = max(1, ...$this->agentsToInstallTo->map(fn ($agent) => Str::length(class_basename($agent)))->toArray());
         foreach ($this->agentsToInstallTo as $agent) {
@@ -559,10 +441,9 @@ HEADER;
             $this->output->write("  {$displayAgentName}... ");
 
             try {
-                $guidelineWriter = new \Laravel\Boost\Install\GuidelineWriter($agent);
-                $guidelineWriter->write($composedAiGuidelines);
+                (new GuidelineWriter($agent))
+                    ->write($composedAiGuidelines);
 
-                $successful[] = $agentName;
                 $this->line($this->greenTick);
             } catch (\Exception $e) {
                 $failed[$agentName] = $e->getMessage();
@@ -603,178 +484,50 @@ HEADER;
         return in_array('herd_mcp', $this->boostToInstall, true);
     }
 
-    protected function datatable(array $data): void
+    protected function publishAndUpdateConfig(): void
     {
-        if (empty($data)) {
-            return;
+        $configPath = config_path('boost.php');
+
+        // Publish config if it doesn't exist
+        if (! file_exists($configPath)) {
+            $this->newLine();
+            $this->info('Publishing Boost configuration file...');
+
+            Artisan::call('vendor:publish', [
+                '--provider' => 'Laravel\\Boost\\BoostServiceProvider',
+                '--tag' => 'boost-config',
+                '--force' => false,
+            ]);
+
+            $this->line('  Configuration published '.$this->greenTick);
         }
 
-        // Calculate column widths
-        $columnWidths = [];
-        foreach ($data as $row) {
-            $colIndex = 0;
-            foreach ($row as $cell) {
-                $length = mb_strlen((string) $cell);
-                if (! isset($columnWidths[$colIndex]) || $length > $columnWidths[$colIndex]) {
-                    $columnWidths[$colIndex] = $length;
-                }
-                $colIndex++;
-            }
-        }
-
-        // Add padding
-        $columnWidths = array_map(fn ($width) => $width + 2, $columnWidths);
-
-        // Unicode box drawing characters
-        $topLeft = '╭';
-        $topRight = '╮';
-        $bottomLeft = '╰';
-        $bottomRight = '╯';
-        $horizontal = '─';
-        $vertical = '│';
-        $cross = '┼';
-        $topT = '┬';
-        $bottomT = '┴';
-        $leftT = '├';
-        $rightT = '┤';
-
-        // Draw top border
-        $topBorder = $topLeft;
-        foreach ($columnWidths as $index => $width) {
-            $topBorder .= str_repeat($horizontal, $width);
-            if ($index < count($columnWidths) - 1) {
-                $topBorder .= $topT;
-            }
-        }
-        $topBorder .= $topRight;
-        $this->line($topBorder);
-
-        // Draw rows
-        $rowCount = 0;
-        foreach ($data as $row) {
-            $line = $vertical;
-            $colIndex = 0;
-            foreach ($row as $cell) {
-                $cellStr = ($colIndex === 0) ? "\e[1m".$cell."\e[0m" : $cell;
-                $padding = $columnWidths[$colIndex] - mb_strlen($cell);
-                $line .= ' '.$cellStr.str_repeat(' ', $padding - 1).$vertical;
-                $colIndex++;
-            }
-            $this->line($line);
-
-            // Draw separator between rows (except after last row)
-            if ($rowCount < count($data) - 1) {
-                $separator = $leftT;
-                foreach ($columnWidths as $index => $width) {
-                    $separator .= str_repeat($horizontal, $width);
-                    if ($index < count($columnWidths) - 1) {
-                        $separator .= $cross;
-                    }
-                }
-                $separator .= $rightT;
-                $this->line($separator);
-            }
-            $rowCount++;
-        }
-
-        // Draw bottom border
-        $bottomBorder = $bottomLeft;
-        foreach ($columnWidths as $index => $width) {
-            $bottomBorder .= str_repeat($horizontal, $width);
-            if ($index < count($columnWidths) - 1) {
-                $bottomBorder .= $bottomT;
-            }
-        }
-        $bottomBorder .= $bottomRight;
-        $this->line($bottomBorder);
+        $updated = $this->updateProjectPurposeInConfig($configPath, $this->projectPurpose);
     }
 
-    protected function grid(array $items): void
+    protected function updateProjectPurposeInConfig(string $configPath, ?string $purpose): bool
     {
-        if (empty($items)) {
-            return;
+        if (empty($purpose) || $purpose === config('boost.project_purpose', '')) {
+            return false;
         }
 
-        // Get terminal width
-        $terminalWidth = $this->terminal->cols() ?? 80;
-
-        // Calculate the longest item length
-        $maxItemLength = max(array_map('mb_strlen', $items));
-
-        // Add padding (2 spaces on each side + 1 for border)
-        $cellWidth = $maxItemLength + 4;
-
-        // Calculate how many cells can fit per row
-        $cellsPerRow = max(1, (int) floor(($terminalWidth - 1) / ($cellWidth + 1)));
-
-        // Unicode box drawing characters
-        $topLeft = '╭';
-        $topRight = '╮';
-        $bottomLeft = '╰';
-        $bottomRight = '╯';
-        $horizontal = '─';
-        $vertical = '│';
-        $cross = '┼';
-        $topT = '┬';
-        $bottomT = '┴';
-        $leftT = '├';
-        $rightT = '┤';
-
-        // Group items into rows
-        $rows = array_chunk($items, $cellsPerRow);
-
-        // Draw top border
-        $topBorder = $topLeft;
-        for ($i = 0; $i < $cellsPerRow; $i++) {
-            $topBorder .= str_repeat($horizontal, $cellWidth);
-            if ($i < $cellsPerRow - 1) {
-                $topBorder .= $topT;
-            }
-        }
-        $topBorder .= $topRight;
-        $this->line($topBorder);
-
-        // Draw rows
-        $rowCount = 0;
-        foreach ($rows as $row) {
-            $line = $vertical;
-            for ($i = 0; $i < $cellsPerRow; $i++) {
-                if (isset($row[$i])) {
-                    $item = $row[$i];
-                    $padding = $cellWidth - mb_strlen($item) - 2;
-                    $line .= ' '.$item.str_repeat(' ', $padding + 1).$vertical;
-                } else {
-                    // Empty cell
-                    $line .= str_repeat(' ', $cellWidth).$vertical;
-                }
-            }
-            $this->line($line);
-
-            // Draw separator between rows (except after last row)
-            if ($rowCount < count($rows) - 1) {
-                $separator = $leftT;
-                for ($i = 0; $i < $cellsPerRow; $i++) {
-                    $separator .= str_repeat($horizontal, $cellWidth);
-                    if ($i < $cellsPerRow - 1) {
-                        $separator .= $cross;
-                    }
-                }
-                $separator .= $rightT;
-                $this->line($separator);
-            }
-            $rowCount++;
+        $content = file_get_contents($configPath);
+        if ($content === false) {
+            return false;
         }
 
-        // Draw bottom border
-        $bottomBorder = $bottomLeft;
-        for ($i = 0; $i < $cellsPerRow; $i++) {
-            $bottomBorder .= str_repeat($horizontal, $cellWidth);
-            if ($i < $cellsPerRow - 1) {
-                $bottomBorder .= $bottomT;
-            }
+        $purposeExists = preg_match('/\'project_purpose\'\s+\=\>\s+(.+),/', $content, $matches);
+
+        if (! $purposeExists) { // This shouldn't be possible
+            // TODO: Add the line to after the `return [` line, gets a bit dicey here though if people don't use short array syntax for example
+            return false;
         }
-        $bottomBorder .= $bottomRight;
-        $this->line($bottomBorder);
+
+        $newPurpose = addcslashes($purpose, "'");
+        $newPurposeLine = "'project_purpose' => '{$newPurpose}',";
+        $content = str_replace($matches[0], $newPurposeLine, $content);
+
+        return file_put_contents($configPath, $content) !== false;
     }
 
     protected function enactMcpServers(): void
@@ -813,7 +566,7 @@ HEADER;
             if ($this->installingHerdMcp()) {
                 try {
                     // TODO: SET ENV for site path!
-                    $result = $ide->installMcp('herd', PHP_BINARY, [$this->herdMcpPath()]);
+                    $result = $ide->installMcp('herd', PHP_BINARY, [$this->herd->mcpPath()]);
 
                     if ($result) {
                         $results[] = $this->greenTick.' Herd';

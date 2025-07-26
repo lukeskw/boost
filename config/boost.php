@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 return [
+    // How would you explain this project's goal/approach/purpose to a new developer?
+    'project_purpose' => null,
     'hosted' => [
         'api_url' => env('BOOST_HOSTED_API_URL', 'https://boost.laravel.com'),
         'token' => env('BOOST_HOSTED_TOKEN'),

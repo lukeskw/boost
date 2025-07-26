@@ -1,2 +1,2 @@
 - This site is hosted with Laravel Herd. You MUST NOT ever run `artisan serve`.
-- The site is always available at: {app.url}
+- The site is always available at: {{ config('app.url') }}
