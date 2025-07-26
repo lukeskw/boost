@@ -98,12 +98,12 @@ class InstallCommandMultiselectTest extends TestCase
         // Verify we get keys that can be used with in_array checks
         $this->assertIsArray($result);
         $this->assertCount(3, $result); // All 3 selected (2 default + 1 added)
-        
+
         // These are the exact checks used in InstallCommand
         $this->assertTrue(in_array('mcp_server', $result, true));
         $this->assertTrue(in_array('ai_guidelines', $result, true));
         $this->assertTrue(in_array('style_guidelines', $result, true));
-        
+
         // Verify it doesn't contain the display values
         $this->assertFalse(in_array('Boost MCP Server', $result, true));
         $this->assertFalse(in_array('Package AI Guidelines (i.e. Framework, Inertia, Pest)', $result, true));
