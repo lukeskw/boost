@@ -46,8 +46,8 @@ class ExecuteToolCommand extends Command
 
         } catch (\Throwable $e) {
             // Output error result
-            $errorResult = ToolResult::error("Tool execution failed: {$e->getMessage()}");
-            echo json_encode($errorResult->toArray());
+            $errorResult = ToolResult::error("Tool execution failed (E_THROWABLE): {$e->getMessage()}");
+            $this->error(json_encode($errorResult->toArray()));
 
             return 1;
         }

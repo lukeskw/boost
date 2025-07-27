@@ -67,9 +67,9 @@ class ToolExecutor
             return ToolResult::error("Tool execution timed out after {$this->getTimeout()} seconds");
 
         } catch (ProcessFailedException $e) {
-            $errorOutput = $process->getErrorOutput();
+            $errorOutput = $process->getErrorOutput().$process->getOutput();
 
-            return ToolResult::error("Tool execution failed: {$errorOutput}");
+            return ToolResult::error("Process tool execution failed: {$errorOutput}");
         }
     }
 
@@ -83,7 +83,7 @@ class ToolExecutor
 
             return $tool->handle($arguments);
         } catch (\Throwable $e) {
-            return ToolResult::error("Tool execution failed: {$e->getMessage()}");
+            return ToolResult::error("Inline tool execution failed: {$e->getMessage()}");
         }
     }
 
