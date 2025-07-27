@@ -67,12 +67,6 @@ class GuidelineComposer
     protected function find(): Collection
     {
         $guidelines = collect(['boost/core' => $this->guideline('core')]);
-        // TODO: Add package info, php version, laravel version, existing approaches, directory structure, models? General Laravel guidance that applies to all projects somehow? 'Follow existing conventions - if you are creating or editing a file, check sibling files for structure/approach/naming
-        // TODO: Add project structure / relevant models / etc.. ? Kind of like Claude's /init, but for every Laravel developer regardless of IDE ? But if they already have that in Claude.md then that's gonna be doubling up and wasting tokens
-
-        // This might be the wrong PHP version to give. This should be based on the version specified in composer.json as the version they want to support right?
-        // **Target version vs runtime version**
-        // Should Roster return TARGET_PHP
 
         $phpMajorMinor = PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;
         $guidelines->put('php/core', $this->guideline('php/core'));

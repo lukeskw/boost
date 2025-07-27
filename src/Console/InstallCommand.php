@@ -95,9 +95,7 @@ class InstallCommand extends Command
     {
         $this->installedIdes = $this->detectInstalledIdes();
         $this->detectedProjectIdes = $this->detectIdesUsedInProject();
-        $this->detectedProjectAgents = $this->detectProjectAgents(); // TODO: Roo, Cline, Copilot
-        // TODO: Should we create all agents to start, add a 'detected' prop to them that's set on construct
-        // Maybe add a trait 'DetectsInstalled' and 'DetectsUsed' (in this project)
+        $this->detectedProjectAgents = $this->detectProjectAgents();
     }
 
     protected function query()
@@ -229,7 +227,6 @@ HEADER;
 
     private function outro(): void
     {
-        // TODO: Pass info to /installed on what we did so it can show specific help
         $text = 'Enjoy the boost 🚀 https://boost.laravel.com/installed';
         $padding = (int) (floor(($this->terminal->cols() - mb_strlen($text)) / 2)) - 2;
         echo ' '.$this->colors->bgGreen($this->colors->black($this->colors->bold(str_repeat(' ', $padding).$text.str_repeat(' ', $padding)))).PHP_EOL;
@@ -436,7 +433,7 @@ HEADER;
             label: sprintf('Which agents need AI guidelines for %s?', $this->projectName),
             options: $agents,
             default: $detectedClasses,
-            scroll: 4, // TODO: use detection to auto-select
+            scroll: 4,
         ));
 
         return $selectedAgentClasses->map(fn ($agentClass) => new $agentClass);
@@ -558,7 +555,6 @@ HEADER;
         $purposeExists = preg_match('/\'project_purpose\'\s+\=\>\s+(.+),/', $content, $matches);
 
         if (! $purposeExists) { // This shouldn't be possible
-            // TODO: Add the line to after the `return [` line, gets a bit dicey here though if people don't use short array syntax for example
             return false;
         }
 
