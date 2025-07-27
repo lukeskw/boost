@@ -112,8 +112,8 @@ class GuidelineComposer
         $userGuidelines = $this->guidelineFilesInDir(base_path($this->userGuidelineDir));
 
         foreach ($userGuidelines as $guideline) {
-            $guidelineKey = $guideline->getBasename('.blade.php');
-            $guidelines->put('users/'.$guidelineKey, $this->guideline($guideline->getPathname()));
+            $guidelineKey = '.ai/'.$guideline->getBasename('.blade.php');
+            $guidelines->put($guidelineKey, $this->guideline($guideline->getPathname()));
         }
 
         return $guidelines
