@@ -4,19 +4,17 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Mcp\Resources;
 
-use Illuminate\Support\Facades\File;
+use Laravel\Boost\Mcp\ToolExecutor;
+use Laravel\Boost\Mcp\Tools\ApplicationInfo as ApplicationInfoTool;
 use Laravel\Mcp\Server\Resource;
 
 class ApplicationInfo extends Resource
 {
-    public function name(): string
-    {
-        return 'Application Info';
-    }
+    public function __construct(protected ToolExecutor $toolExecutor) {}
 
     public function description(): string
     {
-        return 'Learn about the technical details of the application.';
+        return 'Comprehensive application information including PHP version, Laravel version, database engine, all installed packages with their versions, and all Eloquent models in the application.';
     }
 
     public function uri(): string
@@ -31,78 +29,18 @@ class ApplicationInfo extends Resource
 
     public function read(): string
     {
-        $laravelVersion = app()->version();
-        $phpVersion = PHP_VERSION;
+        $result = $this->toolExecutor->execute(ApplicationInfoTool::class);
 
-        $frontendFramework = $this->guessFrontendFramework();
-        $cssFramework = $this->guessCssFramework();
-        $testingFramework = $this->guessTestingFramework();
-
-        return <<<EOT
-        Laravel Version: {$laravelVersion}
-        PHP Version: {$phpVersion}
-
-        Frontend Framework: {$frontendFramework}
-        CSS Framework: {$cssFramework}
-
-        Testing Framework: {$testingFramework}
-
-        EOT;
-    }
-
-    private function guessFrontendFramework(): string
-    {
-        $composerJson = File::json(base_path('composer.json'));
-        $packageJson = File::json(base_path('package.json'));
-
-        if (isset($composerJson['require']['livewire/livewire'])) {
-            $version = $composerJson['require']['livewire/livewire'];
-
-            return "Livewire ({$version})";
+        if ($result->isError) {
+            return 'Error fetching application information: '.$result->toArray()['content'][0]['text'];
         }
 
-        $version = $packageJson['dependencies']['vue'] ?? $packageJson['devDependencies']['vue'] ?? null;
+        $data = json_decode($result->toArray()['content'][0]['text'], true);
 
-        if ($version) {
-            return "Vue ({$version})";
+        if (! $data) {
+            return 'Error parsing application information';
         }
 
-        $version = $packageJson['dependencies']['react'] ?? $packageJson['devDependencies']['react'] ?? null;
-
-        if ($version) {
-            return "React ({$version})";
-        }
-
-        return 'Blade';
-    }
-
-    private function guessCssFramework(): string
-    {
-        $packageJson = File::json(base_path('package.json'));
-
-        $version = $packageJson['dependencies']['tailwindcss'] ?? $packageJson['devDependencies']['tailwindcss'] ?? null;
-
-        if ($version) {
-            return "Tailwind ({$version})";
-        }
-
-        $version = $packageJson['dependencies']['bootstrap'] ?? $packageJson['devDependencies']['bootstrap'] ?? null;
-
-        if ($version) {
-            return "Bootstrap ({$version})";
-        }
-
-        return 'None';
-    }
-
-    private function guessTestingFramework(): string
-    {
-        $composerJson = File::json(base_path('composer.json'));
-
-        if (isset($composerJson['require-dev']['pestphp/pest'])) {
-            return 'Pest';
-        }
-
-        return 'PHPUnit';
+        return json_encode($data, JSON_PRETTY_PRINT);
     }
 }

@@ -538,6 +538,7 @@ HEADER;
             ]);
 
             $this->line('  Configuration published '.$this->greenTick);
+            $this->newLine();
         }
 
         $updated = $this->updateProjectPurposeInConfig($configPath, $this->projectPurpose);
