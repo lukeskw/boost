@@ -27,7 +27,7 @@
     </script>
 
     <template>
-        <h1>Create {{ page.modelName }}</h1>
+        <h1>Create \{\{ page.modelName \}\}</h1>
         <form @submit.prevent="submit">
             <label for="first_name">First name:</label>
             <input id="first_name" v-model="form.first_name" />
