@@ -10,8 +10,8 @@ abstract class ShellMcpIde implements Ide
     protected string $shellCommand = 'echo "{command} {args} {env}"';
 
     /**
-     * @param array<int, string> $args
-     * @param array<string, string> $env
+     * @param  array<int, string>  $args
+     * @param  array<string, string>  $env
      */
     public function installMcp(string $key, string $command, array $args = [], array $env = []): bool
     {
