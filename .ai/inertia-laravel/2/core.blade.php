@@ -6,3 +6,5 @@
 - Deferred props
 - Infinite scrolling using merging props and WhenVisible
 - Lazy loading data on scroll
+
+- When using <Deferred></Deferred> we should add a nice empty state with pulsing/animated skeleton/blocks.
