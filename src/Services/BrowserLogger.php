@@ -8,8 +8,8 @@ class BrowserLogger
 {
     public static function getScript(): string
     {
-        $endpoint = Route::has('boost.browser-logs') 
-            ? route('boost.browser-logs') 
+        $endpoint = Route::has('boost.browser-logs')
+            ? route('boost.browser-logs')
             : '/_boost/browser-logs';
 
         return <<<HTML
