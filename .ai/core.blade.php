@@ -6,7 +6,7 @@ This project is a Laravel app and its main Laravel ecosystems package & versions
 
 - php - {{ PHP_VERSION }}
 @foreach (app(\Laravel\Roster\Roster::class)->packages()->unique(fn ($package) => $package->rawName()) as $package)
-    - {{ $package->rawName() }} ({{ $package->name() }}) - v{{ $package->majorVersion() }}
+- {{ $package->rawName() }} ({{ $package->name() }}) - v{{ $package->majorVersion() }}
 @endforeach
 
 @if(!empty(config('boost.project_purpose')))
