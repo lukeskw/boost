@@ -23,7 +23,6 @@ use Symfony\Component\Finder\Finder;
 
 use function Laravel\Prompts\intro;
 use function Laravel\Prompts\multiselect;
-use function Laravel\Prompts\outro;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 
@@ -120,18 +119,15 @@ class InstallCommand extends Command
             $this->enactGuidelines();
         }
 
+        usleep(750000);
+
         if (($this->installingMcp() || $this->installingHerdMcp()) && $this->idesToInstallTo->isNotEmpty()) {
             $this->enactMcpServers();
         }
 
-        // Check if any of the selected IDEs is an "other" type IDE
-        $hasOtherIde = true;
-
-        if ($hasOtherIde) {
-            $this->newLine();
-            $this->line('Add Boost MCP manually if needed:'); // some ides require absolute
-            DisplayHelper::datatable([['Command', base_path('artisan')], ['Args', 'boost:mcp']], $this->terminal->cols());
-        }
+        //        $this->newLine();
+        //        $this->line('Add Boost MCP manually if needed:'); // some ides require absolute
+        //        DisplayHelper::datatable([['Command', base_path('artisan')], ['Args', 'boost:mcp']], $this->terminal->cols());
 
         $this->publishAndUpdateConfig();
     }
@@ -187,8 +183,6 @@ class InstallCommand extends Command
             $detected[] = 'claudecode';
         }
 
-        $detected[] = 'other';
-
         return $detected;
     }
 
@@ -234,8 +228,10 @@ HEADER;
 
     private function outro()
     {
-        outro('All done. Enjoy the boost 🚀');
-        outro('Get the most out of Boost by visiting https://boost.laravel.com/installed'); // TODO: Pass info on what we did so it can show specific help
+        // TODO: Pass info to /installed on what we did so it can show specific help
+        $text = 'Enjoy the boost 🚀 https://boost.laravel.com/installed';
+        $padding = (int) (floor(($this->terminal->cols() - mb_strlen($text)) / 2)) - 2;
+        echo ' '.$this->colors->bgGreen($this->colors->black($this->colors->bold(str_repeat(' ', $padding).$text.str_repeat(' ', $padding)))).PHP_EOL;
     }
 
     protected function projectPurpose(): string
@@ -341,7 +337,6 @@ HEADER;
         }
 
         ksort($ides);
-        //        $ides['other'] = 'Other'; // TODO: Make 'Other' work now we are working with classes not strings
 
         // Map detected IDE keys to class names
         $detectedClasses = [];
@@ -422,14 +417,17 @@ HEADER;
         $guidelineConfig = new GuidelineConfig;
         $guidelineConfig->enforceTests = $this->enforceTests;
         $guidelineConfig->laravelStyle = $this->installingStyleGuidelines();
+        $guidelineConfig->caresAboutLocalization = $this->detectLocalization();
+        $guidelineConfig->hasAnApi = false;
 
         $composer = app(GuidelineComposer::class)->config($guidelineConfig);
         $guidelines = $composer->guidelines();
 
         $this->newLine();
-        $this->info(sprintf('Adding %d guidelines to your selected agents', $guidelines->count()));
+        $this->info(sprintf(' Adding %d guidelines to your selected agents', $guidelines->count()));
         DisplayHelper::grid($guidelines->keys()->toArray(), $this->terminal->cols());
         $this->newLine();
+        usleep(750000);
 
         $failed = [];
         $composedAiGuidelines = $composer->compose();
@@ -533,8 +531,10 @@ HEADER;
     protected function enactMcpServers(): void
     {
         $this->newLine();
-        $this->info('Installing MCP servers to your selected IDEs');
+        $this->info(' Installing MCP servers to your selected IDEs');
         $this->newLine();
+
+        usleep(750000);
 
         $failed = [];
         $longestIdeName = max(1, ...$this->idesToInstallTo->map(fn ($ide) => Str::length(class_basename($ide)))->toArray());
@@ -565,8 +565,12 @@ HEADER;
             // Install Herd MCP if enabled
             if ($this->installingHerdMcp()) {
                 try {
-                    // TODO: SET ENV for site path!
-                    $result = $ide->installMcp('herd', PHP_BINARY, [$this->herd->mcpPath()]);
+                    $result = $ide->installMcp(
+                        key: 'herd',
+                        command: PHP_BINARY,
+                        args: [$this->herd->mcpPath()],
+                        env: ['SITE_PATH' => base_path()]
+                    );
 
                     if ($result) {
                         $results[] = $this->greenTick.' Herd';
@@ -593,5 +597,17 @@ HEADER;
                 }
             }
         }
+    }
+
+    protected function detectLocalization(): bool
+    {
+        // TODO: How do we detect whether it's actually in use? Somebody who publishes the lang files doesn't care about their AI then making a ton of effort to add localization strings, but somebody who makes sure there is always localization will be grateful, and somebody who has an entirely separate process to generate localization files will be annoyed? Do we need a way of disabling this in config?
+        // This feels like a particularly tricky bit because it can have so many different processes involved with it, whether that's LLM based translation, or real human translators, done during PR, or done after release, or using some 3rd party service that barely works, or something else entirely. Should probably just not get involved.
+
+        $actuallyUsing = false; // Diff the dir based on the default for that framework version
+        // Or, recent~ git commit that modifies lang files
+        // Or, lang used in resources/ ?
+
+        return is_dir(base_path('lang')) && $actuallyUsing;
     }
 }

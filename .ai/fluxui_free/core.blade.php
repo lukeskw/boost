@@ -1,0 +1,3 @@
+- **Use Flux UI components** when available
+- Fallback to standard Blade components if Flux is unavailable.
+- Use Laravel Boost's `search-docs` tool to get the exact documentation & code snippets available for this project.

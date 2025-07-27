@@ -1,1 +1,1 @@
-Inertia v2 core.md
+Inertia v2 core

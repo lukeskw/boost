@@ -36,4 +36,5 @@ return [
         'timeout' => env('BOOST_PROCESS_TIMEOUT', 180), // 3 minutes
         'max_concurrent' => env('BOOST_PROCESS_MAX_CONCURRENT', 5),
     ],
+    'browser_logs' => true, // Allow Boost to access browser logs
 ];

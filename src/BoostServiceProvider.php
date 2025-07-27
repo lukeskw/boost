@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Laravel\Boost;
 
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Boost\Mcp\Boost;
+use Laravel\Boost\Middleware\InjectBoost;
 use Laravel\Mcp\Server\Facades\Mcp;
 use Laravel\Roster\Roster;
 
@@ -46,7 +48,7 @@ class BoostServiceProvider extends ServiceProvider
         });
     }
 
-    public function boot(): void
+    public function boot(Router $router): void
     {
         if (! app()->environment('local', 'testing')) {
             return;
@@ -58,7 +60,8 @@ class BoostServiceProvider extends ServiceProvider
         $this->registerPublishing();
         $this->registerCommands();
         $this->registerRoutes();
-        //        $this->hookIntoResponses(); // TODO: Only if not disabled in config
+        $this->registerBrowserLogger();
+        $this->hookIntoResponses($router);
     }
 
     protected function registerPublishing(): void
@@ -85,86 +88,83 @@ class BoostServiceProvider extends ServiceProvider
     private function registerRoutes()
     {
         Route::post('/_boost/browser-logs', function (Request $request) {
-            Log::write($request->input('type'), $request->input('message'));
+            $logs = $request->input('logs', []);
+
+            /** @var array{type: 'error'|'warn'|'info'|'log'|'table'|'window_error'|'uncaught_error'|'unhandled_rejection', timestamp: string, data: array, url:string, userAgent:string} $log */
+            foreach ($logs as $log) {
+                Log::channel('browser')->write(
+                    level: $this->jsTypeToPsr3($log['type']),
+                    message: $this->buildLogMessageFromData($log['data']),
+                    context: [
+                        'url' => $log['url'],
+                        'user_agent' => $log['userAgent'] ?: null,
+                        'timestamp' => $log['timestamp'] ?: now()->toIso8601String(),
+                    ]
+                );
+            }
 
             return response()->json(['status' => 'logged']);
-        })->name('boost.browser-logs');
+        })->name('boost.browser-logs')->withoutMiddleware(VerifyCsrfToken::class);
     }
 
-    private function hookIntoResponses()
+    /**
+     * Build a string message for the log based on various input types. Single dimensional, and multi:
+     * "data":[{"message":"Unhandled Promise Rejection","reason":{"name":"TypeError","message":"NetworkError when attempting to fetch resource.","stack":""}}]
+     */
+    protected function buildLogMessageFromData(array $data): string
     {
-        Response::macro('injectBoostBrowserLogger', function () {
-            $content = $this->getContent();
+        $messages = [];
 
-            if ($this->shouldInject($content)) {
-                $injectedContent = $this->injectScript($content);
-                $this->setContent($injectedContent);
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $nestedMessage = $this->buildLogMessageFromData($value);
+                if ($nestedMessage !== '') {
+                    $messages[] = $nestedMessage;
+                }
+            } elseif (is_string($value) || is_numeric($value)) {
+                $messages[] = (string) $value;
+            } elseif (is_bool($value)) {
+                $messages[] = $value ? 'true' : 'false';
+            } elseif (is_null($value)) {
+                $messages[] = 'null';
+            } elseif (is_object($value)) {
+                $messages[] = json_encode($value);
             }
+        }
 
-            return $this;
-        });
-
-        // Register response middleware
-
-        app('router')->pushMiddlewareToGroup('web', function ($request, $next) {
-            $response = $next($request);
-
-            if (method_exists($response, 'injectBoostBrowserLogger')) {
-                $response->injectBoostBrowserLogger();
-            }
-
-            return $response;
-        });
+        return implode(' ', $messages);
     }
 
-    private function shouldInject(string $content): bool
+    protected function registerBrowserLogger(): void
     {
-        // Check if it's HTML
-        if (! str_contains($content, '<html') && ! str_contains($content, '<head')) {
-            return false;
-        }
-
-        // Check if already injected
-        if (str_contains($content, 'browser-logger-active')) {
-            return false;
-        }
-
-        return true;
+        // Register a custom log channel for browser logs
+        config(['logging.channels.browser' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/browser.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 14,
+        ]]);
     }
 
-    private function injectScript(string $content): string
+    private function jsTypeToPsr3(string $type): string
     {
-        $script = $this->getBrowserLoggerScript();
-
-        // Try to inject before closing </head>
-        if (str_contains($content, '</head>')) {
-            return str_replace('</head>', $script."\n</head>", $content);
-        }
-
-        // Fallback: inject before closing </body>
-        if (str_contains($content, '</body>')) {
-            return str_replace('</body>', $script."\n</body>", $content);
-        }
-
-        return $content.$script;
+        return match ($type) {
+            'warn' => 'warning',
+            'log' => 'debug',
+            'table' => 'debug',
+            'window_error' => 'error', // TODO: Manage the data differently
+            'uncaught_error' => 'error', // TODO: Manage the data differently
+            'unhandled_rejection' => 'error', // TODO: Manage the data differently
+            default => $type
+        };
     }
 
-    private function getBrowserLoggerScript(): string
+    private function hookIntoResponses(Router $router): void
     {
-        $endpoint = route('boost.browser-logs');
-        $csrfToken = csrf_token();
+        if (config('boost.browser_logs', true) === false) {
+            return;
+        }
 
-        return <<<HTML
-<script id="browser-logger-active">
-(function() {
-    const ENDPOINT = '{$endpoint}';
-    const CSRF_TOKEN = '{$csrfToken}';
-
-    // [Same script content as before]
-
-    console.log('🔍 Browser logger active (MCP server detected)');
-})();
-</script>
-HTML;
+        $router->pushMiddlewareToGroup('web', InjectBoost::class);
     }
 }

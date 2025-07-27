@@ -44,7 +44,7 @@ class LastError extends Tool
 
     public function description(): string
     {
-        return 'Get details of the last error/exception created in this application.';
+        return 'Get details of the last error/exception created in this application on the backend. Use browser-log tool for browser errors.';
     }
 
     public function schema(ToolInputSchema $schema): ToolInputSchema

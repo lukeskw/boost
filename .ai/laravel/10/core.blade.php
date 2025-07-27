@@ -1,1 +1,1 @@
-Laravel 10 Core.md
+Laravel 10 Core

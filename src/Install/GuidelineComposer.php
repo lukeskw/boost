@@ -64,9 +64,17 @@ class GuidelineComposer
      */
     protected function find(): Collection
     {
-        $guidelines = collect(['core' => $this->guideline('core')]);
+        $guidelines = collect(['boost/core' => $this->guideline('core')]);
         // TODO: Add package info, php version, laravel version, existing approaches, directory structure, models? General Laravel guidance that applies to all projects somehow? 'Follow existing conventions - if you are creating or editing a file, check sibling files for structure/approach/naming
-        //            TODO: Add project structure / relevant models / etc.. ? Kind of like Claude's /init, but for every Laravel developer regardless of IDE ? But if they already have that in Claude.md then that's gonna be doubling up and wasting tokens
+        // TODO: Add project structure / relevant models / etc.. ? Kind of like Claude's /init, but for every Laravel developer regardless of IDE ? But if they already have that in Claude.md then that's gonna be doubling up and wasting tokens
+
+        // This might be the wrong PHP version to give. This should be based on the version specified in composer.json as the version they want to support right?
+        // **Target version vs runtime version**
+        // Should Roster return TARGET_PHP
+
+        $phpMajorMinor = PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;
+        $guidelines->put('php/core', $this->guideline('php/core'));
+        $guidelines->put('php/v'.$phpMajorMinor, $this->guidelinesDir('php/'.$phpMajorMinor));
 
         if (str_contains(config('app.url'), '.test') && $this->herd->isInstalled()) {
             $guidelines->put('herd/core', $this->guideline('herd/core'));
@@ -74,6 +82,15 @@ class GuidelineComposer
 
         if ($this->config->laravelStyle) {
             $guidelines->put('laravel/style', $this->guideline('laravel/style'));
+        }
+
+        if ($this->config->hasAnApi) {
+            $guidelines->put('laravel/api', $this->guideline('laravel/api'));
+        }
+
+        if ($this->config->caresAboutLocalization) {
+            $guidelines->put('laravel/localization', $this->guideline('laravel/localization'));
+            // In future, if using NextJS localization/etc.. then have a diff. rule here
         }
 
         // Add all core and version specific docs for Roster supported packages

@@ -96,6 +96,7 @@ class DisplayHelper
             return;
         }
 
+        $cols -= 2;
         // Calculate the longest item length
         $maxItemLength = max(array_map('mb_strlen', $items));
 
@@ -130,7 +131,7 @@ class DisplayHelper
             }
         }
         $topBorder .= $topRight;
-        echo $topBorder.PHP_EOL;
+        echo ' '.$topBorder.PHP_EOL;
 
         // Draw rows
         $rowCount = 0;
@@ -146,7 +147,7 @@ class DisplayHelper
                     $line .= str_repeat(' ', $cellWidth).$vertical;
                 }
             }
-            echo $line.PHP_EOL;
+            echo ' '.$line.PHP_EOL;
 
             // Draw separator between rows (except after last row)
             if ($rowCount < count($rows) - 1) {
@@ -158,7 +159,7 @@ class DisplayHelper
                     }
                 }
                 $separator .= $rightT;
-                echo $separator.PHP_EOL;
+                echo ' '.$separator.PHP_EOL;
             }
             $rowCount++;
         }
@@ -172,6 +173,6 @@ class DisplayHelper
             }
         }
         $bottomBorder .= $bottomRight;
-        echo $bottomBorder.PHP_EOL;
+        echo ' '.$bottomBorder.PHP_EOL;
     }
 }

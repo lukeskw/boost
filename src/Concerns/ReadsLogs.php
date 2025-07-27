@@ -12,7 +12,7 @@ trait ReadsLogs
      * Regular expression fragments and default chunk-window sizes used when
      * scanning log files. Declaring them once keeps every consumer in sync.
      */
-    private const TIMESTAMP_REGEX = '\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\]';
+    private const TIMESTAMP_REGEX = '\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\]'; // TODO: This is PHP 8.2 only, not Laravel 10 / PHP 8.1 friendly
 
     private const ENTRY_SPLIT_REGEX = '/(?='.self::TIMESTAMP_REGEX.')/';
 

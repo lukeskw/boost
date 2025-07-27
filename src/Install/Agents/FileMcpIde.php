@@ -13,7 +13,7 @@ abstract class FileMcpIde implements Ide
         throw new \Exception('Override me');
     }
 
-    public function installMcp(string $key, string $command, array $args = []): bool
+    public function installMcp(string $key, string $command, array $args = [], array $env = []): bool
     {
         $path = $this->mcpPath();
 
@@ -43,10 +43,11 @@ abstract class FileMcpIde implements Ide
         }
 
         // Add or update laravel-boost server configuration
-        $config[$this->jsonMcpKey][$key] = [
+        $config[$this->jsonMcpKey][$key] = array_filter([
             'command' => $command,
             'args' => $args,
-        ];
+            'env' => $env,
+        ]);
 
         // Write configuration back to file
         $json = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);

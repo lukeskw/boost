@@ -18,7 +18,7 @@ class Tinker extends Tool
 
     public function description(): string
     {
-        return 'Execute PHP code in the Laravel application context, similar to artisan tinker. Most useful for debugging issues. Returns the output of the code, as well as whatever is "returned" using "return".';
+        return 'Execute PHP code in the Laravel application context, similar to artisan tinker. Most useful for debugging issues, checking if functions exists, and testing code snippets. Returns the output of the code, as well as whatever is "returned" using "return".';
     }
 
     public function schema(ToolInputSchema $schema): ToolInputSchema

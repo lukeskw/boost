@@ -28,4 +28,9 @@ trait MakesHttpRequests
     {
         return $this->client()->get($url);
     }
+
+    public function json(string $url, array $json): Response
+    {
+        return $this->client()->asJson()->post($url, $json);
+    }
 }

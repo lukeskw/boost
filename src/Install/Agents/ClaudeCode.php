@@ -6,7 +6,7 @@ use Laravel\Boost\Contracts\Agent;
 
 class ClaudeCode extends ShellMcpIde implements Agent
 {
-    protected string $shellCommand = 'claude mcp add {key} {command} {args}';
+    protected string $shellCommand = 'claude mcp add {key} "{command}" {args} {env}';
 
     public function guidelinesPath(): string
     {

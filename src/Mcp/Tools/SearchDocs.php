@@ -30,13 +30,25 @@ class SearchDocs extends Tool
         return $schema
             ->string('queries')
             ->description('### separated list of queries to perform. Useful to pass multiple if you aren\'t sure if it is "toggle" or "switch, or "infinite scroll" or "infinite load", for example.')->required()
+
+            ->raw('packages', [
+                'description' => 'Package names to limit searching to from application-info. Useful if you know the package(s) you need. i.e. laravel/framework, inertiajs/inertia-laravel, @inertiajs/react',
+                'type' => 'array',
+                'items' => [
+                    'type' => 'string',
+                    'description' => "The composer package name (e.g., 'symfony/console')",
+                ],
+            ])
+
             ->integer('token_limit')
-            ->description('Maximum number of tokens to return in the response. Defaults to 10,000 tokens, maximum 1,000,000 tokens.');
+            ->description('Maximum number of tokens to return in the response. Defaults to 10,000 tokens, maximum 1,000,000 tokens.')
+            ->optional();
     }
 
     public function handle(array $arguments): ToolResult|Generator
     {
         $apiUrl = config('boost.hosted.api_url', 'https://boost.laravel.com').'/api/docs';
+        $packagesFilter = array_key_exists('packages', $arguments) ? $arguments['packages'] : null;
 
         $queries = array_filter(
             array_map('trim', explode('###', $arguments['queries'])),
@@ -46,6 +58,11 @@ class SearchDocs extends Tool
         try {
             $packagesCollection = $this->roster->packages();
 
+            // Only search in specific packages
+            if ($packagesFilter) {
+                $packagesCollection = $packagesCollection->filter(fn (Package $package) => in_array($package->rawName(), $packagesFilter));
+            }
+
             $packages = $packagesCollection->map(function (Package $package) {
                 $name = $package->rawName();
                 $version = $package->majorVersion().'.x';
@@ -54,7 +71,9 @@ class SearchDocs extends Tool
                     'name' => $name,
                     'version' => $version,
                 ];
-            })->values()->toArray();
+            });
+
+            $packages = $packages->values()->toArray();
         } catch (\Throwable $e) {
             return ToolResult::error('Failed to get packages: '.$e->getMessage());
         }
