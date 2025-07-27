@@ -98,7 +98,11 @@ class GuidelineComposer
         foreach ($this->roster->packages() as $package) {
             $guidelineDir = str_replace('_', '-', strtolower($package->name()));
 
-            $guidelines->put($guidelineDir.'/core', $this->guideline($guidelineDir.'/core')); // Add core
+            $guidelines->put(
+                $guidelineDir.'/core',
+                $this->guideline($guidelineDir.'/core')
+            ); // Always add package core
+
             $guidelines->put(
                 $guidelineDir.'/v'.$package->majorVersion(),
                 $this->guidelinesDir($guidelineDir.'/'.$package->majorVersion())
