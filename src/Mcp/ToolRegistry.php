@@ -6,10 +6,12 @@ namespace Laravel\Boost\Mcp;
 
 class ToolRegistry
 {
+    /** @var array<int, class-string>|null */
     private static ?array $cachedTools = null;
 
     /**
      * Get all available tools based on the discovery logic from Boost server
+     * @return array<int, class-string>
      */
     public static function getAvailableTools(): array
     {
@@ -63,6 +65,7 @@ class ToolRegistry
 
     /**
      * Get tool names (class basenames) mapped to their full class names
+     * @return array<string, class-string>
      */
     public static function getToolNames(): array
     {

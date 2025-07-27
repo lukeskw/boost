@@ -45,6 +45,9 @@ class SearchDocs extends Tool
             ->optional();
     }
 
+    /**
+     * @param  array<string, mixed>  $arguments
+     */
     public function handle(array $arguments): ToolResult|Generator
     {
         $apiUrl = config('boost.hosted.api_url', 'https://boost.laravel.com').'/api/docs';
@@ -99,6 +102,7 @@ class SearchDocs extends Tool
         $data = $response->json();
         $results = $data['results'] ?? [];
 
+        /** @var array<int, array{content?: string}> $results */
         $concatenatedKnowledge = collect($results)
             ->map(fn ($result) => $result['content'] ?? '')
             ->filter()

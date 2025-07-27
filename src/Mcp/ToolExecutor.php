@@ -18,6 +18,7 @@ class ToolExecutor
 
     /**
      * Execute a tool with the given arguments
+     * @param array<string, mixed> $arguments
      */
     public function execute(string $toolClass, array $arguments = []): ToolResult
     {
@@ -34,6 +35,7 @@ class ToolExecutor
 
     /**
      * Execute tool in a separate process for isolation
+     * @param array<string, mixed> $arguments
      */
     protected function executeInProcess(string $toolClass, array $arguments): ToolResult
     {
@@ -75,6 +77,7 @@ class ToolExecutor
 
     /**
      * Execute tool inline (current process)
+     * @param array<string, mixed> $arguments
      */
     protected function executeInline(string $toolClass, array $arguments): ToolResult
     {
@@ -110,6 +113,7 @@ class ToolExecutor
 
     /**
      * Reconstruct a ToolResult from JSON data
+     * @param array<string, mixed> $data
      */
     protected function reconstructToolResult(array $data): ToolResult
     {

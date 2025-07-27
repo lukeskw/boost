@@ -13,6 +13,10 @@ abstract class FileMcpIde implements Ide
         throw new \Exception('Override me');
     }
 
+    /**
+     * @param array<int, string> $args
+     * @param array<string, string> $env
+     */
     public function installMcp(string $key, string $command, array $args = [], array $env = []): bool
     {
         $path = $this->mcpPath();

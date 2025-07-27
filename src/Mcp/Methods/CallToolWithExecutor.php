@@ -10,6 +10,7 @@ use Laravel\Boost\Mcp\ToolExecutor;
 use Laravel\Mcp\Server\Contracts\Methods\Method;
 use Laravel\Mcp\Server\ServerContext;
 use Laravel\Mcp\Server\Tools\ToolResult;
+use Laravel\Mcp\Server\Transport\JsonRpcNotification;
 use Laravel\Mcp\Server\Transport\JsonRpcRequest;
 use Laravel\Mcp\Server\Transport\JsonRpcResponse;
 

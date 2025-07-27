@@ -25,6 +25,9 @@ class ReportFeedback extends Tool
             ->required();
     }
 
+    /**
+     * @param  array<string, string>  $arguments
+     */
     public function handle(array $arguments): ToolResult|Generator
     {
         $apiUrl = config('boost.hosted.api_url', 'https://boost.laravel.com').'/api/feedback';

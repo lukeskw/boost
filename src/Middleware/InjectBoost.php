@@ -4,11 +4,12 @@ namespace Laravel\Boost\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Laravel\Boost\Services\BrowserLogger;
 
 class InjectBoost
 {
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
         /** @var \Illuminate\Http\Response $response */
         $response = $next($request);

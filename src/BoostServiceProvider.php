@@ -87,14 +87,16 @@ class BoostServiceProvider extends ServiceProvider
         }
     }
 
-    private function registerRoutes()
+    private function registerRoutes(): void
     {
         Route::post('/_boost/browser-logs', function (Request $request) {
             $logs = $request->input('logs', []);
+            /** @var \Illuminate\Log\Logger $logger */
+            $logger = Log::channel('browser');
 
-            /** @var array{type: 'error'|'warn'|'info'|'log'|'table'|'window_error'|'uncaught_error'|'unhandled_rejection', timestamp: string, data: array, url:string, userAgent:string} $log */
+            /** @var array{type: 'error'|'warn'|'info'|'log'|'table'|'window_error'|'uncaught_error'|'unhandled_rejection', timestamp: string, data: array<mixed>, url:string, userAgent:string} $log */
             foreach ($logs as $log) {
-                Log::channel('browser')->write(
+                $logger->write(
                     level: $this->jsTypeToPsr3($log['type']),
                     message: $this->buildLogMessageFromData($log['data']),
                     context: [
@@ -112,6 +114,7 @@ class BoostServiceProvider extends ServiceProvider
     /**
      * Build a string message for the log based on various input types. Single dimensional, and multi:
      * "data":[{"message":"Unhandled Promise Rejection","reason":{"name":"TypeError","message":"NetworkError when attempting to fetch resource.","stack":""}}]
+     * @param array<mixed> $data
      */
     protected function buildLogMessageFromData(array $data): string
     {

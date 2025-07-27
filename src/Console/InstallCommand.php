@@ -227,7 +227,7 @@ HEADER;
         $this->line(' Let\'s give '.$this->colors->bgYellow($this->colors->black($this->projectName)).' a Boost');
     }
 
-    private function outro()
+    private function outro(): void
     {
         // TODO: Pass info to /installed on what we did so it can show specific help
         $text = 'Enjoy the boost 🚀 https://boost.laravel.com/installed';
@@ -270,6 +270,9 @@ HEADER;
         return $enforce;
     }
 
+    /**
+     * @return array<int, string>
+     */
     protected function boostToInstall(): array
     {
         $defaultToInstallOptions = ['mcp_server', 'ai_guidelines'];
@@ -293,6 +296,9 @@ HEADER;
         );
     }
 
+    /**
+     * @return array<int, string>
+     */
     protected function boostToolsToDisable(): array
     {
         return multiselect(
@@ -303,6 +309,9 @@ HEADER;
         );
     }
 
+    /**
+     * @return array<int, string>
+     */
     protected function detectProjectAgents(): array
     {
         $agents = [];
@@ -520,7 +529,7 @@ HEADER;
         // Publish config if it doesn't exist
         if (! file_exists($configPath)) {
             $this->newLine();
-            $this->info('Publishing Boost configuration file...');
+            $this->info(' Publishing Boost configuration file...');
 
             Artisan::call('vendor:publish', [
                 '--provider' => 'Laravel\\Boost\\BoostServiceProvider',
@@ -637,6 +646,7 @@ HEADER;
     {
         $actuallyUsing = false;
 
+        /** @phpstan-ignore-next-line  */
         return is_dir(base_path('lang')) && $actuallyUsing;
     }
 }

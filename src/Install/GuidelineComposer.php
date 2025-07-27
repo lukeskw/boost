@@ -14,6 +14,7 @@ class GuidelineComposer
 
     protected string $userGuidelineDir = '.ai/guidelines';
 
+    /** @var Collection<string, string> */
     protected Collection $guidelines;
 
     protected GuidelineConfig $config;
@@ -48,6 +49,9 @@ class GuidelineComposer
         return $this->guidelines()->keys()->toArray();
     }
 
+    /**
+     * @return Collection<string, string>
+     */
     public function guidelines(): Collection
     {
         if (! empty($this->guidelines)) {
@@ -125,7 +129,7 @@ class GuidelineComposer
     }
 
     /**
-     * @return \Illuminate\Support\Collection<\Symfony\Component\Finder\SplFileInfo $file>
+     * @return Collection<string, \Symfony\Component\Finder\SplFileInfo>
      */
     protected function guidelineFilesInDir(string $dirPath): Collection
     {
