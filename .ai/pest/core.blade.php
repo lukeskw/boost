@@ -1,6 +1,7 @@
 # Pest tests
 - All tests must be written using Pest.
 - You must not remove any tests without approval.
+- Tests should test all of the the unhappy paths, happy paths, and weird paths.
 - Tests live in the `tests/Feature` and `tests/Unit` directories
 - Pest tests look and behave like this:
 <code-snippet lang="php">
