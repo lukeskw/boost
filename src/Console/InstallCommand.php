@@ -621,7 +621,7 @@ HEADER;
         $this->newLine();
 
         if (count($failed) > 0) {
-            $this->error(sprintf('✗ Some MCP servers failed to install:'));
+            $this->error(sprintf('%s Some MCP servers failed to install:', $this->redCross));
             foreach ($failed as $ideName => $errors) {
                 foreach ($errors as $server => $error) {
                     $this->line("  - {$ideName} ({$server}): {$error}");
@@ -630,14 +630,12 @@ HEADER;
         }
     }
 
+    /**
+     * Is the project actually using localization for their new features?
+     */
     protected function detectLocalization(): bool
     {
-        // TODO: How do we detect whether it's actually in use? Somebody who publishes the lang files doesn't care about their AI then making a ton of effort to add localization strings, but somebody who makes sure there is always localization will be grateful, and somebody who has an entirely separate process to generate localization files will be annoyed? Do we need a way of disabling this in config?
-        // This feels like a particularly tricky bit because it can have so many different processes involved with it, whether that's LLM based translation, or real human translators, done during PR, or done after release, or using some 3rd party service that barely works, or something else entirely. Should probably just not get involved.
-
-        $actuallyUsing = false; // Diff the dir based on the default for that framework version
-        // Or, recent~ git commit that modifies lang files
-        // Or, lang used in resources/ ?
+        $actuallyUsing = false;
 
         return is_dir(base_path('lang')) && $actuallyUsing;
     }
