@@ -425,7 +425,7 @@ HEADER;
 
         $this->newLine();
         $this->info(sprintf(' Adding %d guidelines to your selected agents', $guidelines->count()));
-        DisplayHelper::grid($guidelines->keys()->toArray(), $this->terminal->cols());
+        DisplayHelper::grid($guidelines->keys()->sort()->toArray(), $this->terminal->cols());
         $this->newLine();
         usleep(750000);
 
