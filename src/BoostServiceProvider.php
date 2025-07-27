@@ -7,6 +7,7 @@ namespace Laravel\Boost;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -61,6 +62,7 @@ class BoostServiceProvider extends ServiceProvider
         $this->registerCommands();
         $this->registerRoutes();
         $this->registerBrowserLogger();
+        $this->registerBladeDirectives();
         $this->hookIntoResponses($router);
     }
 
@@ -146,15 +148,22 @@ class BoostServiceProvider extends ServiceProvider
         ]]);
     }
 
+    protected function registerBladeDirectives(): void
+    {
+        Blade::directive('boostJs', function () {
+            return '<?php echo \\Laravel\\Boost\\Services\\BrowserLogger::getScript(); ?>';
+        });
+    }
+
     private function jsTypeToPsr3(string $type): string
     {
         return match ($type) {
             'warn' => 'warning',
             'log' => 'debug',
             'table' => 'debug',
-            'window_error' => 'error', // TODO: Manage the data differently
-            'uncaught_error' => 'error', // TODO: Manage the data differently
-            'unhandled_rejection' => 'error', // TODO: Manage the data differently
+            'window_error' => 'error',
+            'uncaught_error' => 'error',
+            'unhandled_rejection' => 'error',
             default => $type
         };
     }
