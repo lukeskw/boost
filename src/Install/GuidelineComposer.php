@@ -10,8 +10,6 @@ use Symfony\Component\Finder\Finder;
 
 class GuidelineComposer
 {
-    // TODO: Import the user's guidelines from base_path('.ai/')
-
     protected string $userGuidelineDir = '.ai/guidelines';
 
     /** @var Collection<string, string> */

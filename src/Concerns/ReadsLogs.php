@@ -12,15 +12,30 @@ trait ReadsLogs
      * Regular expression fragments and default chunk-window sizes used when
      * scanning log files. Declaring them once keeps every consumer in sync.
      */
-    private const TIMESTAMP_REGEX = '\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\]'; // TODO: This is PHP 8.2 only, not Laravel 10 / PHP 8.1 friendly
+    private function getTimestampRegex(): string
+    {
+        return '\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\]';
+    }
 
-    private const ENTRY_SPLIT_REGEX = '/(?='.self::TIMESTAMP_REGEX.')/';
+    private function getEntrySplitRegex(): string
+    {
+        return '/(?='.$this->getTimestampRegex().')/';
+    }
 
-    private const ERROR_ENTRY_REGEX = '/^'.self::TIMESTAMP_REGEX.'.*\\.ERROR:/';
+    private function getErrorEntryRegex(): string
+    {
+        return '/^'.$this->getTimestampRegex().'.*\\.ERROR:/';
+    }
 
-    private const CHUNK_SIZE_START = 64 * 1024;       // 64 kB
+    private function getChunkSizeStart(): int
+    {
+        return 64 * 1024; // 64 kB
+    }
 
-    private const CHUNK_SIZE_MAX = 1 * 1024 * 1024; // 1 MB
+    private function getChunkSizeMax(): int
+    {
+        return 1 * 1024 * 1024; // 1 MB
+    }
 
     /**
      * Resolve the current log file path based on Laravel's logging configuration.
@@ -42,7 +57,7 @@ trait ReadsLogs
      */
     protected function isErrorEntry(string $line): bool
     {
-        return preg_match(self::ERROR_ENTRY_REGEX, $line) === 1;
+        return preg_match($this->getErrorEntryRegex(), $line) === 1;
     }
 
     /**
@@ -53,12 +68,12 @@ trait ReadsLogs
      */
     protected function readLastLogEntries(string $logFile, int $count): array
     {
-        $chunkSize = self::CHUNK_SIZE_START;
+        $chunkSize = $this->getChunkSizeStart();
 
         do {
             $entries = $this->scanLogChunkForEntries($logFile, $chunkSize);
 
-            if (count($entries) >= $count || $chunkSize >= self::CHUNK_SIZE_MAX) {
+            if (count($entries) >= $count || $chunkSize >= $this->getChunkSizeMax()) {
                 break;
             }
 
@@ -74,7 +89,7 @@ trait ReadsLogs
      */
     protected function readLastErrorEntry(string $logFile): ?string
     {
-        $chunkSize = self::CHUNK_SIZE_START;
+        $chunkSize = $this->getChunkSizeStart();
 
         do {
             $entries = $this->scanLogChunkForEntries($logFile, $chunkSize);
@@ -85,7 +100,7 @@ trait ReadsLogs
                 }
             }
 
-            if ($chunkSize >= self::CHUNK_SIZE_MAX) {
+            if ($chunkSize >= $this->getChunkSizeMax()) {
                 return null;
             }
 
@@ -123,7 +138,7 @@ trait ReadsLogs
             $content = stream_get_contents($handle);
 
             // Split by beginning-of-entry look-ahead (PSR-3 timestamp pattern).
-            $entries = preg_split(self::ENTRY_SPLIT_REGEX, $content, -1, PREG_SPLIT_NO_EMPTY);
+            $entries = preg_split($this->getEntrySplitRegex(), $content, -1, PREG_SPLIT_NO_EMPTY);
             if (! $entries) {
                 return [];
             }
