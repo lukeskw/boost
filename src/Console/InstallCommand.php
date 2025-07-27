@@ -95,7 +95,7 @@ class InstallCommand extends Command
     {
         $this->installedIdes = $this->detectInstalledIdes();
         $this->detectedProjectIdes = $this->detectIdesUsedInProject();
-        //        $this->detectedProjectAgents = $this->detectProjectAgents(); // TODO: Roo, Cline, Copilot
+        $this->detectedProjectAgents = $this->detectProjectAgents(); // TODO: Roo, Cline, Copilot
         // TODO: Should we create all agents to start, add a 'detected' prop to them that's set on construct
         // Maybe add a trait 'DetectsInstalled' and 'DetectsUsed' (in this project)
     }
@@ -144,6 +144,7 @@ class InstallCommand extends Command
                 'phpstorm' => '/Applications/PhpStorm.app',
                 'cursor' => '/Applications/Cursor.app',
                 'zed' => '/Applications/Zed.app',
+                'vscode' => '/Applications/Visual Studio Code.app',
             ];
 
             foreach ($macDetect as $ideKey => $path) {
@@ -153,7 +154,7 @@ class InstallCommand extends Command
             }
 
             if (Process::run('which claude')->successful()) {
-                $detected[] = 'claude_code';
+                $detected[] = 'claudecode';
             }
         }
 
@@ -304,7 +305,26 @@ HEADER;
 
     protected function detectProjectAgents(): array
     {
-        return [];
+        $agents = [];
+        if (file_exists(base_path('CLAUDE.md')) || is_dir(base_path('.claude'))) {
+            $agents[] = 'claudecode';
+        } elseif (Process::run('which claude')->successful()) {
+            $agents[] = 'claudecode';
+        }
+
+        if (is_dir(base_path('.cursor')) || array_key_exists('cursor', $this->installedIdes)) {
+            $agents[] = 'cursor';
+        }
+
+        if (is_dir(base_path('.junie')) || array_key_exists('phpstorm', $this->installedIdes)) {
+            $agents[] = 'junie';
+        }
+
+        if (file_exists(base_path('.github/copilot-instructions.md'))) {
+            $agents[] = 'copilot';
+        }
+
+        return $agents;
     }
 
     /**
@@ -392,10 +412,21 @@ HEADER;
 
         ksort($agents);
 
+        // Map detected agent keys to class names
+        $detectedClasses = [];
+        foreach ($this->detectedProjectAgents as $agentKey) {
+            foreach ($agents as $className => $displayName) {
+                if (strtolower($agentKey) === strtolower(class_basename($className))) {
+                    $detectedClasses[] = $className;
+                    break;
+                }
+            }
+        }
+
         $selectedAgentClasses = collect(multiselect(
             label: sprintf('Which agents need AI guidelines for %s?', $this->projectName),
             options: $agents,
-            default: ['Laravel\\Boost\\Install\\Agents\\ClaudeCode'],// array_keys($agents),
+            default: $detectedClasses,
             scroll: 4, // TODO: use detection to auto-select
         ));
 
