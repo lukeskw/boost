@@ -14,13 +14,57 @@
 > 10. Write a great README
 
 ## Introduction
+Laravel Boost gives you a jump-start with AI assisted coding by making it simple to add everything you need to help the AI make good choices.
 
-- `composer require laravel/boost`
-- `./artisan vendor:publish --tag=boost-config`
-- `./artisan boost:install`
+Core features:
+- MCP server with 15+ tools
+- Composable AI guidelines for ecosystem packages
+- Documentation API with built-in MCP tool
+
+Other features:
+- Browser logs streamed to `log/storage/browser.log`
 
 > [!IMPORTANT]
-> Boost is currently in Beta, is subject to change prior to the v1.0.0 release, and will be updated frequently. All notable changes will be documented in the [changelog](./CHANGELOG.md).
+> Boost is in Beta and will be updated frequently.
+
+## Installation
+
+Add the package
+```bash
+composer require laravel/boost --dev
+```
+
+Install the MCP server & guidelines
+```bash
+./artisan boost:install
+```
+
+## Current MCP Tools
+
+| Name                       | Notes                                                        |
+| -------------------------- | ------------------------------------------------------------ |
+| Application Info           | Shares PHP & Laravel versions, database engine, list of ecosystem packages with versions, and Eloquent models. |
+| Browser Logs               | Read logs & errors from the browser                          |
+| Database Connections       | List database connections, and the default                   |
+| Database Query             |                                                              |
+| Database Schema            |                                                              |
+| Get Absolute Url           | Converts relative path to absolute so AI doesn't give you invalid URLs |
+| Get Config                 | Get specific value from config using dot notation            |
+| Last Error                 | From the log files                                           |
+| List Artisan Commands      |                                                              |
+| List Available Config Keys |                                                              |
+| List Available Env Vars    | Keys only                                                    |
+| List Routes                | Regular & folio routes are combined. Ability to filter routes too |
+| Read Log Entries           | Last X entries                                               |
+| Report Feedback            | Share Boost & Laravel AI feedback with the team              |
+| Search Docs                | Use hosted API service to retrieve docs based on installed packages |
+| Tinker                     | Run arbitrary code within the context of the project         |
+
+
+
+
+## Adding your own AI guidelines
+
 
 ## Official Documentation
 
