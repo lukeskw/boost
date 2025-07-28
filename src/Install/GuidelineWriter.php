@@ -56,13 +56,15 @@ class GuidelineWriter
                 $newContent = preg_replace($pattern, $replacement, $content, 1);
                 $replaced = true;
             } else {
-                // No existing guidelines found, append to end
+                // No existing Boost guidelines found, append to end of existing file
                 $frontMatter = '';
                 if ($this->agent->frontmatter() && ! str_contains($content, "\n---\n")) {
                     $frontMatter = "---\nalwaysApply: true\n---\n";
                 }
 
-                $newContent = $frontMatter.rtrim($content)."\n\n\n".$replacement;
+                $existingContent = rtrim($content);
+                $separatingNewlines = empty($existingContent) ? '' : "\n\n===\n\n";
+                $newContent = $frontMatter.$existingContent.$separatingNewlines.$replacement;
             }
 
             if (ftruncate($handle, 0) === false || fseek($handle, 0) === -1) {

@@ -35,8 +35,8 @@ class GuidelineComposer
     public function compose(): string
     {
         return $this->guidelines()
-            ->map(fn ($content, $key) => "# {$key}\n{$content}\n")
-            ->join("\n\n====\n\n");
+            ->map(fn ($content, $key) => "\n=== {$key} ===\n\n{$content}")
+            ->join("\n\n");
     }
 
     /**
