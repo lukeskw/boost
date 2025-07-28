@@ -382,7 +382,7 @@ HEADER;
             scroll: 5,
             required: true,
             hint: sprintf('Auto-detected %s for you', Arr::join(array_map(fn ($c) => class_basename($c), $detectedClasses), ', ', ' & '))
-        ));
+        ))->sort();
 
         return $selectedIdeClasses->map(fn ($ideClass) => new $ideClass);
     }
@@ -434,7 +434,7 @@ HEADER;
             options: $agents,
             default: $detectedClasses,
             scroll: 4,
-        ));
+        ))->sort();
 
         return $selectedAgentClasses->map(fn ($agentClass) => new $agentClass);
     }
