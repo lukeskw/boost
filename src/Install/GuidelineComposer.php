@@ -119,7 +119,8 @@ class GuidelineComposer
         }
 
         return $guidelines
-            ->whereNotNull();
+            ->whereNotNull()
+            ->where(fn ($guideline) => ! empty(trim($guideline)));
     }
 
     /**
