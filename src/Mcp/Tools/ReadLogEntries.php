@@ -50,10 +50,15 @@ class ReadLogEntries extends Tool
         $entries = $this->readLastLogEntries($logFile, $maxEntries);
 
         if ($entries === []) {
-            return ToolResult::error('Unable to retrieve log entries.');
+            return ToolResult::text('Unable to retrieve log entries, or no entries yet.');
+        }
+        $logs = implode("\n\n", $entries);
+
+        if (empty(trim($logs))) {
+            return ToolResult::text('No log entries yet.');
         }
 
-        return ToolResult::text(implode("\n\n", $entries));
+        return ToolResult::text($logs);
     }
 
     // The isNewLogEntry and readLinesReverse helper methods are now provided by the ReadsLogs trait.

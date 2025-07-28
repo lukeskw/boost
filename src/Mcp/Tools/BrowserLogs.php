@@ -51,9 +51,14 @@ class BrowserLogs extends Tool
         $entries = $this->readLastLogEntries($logFile, $maxEntries);
 
         if ($entries === []) {
-            return ToolResult::error('Unable to retrieve log entries.');
+            return ToolResult::text('Unable to retrieve log entries, or no logs');
         }
 
-        return ToolResult::text(implode("\n\n", $entries));
+        $logs = implode("\n\n", $entries);
+        if (empty(trim($logs))) {
+            return ToolResult::text('No log entries yet.');
+        }
+
+        return ToolResult::text($logs);
     }
 }
