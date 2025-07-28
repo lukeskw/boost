@@ -1,6 +1,6 @@
 # Pest tests
 - All tests must be written using Pest.
-- You must not remove any tests without approval.
+- You must not remove any tests or test files from the tests directory without approval. These are not temporary or helper files, these are core to the application.
 - Tests should test all of the the unhappy paths, happy paths, and weird paths.
 - Tests live in the `tests/Feature` and `tests/Unit` directories
 - Pest tests look and behave like this:
