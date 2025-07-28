@@ -66,7 +66,9 @@ class GuidelineComposer
      */
     protected function find(): Collection
     {
-        $guidelines = collect(['boost/core' => $this->guideline('core')]);
+        $guidelines = collect();
+        $guidelines->put('core', $this->guideline('core'));
+        $guidelines->put('boost/core', $this->guideline('boost/core'));
 
         $phpMajorMinor = PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;
         $guidelines->put('php/core', $this->guideline('php/core'));

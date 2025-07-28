@@ -1,2 +1,2 @@
 ## Pint Code Formatting Core
-- You must run `vendor/bin/pint` before finalizing changes to ensure your code matches the user's expected style.
+- You must run `vendor/bin/pint` before finalizing changes to ensure your code matches the project's expected style.
