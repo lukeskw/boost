@@ -8,7 +8,6 @@
 You should use the ‘tinker’ tool from Boost MCP when you need to run PHP to check data, test code, or debug code.
 Prefer the database-query tool if you only need to query the database.
 
-
 # Searching documentation
 
 Check the docs before making code changes to ensure we are approaching this in the correct way. Use multiple simple topic based queries.

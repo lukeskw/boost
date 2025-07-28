@@ -12,7 +12,7 @@
 > 3. Write a great README
 
 ## Introduction
-Laravel Boost gives you a jump-start with AI assisted coding by making it simple to add everything you need to help the AI make good choices.
+Laravel Boost gives you a jump-start with AI assisted coding by making it simple to add everything you need to help AI make good choices.
 
 Core features:
 - MCP server with 15+ tools
@@ -63,6 +63,7 @@ Install the MCP server & guidelines
 
 ## Adding your own AI guidelines
 
+Add `.blade.php` files to `.ai/guidelines/*` in your project, and they'll be included as part of `boost:install`.
 
 ## Official Documentation
 

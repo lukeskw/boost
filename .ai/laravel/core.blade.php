@@ -23,7 +23,7 @@
 - When creating models for tests, use the factories for the models. Check if the factory has custom states that can be used before manually setting up the model.
 
 ## Vite error
-- If you receive an "Illuminate\Foundation\ViteException: Unable to locate file in Vite manifest" error, you can run `npm run build` and ask the user to run `npm run dev` or `composer run dev`.
+- If you receive an "Illuminate\Foundation\ViteException: Unable to locate file in Vite manifest" error, you can run `npm run build` or ask the user to run `npm run dev` or `composer run dev`.
 
 ## Config
 - **Use environment variables** via config files, never `env()` directly. Always use `config('app.name')` not `env('APP_NAME')`
