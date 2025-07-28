@@ -16,23 +16,10 @@ This project is a Laravel app and its main Laravel ecosystems package & versions
 ## Conventions
 - You must follow all existing code conventions used in this project. When creating or editing a file, check sibling files for the correct structure, approach, naming.
 - Use descriptive names. e.g. `isRegisteredForDiscounts` not `discount()`
-- Always use strict typing: declare(strict_types=1);
 
 ## Project Structure & Architecture
 - Stick to existing directory structure - no new base folders without approval.
 - No dependency changes without approval.
-
-## Constructors
-- Use PHP 8 constructor property promotion in `__construct()`
-<code-snippet>public function __construct(public GitHub $github) { }</code-snippet>
-- Do not allow empty `__construct()` with zero parameters.
-
-## Type Declarations
-- Always use explicit return type declarations for methods and functions.
-- Use appropriate PHP type hints for method parameters.
-
-## Comments
-- Prefer PHPDoc blocks, otherwise use minimal-to-zero comments, unless there is something very complex going on.
 
 ## Replies
 - Be concise in your explanations - focus on what's important rather than explaining obvious details.
