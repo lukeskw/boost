@@ -5,14 +5,14 @@ declare(strict_types=1);
 use Laravel\Boost\Contracts\Agent;
 use Laravel\Boost\Install\GuidelineWriter;
 
-test('it returns early when guidelines are empty', function () {
+test('it returns NOOP when guidelines are empty', function () {
     $agent = Mockery::mock(Agent::class);
     $agent->shouldReceive('guidelinesPath')->andReturn('/tmp/test.md');
 
     $writer = new GuidelineWriter($agent);
 
-    // Should not throw any exception
-    $writer->write('');
+    $result = $writer->write('');
+    expect($result)->toBe(GuidelineWriter::NOOP);
 });
 
 test('it creates directory when it does not exist', function () {
@@ -60,7 +60,7 @@ test('it writes guidelines to new file', function () {
     $writer->write('test guidelines content');
 
     $content = file_get_contents($tempFile);
-    expect($content)->toBe("\n\n\n<laravel-boost-guidelines>\ntest guidelines content\n</laravel-boost-guidelines>");
+    expect($content)->toBe("<laravel-boost-guidelines>\ntest guidelines content\n</laravel-boost-guidelines>");
 
     unlink($tempFile);
 });
@@ -77,7 +77,7 @@ test('it writes guidelines to existing file without existing guidelines', functi
     $writer->write('new guidelines');
 
     $content = file_get_contents($tempFile);
-    expect($content)->toBe("# Existing content\n\nSome text here.\n\n\n<laravel-boost-guidelines>\nnew guidelines\n</laravel-boost-guidelines>");
+    expect($content)->toBe("# Existing content\n\nSome text here.\n\n===\n\n<laravel-boost-guidelines>\nnew guidelines\n</laravel-boost-guidelines>");
 
     unlink($tempFile);
 });
@@ -165,7 +165,7 @@ test('it preserves file content structure with proper spacing', function () {
     $writer->write('my guidelines');
 
     $content = file_get_contents($tempFile);
-    expect($content)->toBe("# Title\n\nParagraph 1\n\nParagraph 2\n\n\n<laravel-boost-guidelines>\nmy guidelines\n</laravel-boost-guidelines>");
+    expect($content)->toBe("# Title\n\nParagraph 1\n\nParagraph 2\n\n===\n\n<laravel-boost-guidelines>\nmy guidelines\n</laravel-boost-guidelines>");
 
     unlink($tempFile);
 });
@@ -182,7 +182,7 @@ test('it handles empty file', function () {
     $writer->write('first guidelines');
 
     $content = file_get_contents($tempFile);
-    expect($content)->toBe("\n\n\n<laravel-boost-guidelines>\nfirst guidelines\n</laravel-boost-guidelines>");
+    expect($content)->toBe("<laravel-boost-guidelines>\nfirst guidelines\n</laravel-boost-guidelines>");
 
     unlink($tempFile);
 });
@@ -199,7 +199,7 @@ test('it handles file with only whitespace', function () {
     $writer->write('clean guidelines');
 
     $content = file_get_contents($tempFile);
-    expect($content)->toBe("\n\n\n<laravel-boost-guidelines>\nclean guidelines\n</laravel-boost-guidelines>");
+    expect($content)->toBe("<laravel-boost-guidelines>\nclean guidelines\n</laravel-boost-guidelines>");
 
     unlink($tempFile);
 });
@@ -214,8 +214,9 @@ test('it does not interfere with other XML-like tags', function () {
     $agent->shouldReceive('frontmatter')->andReturn(false);
 
     $writer = new GuidelineWriter($agent);
-    $writer->write('new guidelines');
+    $result = $writer->write('new guidelines');
 
+    expect($result)->toBe(GuidelineWriter::REPLACED);
     $content = file_get_contents($tempFile);
     expect($content)->toBe("# Title\n\n<other-rules>\nShould not be touched\n</other-rules>\n\n<laravel-boost-guidelines>\nnew guidelines\n</laravel-boost-guidelines>\n\n<custom-config>\nAlso untouched\n</custom-config>");
 
@@ -295,7 +296,7 @@ test('it adds frontmatter when agent supports it and file has no existing frontm
     $writer->write('new guidelines');
 
     $content = file_get_contents($tempFile);
-    expect($content)->toBe("---\nalwaysApply: true\n---\n# Existing content\n\nSome text here.\n\n\n<laravel-boost-guidelines>\nnew guidelines\n</laravel-boost-guidelines>");
+    expect($content)->toBe("---\nalwaysApply: true\n---\n# Existing content\n\nSome text here.\n\n===\n\n<laravel-boost-guidelines>\nnew guidelines\n</laravel-boost-guidelines>");
 
     unlink($tempFile);
 });
@@ -312,7 +313,7 @@ test('it does not add frontmatter when agent supports it but file already has fr
     $writer->write('new guidelines');
 
     $content = file_get_contents($tempFile);
-    expect($content)->toBe("---\ncustomOption: true\n---\n# Existing content\n\nSome text here.\n\n\n<laravel-boost-guidelines>\nnew guidelines\n</laravel-boost-guidelines>");
+    expect($content)->toBe("---\ncustomOption: true\n---\n# Existing content\n\nSome text here.\n\n===\n\n<laravel-boost-guidelines>\nnew guidelines\n</laravel-boost-guidelines>");
 
     unlink($tempFile);
 });
@@ -326,10 +327,11 @@ test('it does not add frontmatter when agent does not support it', function () {
     $agent->shouldReceive('frontmatter')->andReturn(false);
 
     $writer = new GuidelineWriter($agent);
-    $writer->write('new guidelines');
+    $result = $writer->write('new guidelines');
 
+    expect($result)->toBe(GuidelineWriter::NEW);
     $content = file_get_contents($tempFile);
-    expect($content)->toBe("# Existing content\n\nSome text here.\n\n\n<laravel-boost-guidelines>\nnew guidelines\n</laravel-boost-guidelines>");
+    expect($content)->toBe("# Existing content\n\nSome text here.\n\n===\n\n<laravel-boost-guidelines>\nnew guidelines\n</laravel-boost-guidelines>");
 
     unlink($tempFile);
 });
