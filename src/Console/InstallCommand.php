@@ -227,7 +227,7 @@ HEADER;
 
     private function outro(): void
     {
-        $text = 'Enjoy the boost 🚀 https://boost.laravel.com/installed';
+        $text = 'Enjoy the boost 🚀'; // https://boost.laravel.com/installed';
         $padding = (int) (floor(($this->terminal->cols() - mb_strlen($text)) / 2)) - 2;
         echo ' '.$this->colors->bgGreen($this->colors->black($this->colors->bold(str_repeat(' ', $padding).$text.str_repeat(' ', $padding)))).PHP_EOL;
     }
