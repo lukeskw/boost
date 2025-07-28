@@ -59,8 +59,6 @@ Install the MCP server & guidelines
 | Tinker                     | Run arbitrary code within the context of the project         |
 
 
-
-
 ## Adding your own AI guidelines
 
 Add `.blade.php` files to `.ai/guidelines/*` in your project, and they'll be included as part of `boost:install`.
