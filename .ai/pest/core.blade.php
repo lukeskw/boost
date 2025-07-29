@@ -36,7 +36,7 @@ it('returns all', function () {
 - You can also create partial mocks using the same import or self method.
 
 ## Datasets
-- Use datasets in Pest to simplify tests which have a lot of duplicated data. This if often the case when testing validation rules, so often go with the solution of using datasets when writing tests for validation rules.
+- Use datasets in Pest to simplify tests which have a lot of duplicated data. This often the case when testing validation rules, so often go with the solution of using datasets when writing tests for validation rules.
 
 <code-snippet lang="php" package="pest">
 it('has emails', function (string $email) {
