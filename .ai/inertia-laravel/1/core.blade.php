@@ -1,4 +1,4 @@
-Inertia v1 core
+## Inertia v1 Core
 
 - Inertia v1 does _not_ come with these features. Do not recommend using these Inertia v2 features directly.
     - Polling

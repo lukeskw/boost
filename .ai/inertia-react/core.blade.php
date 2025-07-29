@@ -1,11 +1,11 @@
-- Use `router.visit()` or `<Link>` for navigation instead of traditional links
+- Use `router.visit()` or `<Link>` for navigation instead of traditional links.
 <code-snippet lang="react" name="Inertia client navigation">
     import { Link } from '@inertiajs/react'
 
     <Link href="/">Home</Link>
 </code-snippet>
 
-- For form handling, use `router.post` and related methods, do not use regular forms
+- For form handling, use `router.post` and related methods, do not use regular forms.
 <code-snippet lang="react" name="Form example">
 import { useState } from 'react'
 import { router } from '@inertiajs/react'

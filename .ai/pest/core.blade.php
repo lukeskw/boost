@@ -1,11 +1,11 @@
-# Testing
-If you need to verify a feature is working, write or update a Unit/Feature test.
+## Testing
+If you need to verify a feature is working, write or update a Unit / Feature test.
 
-# Pest tests
+# Pest Tests
 - All tests must be written using Pest.
 - You must not remove any tests or test files from the tests directory without approval. These are not temporary or helper files, these are core to the application.
 - Tests should test all of the the unhappy paths, happy paths, and weird paths.
-- Tests live in the `tests/Feature` and `tests/Unit` directories
+- Tests live in the `tests/Feature` and `tests/Unit` directories.
 - Pest tests look and behave like this:
 <code-snippet lang="php">
 it('is true', function () {
@@ -13,12 +13,12 @@ it('is true', function () {
 });
 </code-snippet>
 
-# Running tests
+# Running Tests
 - Run the minimal number of tests, using an appropriate filter, before finalizing.
-- Run all tests: `php artisan test`
-- Run all tests in a file: `php artisan test tests/Feature/ExampleTest.php`
-- Filter on particular test name: `php artisan test --filter=testName` (recommended after making a change to a related file)
-- When the tests relating to your feature are passing, make sure to also run the entire test suite to ensure things are still ok.
+- Run all tests: `php artisan test`.
+- Run all tests in a file: `php artisan test tests/Feature/ExampleTest.php`.
+- Filter on particular test name: `php artisan test --filter=testName` (recommended after making a change to a related file).
+- When the tests relating to your feature are passing, make sure to also run the entire test suite to ensure everything is still passing.
 
 ## Pest Assertions
 - When asserting status codes on a response, use the specific method like `assertForbidden`, `assertNotFound` etc, instead of using `assertStatus(403)` or similar, e.g.:
@@ -31,12 +31,12 @@ it('returns all', function () {
 </code-snippet>
 
 ## Mocking
-- Mocking is very helpful.
+- Mocking can be very helpful.
 - When mocking, you can use the pest function `Pest\Laravel\mock`, and always import it before usage with `use function Pest\Laravel\mock;` or you can use `$this->mock()`.
 - You can also create partial mocks using the same import or self method.
 
 ## Datasets
-- Use datasets in Pest to simplify tests which have a lot of duplicated data. This if for example often the case when testing validation rules, so often go with the solution of using datasets when writing tests for validation rules.
+- Use datasets in Pest to simplify tests which have a lot of duplicated data. This if often the case when testing validation rules, so often go with the solution of using datasets when writing tests for validation rules.
 
 <code-snippet lang="php" package="pest">
 it('has emails', function (string $email) {
