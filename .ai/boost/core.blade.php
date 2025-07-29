@@ -5,8 +5,9 @@
 - Use the `list-artisan-commands` tool when needing to call an artisan command to triple check the available params
 
 # Tinker / Debugging
-You should use the ‘tinker’ tool from Boost MCP when you need to run PHP to check data, test code, or debug code.
-Prefer the database-query tool if you only need to query the database.
+You should use the `tinker` tool from Boost MCP when you need to run PHP to debug code or query eloquent models directly.
+Use the `database-query` tool when you only need to read from the database.
+
 
 # Reading browser logs
 Only recent browser logs will be useful, discard any that are older than two hours or so.

@@ -1,3 +1,6 @@
+# Testing
+If you need to verify a feature is working, write or update a Unit/Feature test.
+
 # Pest tests
 - All tests must be written using Pest.
 - You must not remove any tests or test files from the tests directory without approval. These are not temporary or helper files, these are core to the application.
