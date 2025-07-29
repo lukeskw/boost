@@ -17,6 +17,9 @@ This project is a Laravel app and its main Laravel ecosystems package & versions
 - You must follow all existing code conventions used in this project. When creating or editing a file, check sibling files for the correct structure, approach, naming.
 - Use descriptive names. e.g. `isRegisteredForDiscounts` not `discount()`
 
+## Verification scripts
+- Do not create verification scripts or tinker when tests cover that functionality and prove it works. Unit & feature tests are more important.
+
 ## Project Structure & Architecture
 - Stick to existing directory structure - no new base folders without approval.
 - No dependency changes without approval.
