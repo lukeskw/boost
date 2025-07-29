@@ -104,7 +104,7 @@ class InstallCommand extends Command
         $this->boostToInstall = $this->boostToInstall();
         //        $this->boostToolsToDisable = $this->boostToolsToDisable(); // Not useful to start
 
-//        $this->projectPurpose = $this->projectPurpose();
+        //        $this->projectPurpose = $this->projectPurpose();
         $this->enforceTests = $this->shouldEnforceTests(ask: false);
 
         $this->idesToInstallTo = $this->idesToInstallTo(); // To add boost:mcp to the correct file
@@ -537,7 +537,7 @@ HEADER;
             $this->newLine();
         }
 
-//        $updated = $this->updateProjectPurposeInConfig($configPath, $this->projectPurpose);
+        //        $updated = $this->updateProjectPurposeInConfig($configPath, $this->projectPurpose);
     }
 
     protected function updateProjectPurposeInConfig(string $configPath, ?string $purpose): bool
