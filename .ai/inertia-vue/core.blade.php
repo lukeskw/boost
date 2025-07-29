@@ -1,12 +1,12 @@
-- Vue components must have a single root element
-- Use `router.visit()` or `<Link>` for navigation instead of traditional links
+- Vue components must have a single root element.
+- Use `router.visit()` or `<Link>` for navigation instead of traditional links.
 <code-snippet lang="vue" name="Inertia client navigation">
     import { Link } from '@inertiajs/vue3'
 
     <Link href="/">Home</Link>
 </code-snippet>
 
-- For form handling, use `router.post` and related methods, do not use regular forms
+- For form handling, use `router.post` and related methods, do not use regular forms.
 <code-snippet lang="vue" name="Form example">
     <script setup>
     import { reactive } from 'vue'

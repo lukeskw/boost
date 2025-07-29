@@ -1,4 +1,4 @@
-- Always use strict typing at the head of the file: `declare(strict_types=1);`
+- Always use strict typing at the head of the file: `declare(strict_types=1);`.
 
 ## Constructors
 - Use PHP 8 constructor property promotion in `__construct()`

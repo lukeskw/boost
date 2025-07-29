@@ -1,5 +1,5 @@
-## Do things the Laravel way
-- Use `./artisan make:` commands to create new files (i.e. migrations, controllers, models, etc..)
+## Do Things the Laravel Way
+- Use `./artisan make:` commands to create new files (i.e. migrations, controllers, models, etc.).
 - If you're creating a generic PHP class, use `artisan make:class`.
 
 ## Database
@@ -10,20 +10,23 @@
 - For DB pivot tables, use correct alphabetical order, like "project_role" instead of "role_project"
 - Use Laravel's query builder for very complex database operations.
 
+## Model Creation
+- When creating new models, create factories and seeders for them too. Ask the user if they need any other things, use `list-artisan-commands` to check the available options to `./artisan make:model`
+
+## APIs and Eloquent Resources
+- For APIs, use Eloquent API Resources and API versioning
+
 ## Queues
 - **Job and queue patterns**: Use queued jobs for time-consuming operations with the `ShouldQueue` interface.
 
+## Authentication and Authorization
 - Use Laravel built-in authentication and authorization features (Gates, Policies, Sanctum)
-- For APIs, use Eloquent API Resources and API versioning
 
-## Model creation
-- When creating new models, create factories and seeders for them too. Ask the user if they need any other things, use `list-artisan-commands` to check the available options to `./artisan make:model`
+## Config
+- **Use environment variables** via config files, never `env()` directly. Always use `config('app.name')` not `env('APP_NAME')`.
 
 ## Testing
 - When creating models for tests, use the factories for the models. Check if the factory has custom states that can be used before manually setting up the model.
 
-## Vite error
+## Vite Error
 - If you receive an "Illuminate\Foundation\ViteException: Unable to locate file in Vite manifest" error, you can run `npm run build` or ask the user to run `npm run dev` or `composer run dev`.
-
-## Config
-- **Use environment variables** via config files, never `env()` directly. Always use `config('app.name')` not `env('APP_NAME')`
