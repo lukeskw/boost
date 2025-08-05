@@ -8,7 +8,6 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
 use Laravel\Boost\Install\ApplicationDetector;
 use Laravel\Boost\Install\Cli\DisplayHelper;
@@ -77,7 +76,7 @@ class InstallCommand extends Command
         $this->idesToInstallTo = collect();
         $this->roster = $roster;
         $this->herd = $herd;
-        $this->appDetector = new ApplicationDetector();
+        $this->appDetector = new ApplicationDetector;
 
         $this->colors = new class
         {
@@ -108,7 +107,7 @@ class InstallCommand extends Command
         $this->boostToInstall = $this->boostToInstall();
         //        $this->boostToolsToDisable = $this->boostToolsToDisable(); // Not useful to start
 
-//        $this->projectPurpose = $this->projectPurpose();
+        //        $this->projectPurpose = $this->projectPurpose();
         $this->enforceTests = $this->shouldEnforceTests(ask: false);
 
         $this->idesToInstallTo = $this->idesToInstallTo(); // To add boost:mcp to the correct file
@@ -278,7 +277,7 @@ HEADER;
     {
         $agents = [];
         $projectAgents = $this->appDetector->detectInProject(base_path());
-        
+
         // Map IDE detections to their corresponding agents
         $ideToAgentMap = [
             'phpstorm' => 'junie',
@@ -287,20 +286,20 @@ HEADER;
             'windsurf' => 'windsurf',
             'copilot' => 'copilot',
         ];
-        
+
         foreach ($projectAgents as $app) {
             if (isset($ideToAgentMap[$app])) {
                 $agents[] = $ideToAgentMap[$app];
             }
         }
-        
+
         // Also check installed IDEs that might not have project files yet
         foreach ($this->installedIdes as $ide) {
-            if (isset($ideToAgentMap[$ide]) && !in_array($ideToAgentMap[$ide], $agents)) {
+            if (isset($ideToAgentMap[$ide]) && ! in_array($ideToAgentMap[$ide], $agents)) {
                 $agents[] = $ideToAgentMap[$ide];
             }
         }
-        
+
         return array_unique($agents);
     }
 
@@ -391,7 +390,7 @@ HEADER;
 
         // Filter agents to only show those that are installed (for Windsurf)
         $filteredAgents = $agents;
-        if (!in_array('windsurf', $this->installedIdes) && !in_array('windsurf', $this->detectedProjectAgents)) {
+        if (! in_array('windsurf', $this->installedIdes) && ! in_array('windsurf', $this->detectedProjectAgents)) {
             unset($filteredAgents['Laravel\\Boost\\Install\\Agents\\Windsurf']);
         }
 
@@ -515,7 +514,7 @@ HEADER;
             $this->newLine();
         }
 
-//        $updated = $this->updateProjectPurposeInConfig($configPath, $this->projectPurpose);
+        //        $updated = $this->updateProjectPurposeInConfig($configPath, $this->projectPurpose);
     }
 
     protected function updateProjectPurposeInConfig(string $configPath, ?string $purpose): bool

@@ -10,7 +10,7 @@ class ApplicationDetector
 {
     /**
      * Application detection configurations for each platform.
-     * 
+     *
      * @var array<string, array<string, array<string, string|array<string>>>>
      */
     protected array $detectionConfig = [
@@ -114,7 +114,7 @@ class ApplicationDetector
 
     /**
      * Project-specific detection patterns.
-     * 
+     *
      * @var array<string, array<string, string|array<string>>>
      */
     protected array $projectDetectionConfig = [
@@ -147,7 +147,7 @@ class ApplicationDetector
 
     /**
      * Detect installed applications on the current platform.
-     * 
+     *
      * @return array<string>
      */
     public function detectInstalled(): array
@@ -155,7 +155,7 @@ class ApplicationDetector
         $platform = $this->getPlatform();
         $detected = [];
 
-        if (!isset($this->detectionConfig[$platform])) {
+        if (! isset($this->detectionConfig[$platform])) {
             return [];
         }
 
@@ -170,8 +170,7 @@ class ApplicationDetector
 
     /**
      * Detect applications used in the current project.
-     * 
-     * @param string $basePath
+     *
      * @return array<string>
      */
     public function detectInProject(string $basePath): array
@@ -189,10 +188,8 @@ class ApplicationDetector
 
     /**
      * Check if an application is installed based on its configuration.
-     * 
-     * @param array<string, string|array<string>> $config
-     * @param string $platform
-     * @return bool
+     *
+     * @param  array<string, string|array<string>>  $config
      */
     protected function isAppInstalled(array $config, string $platform): bool
     {
@@ -203,11 +200,11 @@ class ApplicationDetector
         if ($config['type'] === 'directory' && isset($config['paths'])) {
             foreach ($config['paths'] as $path) {
                 $expandedPath = $this->expandPath($path, $platform);
-                
+
                 // Handle wildcards
                 if (strpos($expandedPath, '*') !== false) {
                     $matches = glob($expandedPath, GLOB_ONLYDIR);
-                    if (!empty($matches)) {
+                    if (! empty($matches)) {
                         return true;
                     }
                 } elseif (is_dir($expandedPath)) {
@@ -221,16 +218,14 @@ class ApplicationDetector
 
     /**
      * Check if an application is used in the current project.
-     * 
-     * @param array<string, string|array<string>> $config
-     * @param string $basePath
-     * @return bool
+     *
+     * @param  array<string, string|array<string>>  $config
      */
     protected function isAppUsedInProject(array $config, string $basePath): bool
     {
         if ($config['type'] === 'directory' && isset($config['paths'])) {
             foreach ($config['paths'] as $path) {
-                if (is_dir($basePath . DIRECTORY_SEPARATOR . $path)) {
+                if (is_dir($basePath.DIRECTORY_SEPARATOR.$path)) {
                     return true;
                 }
             }
@@ -238,7 +233,7 @@ class ApplicationDetector
 
         if ($config['type'] === 'file' && isset($config['files'])) {
             foreach ($config['files'] as $file) {
-                if (file_exists($basePath . DIRECTORY_SEPARATOR . $file)) {
+                if (file_exists($basePath.DIRECTORY_SEPARATOR.$file)) {
                     return true;
                 }
             }
@@ -247,14 +242,14 @@ class ApplicationDetector
         if ($config['type'] === 'mixed') {
             if (isset($config['paths'])) {
                 foreach ($config['paths'] as $path) {
-                    if (is_dir($basePath . DIRECTORY_SEPARATOR . $path)) {
+                    if (is_dir($basePath.DIRECTORY_SEPARATOR.$path)) {
                         return true;
                     }
                 }
             }
             if (isset($config['files'])) {
                 foreach ($config['files'] as $file) {
-                    if (file_exists($basePath . DIRECTORY_SEPARATOR . $file)) {
+                    if (file_exists($basePath.DIRECTORY_SEPARATOR.$file)) {
                         return true;
                     }
                 }
@@ -266,10 +261,6 @@ class ApplicationDetector
 
     /**
      * Expand environment variables and user home directory in paths.
-     * 
-     * @param string $path
-     * @param string $platform
-     * @return string
      */
     protected function expandPath(string $path, string $platform): string
     {
@@ -293,8 +284,6 @@ class ApplicationDetector
 
     /**
      * Get the current platform identifier.
-     * 
-     * @return string
      */
     protected function getPlatform(): string
     {
@@ -307,11 +296,8 @@ class ApplicationDetector
 
     /**
      * Add custom detection configuration for an application.
-     * 
-     * @param string $app
-     * @param array<string, array<string, string|array<string>>> $config
-     * @param string|null $platform
-     * @return void
+     *
+     * @param  array<string, array<string, string|array<string>>>  $config
      */
     public function addDetectionConfig(string $app, array $config, ?string $platform = null): void
     {
@@ -327,10 +313,8 @@ class ApplicationDetector
 
     /**
      * Add custom project detection configuration for an application.
-     * 
-     * @param string $app
-     * @param array<string, string|array<string>> $config
-     * @return void
+     *
+     * @param  array<string, string|array<string>>  $config
      */
     public function addProjectDetectionConfig(string $app, array $config): void
     {
