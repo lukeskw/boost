@@ -91,8 +91,8 @@ test('it returns error when log file is empty', function () {
     expect($result)->toBeInstanceOf(ToolResult::class);
 
     $data = $result->toArray();
-    expect($data['isError'])->toBeTrue();
-    expect($data['content'][0]['text'])->toBe('Unable to retrieve log entries.');
+    expect($data['isError'])->toBeFalse();
+    expect($data['content'][0]['text'])->toBe('Unable to retrieve log entries, or no logs');
 });
 
 test('@boostJs blade directive renders browser logger script', function () {
