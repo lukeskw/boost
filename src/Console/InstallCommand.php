@@ -10,6 +10,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
+use Laravel\Boost\Install\ApplicationDetector;
 use Laravel\Boost\Install\Cli\DisplayHelper;
 use Laravel\Boost\Install\GuidelineComposer;
 use Laravel\Boost\Install\GuidelineConfig;
@@ -60,6 +61,8 @@ class InstallCommand extends Command
 
     protected Herd $herd;
 
+    protected ApplicationDetector $appDetector;
+
     private string $greenTick;
 
     private string $redCross;
@@ -74,6 +77,7 @@ class InstallCommand extends Command
         $this->idesToInstallTo = collect();
         $this->roster = $roster;
         $this->herd = $herd;
+        $this->appDetector = new ApplicationDetector();
 
         $this->colors = new class
         {
@@ -135,28 +139,7 @@ class InstallCommand extends Command
      */
     protected function detectInstalledIdes(): array
     {
-        $detected = [];
-
-        if (PHP_OS_FAMILY !== 'Windows') {
-            $macDetect = [
-                'phpstorm' => '/Applications/PhpStorm.app',
-                'cursor' => '/Applications/Cursor.app',
-                'zed' => '/Applications/Zed.app',
-                'vscode' => '/Applications/Visual Studio Code.app',
-            ];
-
-            foreach ($macDetect as $ideKey => $path) {
-                if (is_dir($path)) {
-                    $detected[] = $ideKey;
-                }
-            }
-
-            if (Process::run('which claude')->successful()) {
-                $detected[] = 'claudecode';
-            }
-        }
-
-        return $detected;
+        return $this->appDetector->detectInstalled();
     }
 
     /**
@@ -165,24 +148,7 @@ class InstallCommand extends Command
      */
     protected function detectIdesUsedInProject(): array
     {
-        $detected = [];
-        if (is_dir(base_path('.idea')) || is_dir(base_path('.junie'))) {
-            $detected[] = 'phpstorm';
-        }
-
-        if (is_dir(base_path('.vscode'))) {
-            $detected[] = 'vscode';
-        }
-
-        if (is_dir(base_path('.cursor'))) {
-            $detected[] = 'cursor';
-        }
-
-        if (file_exists(base_path('CLAUDE.md')) || is_dir(base_path('.claude'))) {
-            $detected[] = 'claudecode';
-        }
-
-        return $detected;
+        return $this->appDetector->detectInProject(base_path());
     }
 
     protected function discoverTools(): array
@@ -311,25 +277,31 @@ HEADER;
     protected function detectProjectAgents(): array
     {
         $agents = [];
-        if (file_exists(base_path('CLAUDE.md')) || is_dir(base_path('.claude'))) {
-            $agents[] = 'claudecode';
-        } elseif (Process::run('which claude')->successful()) {
-            $agents[] = 'claudecode';
+        $projectAgents = $this->appDetector->detectInProject(base_path());
+        
+        // Map IDE detections to their corresponding agents
+        $ideToAgentMap = [
+            'phpstorm' => 'junie',
+            'claudecode' => 'claudecode',
+            'cursor' => 'cursor',
+            'windsurf' => 'windsurf',
+            'copilot' => 'copilot',
+        ];
+        
+        foreach ($projectAgents as $app) {
+            if (isset($ideToAgentMap[$app])) {
+                $agents[] = $ideToAgentMap[$app];
+            }
         }
-
-        if (is_dir(base_path('.cursor')) || array_key_exists('cursor', $this->installedIdes)) {
-            $agents[] = 'cursor';
+        
+        // Also check installed IDEs that might not have project files yet
+        foreach ($this->installedIdes as $ide) {
+            if (isset($ideToAgentMap[$ide]) && !in_array($ideToAgentMap[$ide], $agents)) {
+                $agents[] = $ideToAgentMap[$ide];
+            }
         }
-
-        if (is_dir(base_path('.junie')) || array_key_exists('phpstorm', $this->installedIdes)) {
-            $agents[] = 'junie';
-        }
-
-        if (file_exists(base_path('.github/copilot-instructions.md'))) {
-            $agents[] = 'copilot';
-        }
-
-        return $agents;
+        
+        return array_unique($agents);
     }
 
     /**
@@ -417,6 +389,12 @@ HEADER;
 
         ksort($agents);
 
+        // Filter agents to only show those that are installed (for Windsurf)
+        $filteredAgents = $agents;
+        if (!in_array('windsurf', $this->installedIdes) && !in_array('windsurf', $this->detectedProjectAgents)) {
+            unset($filteredAgents['Laravel\\Boost\\Install\\Agents\\Windsurf']);
+        }
+
         // Map detected agent keys to class names
         $detectedClasses = [];
         foreach ($this->detectedProjectAgents as $agentKey) {
@@ -430,7 +408,7 @@ HEADER;
 
         $selectedAgentClasses = collect(multiselect(
             label: sprintf('Which agents need AI guidelines for %s?', $this->projectName),
-            options: $agents,
+            options: $filteredAgents,
             default: $detectedClasses,
             scroll: 4,
         ))->sort();
