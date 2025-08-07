@@ -30,3 +30,6 @@
 
 ## Vite Error
 - If you receive an "Illuminate\Foundation\ViteException: Unable to locate file in Vite manifest" error, you can run `npm run build` or ask the user to run `npm run dev` or `composer run dev`.
+
+## URL Generation
+- When generating links to other pages, always prefer named routes and the `route()` function.
