@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Laravel\Boost\Contracts;
 
 // We install the MCP server into Ides
