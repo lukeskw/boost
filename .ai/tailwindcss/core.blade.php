@@ -1,0 +1,1 @@
+- If existing pages and components support dark mode, new pages and components must support dark mode in a similar way.
