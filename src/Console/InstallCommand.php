@@ -47,7 +47,7 @@ class InstallCommand extends Command
     /** @var Collection<int, \Laravel\Boost\Contracts\Ide> */
     protected Collection $idesToInstallTo;
 
-    protected array $boostToInstall = [];
+    protected Collection $boostToInstall;
 
     protected array $boostToolsToDisable = [];
 
@@ -192,9 +192,43 @@ HEADER;
 
     private function outro(): void
     {
-        $text = 'Enjoy the boost 🚀 https://boost.laravel.com/installed';
-        $padding = (int) (floor(($this->terminal->cols() - mb_strlen($text)) / 2)) - 2;
-        echo ' '.$this->colors->bgGreen($this->colors->black($this->colors->bold(str_repeat(' ', $padding).$text.str_repeat(' ', $padding)))).PHP_EOL;
+        $label = 'https://boost.laravel.com/installed';
+
+        // Build install data - CSV format with type prefixes
+        $data = [];
+
+        $ideNames = $this->idesToInstallTo->map(fn ($ide) => 'i:'.class_basename($ide))->toArray();
+        $agentNames = $this->agentsToInstallTo->map(fn ($agent) => 'a:'.class_basename($agent))->toArray();
+        $boostFeatures = $this->boostToInstall->map(fn ($feature) => 'b:'.$feature)->toArray();
+
+        // Guidelines installed (prefix: g)
+        $guidelines = [];
+        if ($this->installingGuidelines()) {
+            $guidelines[] = 'g:ai';
+        }
+
+        if ($this->installingStyleGuidelines()) {
+            $guidelines[] = 'g:style';
+        }
+
+        // Combine all data
+        $allData = array_merge($ideNames, $agentNames, $boostFeatures, $guidelines);
+
+        // Create compact CSV string and base64 encode
+        $trackingData = base64_encode(implode(',', $allData));
+
+        $link = $this->hyperlink($label, 'https://boost.laravel.com/installed/?d='.$trackingData);
+
+        $text = 'Enjoy the boost 🚀 ';
+        $paddingLength = (int) (floor(($this->terminal->cols() - mb_strlen($text.$label)) / 2)) - 2;
+
+        echo "\033[42m\033[2K".str_repeat(' ', $paddingLength); // Make the entire line have a green background
+        echo $this->colors->black($this->colors->bold($text.$link)).PHP_EOL;
+    }
+
+    private function hyperlink(string $label, string $url): string
+    {
+        return "\033]8;;{$url}\007{$label}\033]8;;\033\\";
     }
 
     protected function projectPurpose(): string
@@ -235,7 +269,7 @@ HEADER;
     /**
      * @return array<int, string>
      */
-    protected function boostToInstall(): array
+    protected function boostToInstall(): Collection
     {
         $defaultToInstallOptions = ['mcp_server', 'ai_guidelines'];
         $toInstallOptions = [
@@ -248,13 +282,13 @@ HEADER;
             $toInstallOptions['herd_mcp'] = 'Herd MCP Server';
         }
 
-        return multiselect(
+        return collect(multiselect(
             label: 'What shall we install?',
             options: $toInstallOptions,
             default: $defaultToInstallOptions,
             required: true,
             hint: 'Style guidelines are best for new projects',
-        );
+        ));
     }
 
     /**
@@ -477,22 +511,22 @@ HEADER;
 
     protected function installingGuidelines(): bool
     {
-        return in_array('ai_guidelines', $this->boostToInstall, true);
+        return $this->boostToInstall->contains('ai_guidelines');
     }
 
     protected function installingStyleGuidelines(): bool
     {
-        return in_array('style_guidelines', $this->boostToInstall, true);
+        return $this->boostToInstall->contains('style_guidelines');
     }
 
     protected function installingMcp(): bool
     {
-        return in_array('mcp_server', $this->boostToInstall, true);
+        return $this->boostToInstall->contains('mcp_server');
     }
 
     protected function installingHerdMcp(): bool
     {
-        return in_array('herd_mcp', $this->boostToInstall, true);
+        return $this->boostToInstall->contains('herd_mcp');
     }
 
     protected function publishAndUpdateConfig(): void
