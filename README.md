@@ -37,6 +37,13 @@ Install the MCP server & guidelines
 ./artisan boost:install
 ```
 
+You're ready to go!
+
+You can optionally publish the Boost config:
+```bash
+TODO: the command that allows that
+```
+
 ## Current MCP Tools
 
 | Name                       | Notes                                                        |

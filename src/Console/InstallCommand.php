@@ -125,12 +125,6 @@ class InstallCommand extends Command
         if (($this->installingMcp() || $this->installingHerdMcp()) && $this->idesToInstallTo->isNotEmpty()) {
             $this->enactMcpServers();
         }
-
-        //        $this->newLine();
-        //        $this->line('Add Boost MCP manually if needed:'); // some ides require absolute
-        //        DisplayHelper::datatable([['Command', base_path('artisan')], ['Args', 'boost:mcp']], $this->terminal->cols());
-
-        $this->publishAndUpdateConfig();
     }
 
     /**
