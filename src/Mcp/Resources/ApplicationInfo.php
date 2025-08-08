@@ -10,7 +10,9 @@ use Laravel\Mcp\Server\Resource;
 
 class ApplicationInfo extends Resource
 {
-    public function __construct(protected ToolExecutor $toolExecutor) {}
+    public function __construct(protected ToolExecutor $toolExecutor)
+    {
+    }
 
     public function description(): string
     {
