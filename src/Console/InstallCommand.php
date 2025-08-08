@@ -261,7 +261,7 @@ HEADER;
     }
 
     /**
-     * @return array<int, string>
+     * @return Collection<int, string>
      */
     protected function boostToInstall(): Collection
     {

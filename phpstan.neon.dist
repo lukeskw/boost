@@ -3,8 +3,4 @@ parameters:
     - config
     - src
 
-  excludePaths:
-    - mentions.php
-    - src/Console/AssistCommand.php
-
   level: 5
