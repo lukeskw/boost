@@ -10,7 +10,7 @@ class ToolRegistry
     private static ?array $cachedTools = null;
 
     /**
-     * Get all available tools based on the discovery logic from Boost server
+     * Get all available tools based on the discovery logic from Boost server.
      *
      * @return array<int, class-string>
      */
@@ -49,7 +49,7 @@ class ToolRegistry
     }
 
     /**
-     * Check if a tool class is allowed to be executed
+     * Check if a tool class is allowed to be executed.
      */
     public static function isToolAllowed(string $toolClass): bool
     {
@@ -57,7 +57,7 @@ class ToolRegistry
     }
 
     /**
-     * Clear the cached tools (useful for testing or when configuration changes)
+     * Clear the cached tools (useful for testing or when configuration changes).
      */
     public static function clearCache(): void
     {
@@ -65,7 +65,7 @@ class ToolRegistry
     }
 
     /**
-     * Get tool names (class basenames) mapped to their full class names
+     * Get tool names (class basenames) mapped to their full class names.
      *
      * @return array<string, class-string>
      */

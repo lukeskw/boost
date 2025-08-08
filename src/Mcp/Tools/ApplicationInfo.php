@@ -17,7 +17,9 @@ use Symfony\Component\Finder\Finder;
 #[IsReadOnly]
 class ApplicationInfo extends Tool
 {
-    public function __construct(protected Roster $roster) {}
+    public function __construct(protected Roster $roster)
+    {
+    }
 
     public function description(): string
     {
@@ -44,7 +46,7 @@ class ApplicationInfo extends Tool
     }
 
     /**
-     * Discover all Eloquent models in the application
+     * Discover all Eloquent models in the application.
      *
      * @return array<string, string>
      */

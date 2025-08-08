@@ -17,7 +17,7 @@ class ToolExecutor
     }
 
     /**
-     * Execute a tool with the given arguments
+     * Execute a tool with the given arguments.
      *
      * @param  array<string, mixed>  $arguments
      */
@@ -35,7 +35,7 @@ class ToolExecutor
     }
 
     /**
-     * Execute tool in a separate process for isolation
+     * Execute tool in a separate process for isolation.
      *
      * @param  array<string, mixed>  $arguments
      */
@@ -78,7 +78,7 @@ class ToolExecutor
     }
 
     /**
-     * Execute tool inline (current process)
+     * Execute tool inline (current process).
      *
      * @param  array<string, mixed>  $arguments
      */
@@ -94,7 +94,7 @@ class ToolExecutor
     }
 
     /**
-     * Check if process isolation should be used
+     * Check if process isolation should be used.
      */
     protected function shouldUseProcessIsolation(): bool
     {
@@ -107,7 +107,7 @@ class ToolExecutor
     }
 
     /**
-     * Get the execution timeout
+     * Get the execution timeout.
      */
     protected function getTimeout(): int
     {
@@ -115,7 +115,7 @@ class ToolExecutor
     }
 
     /**
-     * Reconstruct a ToolResult from JSON data
+     * Reconstruct a ToolResult from JSON data.
      *
      * @param  array<string, mixed>  $data
      */

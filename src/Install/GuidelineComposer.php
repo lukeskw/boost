@@ -32,7 +32,7 @@ class GuidelineComposer
     }
 
     /**
-     * Auto discovers the guideline files and composes them into one string
+     * Auto discovers the guideline files and composes them into one string.
      */
     public function compose(): string
     {
@@ -62,7 +62,7 @@ class GuidelineComposer
     }
 
     /**
-     * Key is the 'guideline key' and value is the rendered blade
+     * Key is the 'guideline key' and value is the rendered blade.
      *
      * @return \Illuminate\Support\Collection<string, string>
      */
