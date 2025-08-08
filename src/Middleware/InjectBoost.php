@@ -6,6 +6,7 @@ namespace Laravel\Boost\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Laravel\Boost\Services\BrowserLogger;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -13,13 +14,17 @@ class InjectBoost
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // \Illuminate\Http\JsonResponse
         /** @var \Symfony\Component\HttpFoundation\Response $response */
         $response = $next($request);
 
         if ($this->shouldInject($response->getContent())) {
+            $originalView = $response->original ?? null;
             $injectedContent = $this->injectScript($response->getContent());
             $response->setContent($injectedContent);
+
+            if ($originalView instanceof View) {
+                $response->original = $originalView;
+            }
         }
 
         return $response;
