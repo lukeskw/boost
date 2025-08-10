@@ -42,8 +42,8 @@ class GuidelineComposer
     /**
      * Static method to compose guidelines from a collection.
      * Can be used without Laravel dependencies.
-     * 
-     * @param Collection<string, string> $guidelines
+     *
+     * @param  Collection<string, string>  $guidelines
      */
     public static function composeGuidelines(Collection $guidelines): string
     {
