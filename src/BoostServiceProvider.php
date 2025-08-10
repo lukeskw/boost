@@ -142,7 +142,7 @@ class BoostServiceProvider extends ServiceProvider
      * "data":[
      * {"message":"Unhandled Promise Rejection","reason":{"name":"TypeError","message":"NetworkError when attempting to fetch resource.","stack":""}}]
      *
-     * @param  array<mixed>  $data
+     * @param array<mixed> $data
      */
     protected function buildLogMessageFromData(array $data): string
     {
@@ -176,7 +176,7 @@ class BoostServiceProvider extends ServiceProvider
     /**
      * Register a Blade directive for the browser logger script.
      *
-     * @param  BladeCompiler  $bladeCompiler
+     * @param BladeCompiler $bladeCompiler
      */
     protected function registerBladeDirectives(BladeCompiler $bladeCompiler): void
     {
