@@ -124,7 +124,7 @@ class BoostServiceProvider extends ServiceProvider
                     level: $this->mapJsTypeToPsr3Level($log['type']),
                     message: $this->buildLogMessageFromData($log['data']),
                     context: [
-                    'url' => $log['url'],
+                        'url' => $log['url'],
                         'user_agent' => $log['userAgent'] ?: null,
                         'timestamp' => $log['timestamp'] ?: now()->toIso8601String(),
                     ]
@@ -133,8 +133,8 @@ class BoostServiceProvider extends ServiceProvider
 
             return response()->json(['status' => 'logged']);
         })
-        ->name('boost.browser-logs')
-        ->withoutMiddleware(VerifyCsrfToken::class);
+            ->name('boost.browser-logs')
+            ->withoutMiddleware(VerifyCsrfToken::class);
     }
 
     /**
@@ -142,7 +142,7 @@ class BoostServiceProvider extends ServiceProvider
      * "data":[
      * {"message":"Unhandled Promise Rejection","reason":{"name":"TypeError","message":"NetworkError when attempting to fetch resource.","stack":""}}]
      *
-     * @param array<mixed> $data
+     * @param  array<mixed>  $data
      */
     protected function buildLogMessageFromData(array $data): string
     {
@@ -174,13 +174,13 @@ class BoostServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register a Blade directive for the browser logger script
+     * Register a Blade directive for the browser logger script.
      *
-     * @param BladeCompiler $bladeCompiler
+     * @param  BladeCompiler  $bladeCompiler
      */
     protected function registerBladeDirectives(BladeCompiler $bladeCompiler): void
     {
-        $bladeCompiler->directive('boostJs', fn() => '<?php echo \\Laravel\\Boost\\Services\\BrowserLogger::getScript(); ?>');
+        $bladeCompiler->directive('boostJs', fn () => '<?php echo \\Laravel\\Boost\\Services\\BrowserLogger::getScript(); ?>');
     }
 
     private function mapJsTypeToPsr3Level(string $type): string
@@ -198,7 +198,7 @@ class BoostServiceProvider extends ServiceProvider
 
     private function hookIntoResponses(Router $router): void
     {
-        if (config('boost.browser_logs', true) === false) {
+        if (! config('boost.boost_browser_logs_watcher', true)) {
             return;
         }
 
