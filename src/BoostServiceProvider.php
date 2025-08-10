@@ -198,7 +198,7 @@ class BoostServiceProvider extends ServiceProvider
 
     private function hookIntoResponses(Router $router): void
     {
-        if (config('boost.browser_logs', true) === false) {
+        if (! config('boost.browser_logs_watcher', true)) {
             return;
         }
 

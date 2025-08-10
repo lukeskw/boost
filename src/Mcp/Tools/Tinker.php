@@ -32,7 +32,7 @@ class Tinker extends Tool
     }
 
     /**
-     * @param  array<string|int>  $arguments
+     * @param array<string|int> $arguments
      */
     public function handle(array $arguments): ToolResult
     {

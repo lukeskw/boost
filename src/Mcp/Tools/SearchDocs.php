@@ -46,7 +46,7 @@ class SearchDocs extends Tool
     }
 
     /**
-     * @param  array<string, mixed>  $arguments
+     * @param array<string, mixed> $arguments
      */
     public function handle(array $arguments): ToolResult|Generator
     {
