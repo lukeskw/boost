@@ -7,7 +7,7 @@ namespace Laravel\Boost\Install\Cli;
 class DisplayHelper
 {
     /**
-     * @param  array<int, array<int|string, mixed>>  $data
+     * @param array<int, array<int|string, mixed>> $data
      */
     public static function datatable(array $data, int $cols = 80): void
     {
@@ -96,7 +96,7 @@ class DisplayHelper
     }
 
     /**
-     * @param  array<int, string>  $items
+     * @param array<int, string> $items
      */
     public static function grid(array $items, int $cols = 80): void
     {
