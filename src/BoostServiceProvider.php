@@ -79,7 +79,7 @@ class BoostServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__.'/../config/boost.php' => config_path('boost.php'),
-            ], ['boost-config', 'config']);
+            ], 'boost-config');
         }
     }
 
