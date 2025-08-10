@@ -69,11 +69,6 @@ class BoostServiceProvider extends ServiceProvider
         $this->hookIntoResponses($router);
     }
 
-    /**
-     * Setup the resource publishing groups for Boost.
-     *
-     * @return void
-     */
     protected function registerPublishing(): void
     {
         if ($this->app->runningInConsole()) {
@@ -83,11 +78,6 @@ class BoostServiceProvider extends ServiceProvider
         }
     }
 
-    /**
-     * Register the Boost Artisan commands.
-     *
-     * @return void
-     */
     protected function registerCommands(): void
     {
         if ($this->app->runningInConsole()) {
@@ -99,11 +89,6 @@ class BoostServiceProvider extends ServiceProvider
         }
     }
 
-    /**
-     * Register the Boost routes.
-     *
-     * @return void
-     */
     private function registerRoutes(): void
     {
         Route::post('/_boost/browser-logs', function (Request $request) {
@@ -173,11 +158,6 @@ class BoostServiceProvider extends ServiceProvider
         ]);
     }
 
-    /**
-     * Register a Blade directive for the browser logger script.
-     *
-     * @param BladeCompiler $bladeCompiler
-     */
     protected function registerBladeDirectives(BladeCompiler $bladeCompiler): void
     {
         $bladeCompiler->directive('boostJs', fn () => '<?php echo \\Laravel\\Boost\\Services\\BrowserLogger::getScript(); ?>');
