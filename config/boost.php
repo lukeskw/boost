@@ -13,6 +13,6 @@ return [
     | functionality which simply provides a single and convenient way to
     | enable or disable browser logs functionality in Boost.
     */
-    
+
     'browser_logs_watcher' => env('BOOST_BROWSER_LOGS_WATCHER', true),
 ];
