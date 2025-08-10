@@ -36,7 +36,18 @@ class GuidelineComposer
      */
     public function compose(): string
     {
-        return $this->guidelines()
+        return self::composeGuidelines($this->guidelines());
+    }
+
+    /**
+     * Static method to compose guidelines from a collection.
+     * Can be used without Laravel dependencies.
+     * 
+     * @param Collection<string, string> $guidelines
+     */
+    public static function composeGuidelines(Collection $guidelines): string
+    {
+        return $guidelines
             ->map(fn ($content, $key) => "\n=== {$key} ===\n\n{$content}")
             ->join("\n\n");
     }
@@ -182,9 +193,11 @@ class GuidelineComposer
         // Read the file content
         $content = file_get_contents($path);
 
-        // Temporarily replace backticks with placeholders before Blade processing so we support inline code
+        // Temporarily replace backticks and PHP opening tags with placeholders before Blade processing
+        // This prevents Blade from trying to execute PHP code examples and supports inline code
         $placeholders = [
             '`' => '___SINGLE_BACKTICK___',
+            '<?php' => '___OPEN_PHP_TAG___',
         ];
 
         $content = str_replace(array_keys($placeholders), array_values($placeholders), $content);
