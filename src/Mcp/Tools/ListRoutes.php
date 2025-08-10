@@ -37,7 +37,7 @@ class ListRoutes extends Tool
     }
 
     /**
-     * @param  array<string>  $arguments
+     * @param array<string> $arguments
      */
     public function handle(array $arguments): ToolResult
     {
@@ -79,7 +79,7 @@ class ListRoutes extends Tool
     }
 
     /**
-     * @param  array<string|bool>  $options
+     * @param array<string|bool> $options
      */
     private function artisan(string $command, array $options = []): string
     {

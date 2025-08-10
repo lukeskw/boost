@@ -111,7 +111,7 @@
         "phpdoc_align": {
             "align": "left",
             "spacing": {
-                "param": 2
+                "param": 1
             }
         },
         "phpdoc_indent": true,

@@ -189,7 +189,7 @@ class ApplicationDetector
     /**
      * Check if an application is installed based on its configuration.
      *
-     * @param  array<string, string|array<string>>  $config
+     * @param array<string, string|array<string>> $config
      */
     protected function isAppInstalled(array $config, string $platform): bool
     {
@@ -219,7 +219,7 @@ class ApplicationDetector
     /**
      * Check if an application is used in the current project.
      *
-     * @param  array<string, string|array<string>>  $config
+     * @param array<string, string|array<string>> $config
      */
     protected function isAppUsedInProject(array $config, string $basePath): bool
     {
@@ -297,7 +297,7 @@ class ApplicationDetector
     /**
      * Add custom detection configuration for an application.
      *
-     * @param  array<string, array<string, string|array<string>>>  $config
+     * @param array<string, array<string, string|array<string>>> $config
      */
     public function addDetectionConfig(string $app, array $config, ?string $platform = null): void
     {
@@ -314,7 +314,7 @@ class ApplicationDetector
     /**
      * Add custom project detection configuration for an application.
      *
-     * @param  array<string, string|array<string>>  $config
+     * @param array<string, string|array<string>> $config
      */
     public function addProjectDetectionConfig(string $app, array $config): void
     {
