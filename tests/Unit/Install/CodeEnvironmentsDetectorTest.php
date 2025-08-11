@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-use Laravel\Boost\Install\CodeEnvironementsDetector;
 use Laravel\Boost\Install\CodeEnvironment\CodeEnvironment;
+use Laravel\Boost\Install\CodeEnvironmentsDetector;
 use Laravel\Boost\Install\Enums\Platform;
 
 beforeEach(function () {
     $this->container = new \Illuminate\Container\Container();
-    $this->detector = new CodeEnvironementsDetector($this->container);
+    $this->detector = new CodeEnvironmentsDetector($this->container);
 });
 
 afterEach(function () {
     Mockery::close();
 });
 
-test('discoverSystemInstalledCodeEnvironements returns detected programs', function () {
+test('discoverSystemInstalledCodeEnvironments returns detected programs', function () {
     // Create mock programs
     $program1 = Mockery::mock(CodeEnvironment::class);
     $program1->shouldReceive('detectOnSystem')->with(Mockery::type(Platform::class))->andReturn(true);
@@ -44,13 +44,13 @@ test('discoverSystemInstalledCodeEnvironements returns detected programs', funct
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\Zed::class, fn () => $otherProgram);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\Copilot::class, fn () => $otherProgram);
 
-    $detector = new CodeEnvironementsDetector($container);
-    $detected = $detector->discoverSystemInstalledCodeEnvironements();
+    $detector = new CodeEnvironmentsDetector($container);
+    $detected = $detector->discoverSystemInstalledCodeEnvironments();
 
     expect($detected)->toBe(['phpstorm', 'cursor']);
 });
 
-test('discoverSystemInstalledCodeEnvironements returns empty array when no programs detected', function () {
+test('discoverSystemInstalledCodeEnvironments returns empty array when no programs detected', function () {
     $program1 = Mockery::mock(CodeEnvironment::class);
     $program1->shouldReceive('detectOnSystem')->with(Mockery::type(Platform::class))->andReturn(false);
     $program1->shouldReceive('name')->andReturn('phpstorm');
@@ -70,13 +70,13 @@ test('discoverSystemInstalledCodeEnvironements returns empty array when no progr
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\Zed::class, fn () => $otherProgram);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\Copilot::class, fn () => $otherProgram);
 
-    $detector = new CodeEnvironementsDetector($container);
-    $detected = $detector->discoverSystemInstalledCodeEnvironements();
+    $detector = new CodeEnvironmentsDetector($container);
+    $detected = $detector->discoverSystemInstalledCodeEnvironments();
 
     expect($detected)->toBeEmpty();
 });
 
-test('discoverProjectInstalledCodeEnvironements detects programs in project', function () {
+test('discoverProjectInstalledCodeEnvironments detects programs in project', function () {
     $basePath = '/path/to/project';
 
     $program1 = Mockery::mock(CodeEnvironment::class);
@@ -97,13 +97,13 @@ test('discoverProjectInstalledCodeEnvironements detects programs in project', fu
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\PhpStorm::class, fn () => $program2);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\ClaudeCode::class, fn () => $program3);
 
-    $detector = new CodeEnvironementsDetector($container);
-    $detected = $detector->discoverProjectInstalledCodeEnvironements($basePath);
+    $detector = new CodeEnvironmentsDetector($container);
+    $detected = $detector->discoverProjectInstalledCodeEnvironments($basePath);
 
     expect($detected)->toBe(['vscode', 'claudecode']);
 });
 
-test('discoverProjectInstalledCodeEnvironements returns empty array when no programs detected in project', function () {
+test('discoverProjectInstalledCodeEnvironments returns empty array when no programs detected in project', function () {
     $basePath = '/path/to/project';
 
     $program1 = Mockery::mock(CodeEnvironment::class);
@@ -114,18 +114,18 @@ test('discoverProjectInstalledCodeEnvironements returns empty array when no prog
     $container = new \Illuminate\Container\Container();
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\VSCode::class, fn () => $program1);
 
-    $detector = new CodeEnvironementsDetector($container);
-    $detected = $detector->discoverProjectInstalledCodeEnvironements($basePath);
+    $detector = new CodeEnvironmentsDetector($container);
+    $detected = $detector->discoverProjectInstalledCodeEnvironments($basePath);
 
     expect($detected)->toBeEmpty();
 });
 
-test('discoverProjectInstalledCodeEnvironements detects applications by directory', function () {
+test('discoverProjectInstalledCodeEnvironments detects applications by directory', function () {
     $tempDir = sys_get_temp_dir().'/boost_test_'.uniqid();
     mkdir($tempDir);
     mkdir($tempDir.'/.vscode');
 
-    $detected = $this->detector->discoverProjectInstalledCodeEnvironements($tempDir);
+    $detected = $this->detector->discoverProjectInstalledCodeEnvironments($tempDir);
 
     expect($detected)->toContain('vscode');
 
@@ -134,12 +134,12 @@ test('discoverProjectInstalledCodeEnvironements detects applications by director
     rmdir($tempDir);
 });
 
-test('discoverProjectInstalledCodeEnvironements detects applications by file', function () {
+test('discoverProjectInstalledCodeEnvironments detects applications by file', function () {
     $tempDir = sys_get_temp_dir().'/boost_test_'.uniqid();
     mkdir($tempDir);
     file_put_contents($tempDir.'/.windsurfrules.md', 'test');
 
-    $detected = $this->detector->discoverProjectInstalledCodeEnvironements($tempDir);
+    $detected = $this->detector->discoverProjectInstalledCodeEnvironments($tempDir);
 
     expect($detected)->toContain('windsurf');
 
@@ -148,12 +148,12 @@ test('discoverProjectInstalledCodeEnvironements detects applications by file', f
     rmdir($tempDir);
 });
 
-test('discoverProjectInstalledCodeEnvironements detects applications with mixed type', function () {
+test('discoverProjectInstalledCodeEnvironments detects applications with mixed type', function () {
     $tempDir = sys_get_temp_dir().'/boost_test_'.uniqid();
     mkdir($tempDir);
     file_put_contents($tempDir.'/CLAUDE.md', 'test');
 
-    $detected = $this->detector->discoverProjectInstalledCodeEnvironements($tempDir);
+    $detected = $this->detector->discoverProjectInstalledCodeEnvironments($tempDir);
 
     expect($detected)->toContain('claudecode');
 
@@ -162,13 +162,13 @@ test('discoverProjectInstalledCodeEnvironements detects applications with mixed 
     rmdir($tempDir);
 });
 
-test('discoverProjectInstalledCodeEnvironements detects copilot with nested file path', function () {
+test('discoverProjectInstalledCodeEnvironments detects copilot with nested file path', function () {
     $tempDir = sys_get_temp_dir().'/boost_test_'.uniqid();
     mkdir($tempDir);
     mkdir($tempDir.'/.github');
     file_put_contents($tempDir.'/.github/copilot-instructions.md', 'test');
 
-    $detected = $this->detector->discoverProjectInstalledCodeEnvironements($tempDir);
+    $detected = $this->detector->discoverProjectInstalledCodeEnvironments($tempDir);
 
     expect($detected)->toContain('copilot');
 
@@ -178,12 +178,12 @@ test('discoverProjectInstalledCodeEnvironements detects copilot with nested file
     rmdir($tempDir);
 });
 
-test('discoverProjectInstalledCodeEnvironements detects claude code with directory', function () {
+test('discoverProjectInstalledCodeEnvironments detects claude code with directory', function () {
     $tempDir = sys_get_temp_dir().'/boost_test_'.uniqid();
     mkdir($tempDir);
     mkdir($tempDir.'/.claude');
 
-    $detected = $this->detector->discoverProjectInstalledCodeEnvironements($tempDir);
+    $detected = $this->detector->discoverProjectInstalledCodeEnvironments($tempDir);
 
     expect($detected)->toContain('claudecode');
 
@@ -192,12 +192,12 @@ test('discoverProjectInstalledCodeEnvironements detects claude code with directo
     rmdir($tempDir);
 });
 
-test('discoverProjectInstalledCodeEnvironements detects phpstorm with idea directory', function () {
+test('discoverProjectInstalledCodeEnvironments detects phpstorm with idea directory', function () {
     $tempDir = sys_get_temp_dir().'/boost_test_'.uniqid();
     mkdir($tempDir);
     mkdir($tempDir.'/.idea');
 
-    $detected = $this->detector->discoverProjectInstalledCodeEnvironements($tempDir);
+    $detected = $this->detector->discoverProjectInstalledCodeEnvironments($tempDir);
 
     expect($detected)->toContain('phpstorm');
 
@@ -206,12 +206,12 @@ test('discoverProjectInstalledCodeEnvironements detects phpstorm with idea direc
     rmdir($tempDir);
 });
 
-test('discoverProjectInstalledCodeEnvironements detects phpstorm with junie directory', function () {
+test('discoverProjectInstalledCodeEnvironments detects phpstorm with junie directory', function () {
     $tempDir = sys_get_temp_dir().'/boost_test_'.uniqid();
     mkdir($tempDir);
     mkdir($tempDir.'/.junie');
 
-    $detected = $this->detector->discoverProjectInstalledCodeEnvironements($tempDir);
+    $detected = $this->detector->discoverProjectInstalledCodeEnvironments($tempDir);
 
     expect($detected)->toContain('phpstorm');
 
@@ -220,12 +220,12 @@ test('discoverProjectInstalledCodeEnvironements detects phpstorm with junie dire
     rmdir($tempDir);
 });
 
-test('discoverProjectInstalledCodeEnvironements detects cursor with cursor directory', function () {
+test('discoverProjectInstalledCodeEnvironments detects cursor with cursor directory', function () {
     $tempDir = sys_get_temp_dir().'/boost_test_'.uniqid();
     mkdir($tempDir);
     mkdir($tempDir.'/.cursor');
 
-    $detected = $this->detector->discoverProjectInstalledCodeEnvironements($tempDir);
+    $detected = $this->detector->discoverProjectInstalledCodeEnvironments($tempDir);
 
     expect($detected)->toContain('cursor');
 
@@ -234,14 +234,14 @@ test('discoverProjectInstalledCodeEnvironements detects cursor with cursor direc
     rmdir($tempDir);
 });
 
-test('discoverProjectInstalledCodeEnvironements handles multiple detections', function () {
+test('discoverProjectInstalledCodeEnvironments handles multiple detections', function () {
     $tempDir = sys_get_temp_dir().'/boost_test_'.uniqid();
     mkdir($tempDir);
     mkdir($tempDir.'/.vscode');
     mkdir($tempDir.'/.cursor');
     file_put_contents($tempDir.'/CLAUDE.md', 'test');
 
-    $detected = $this->detector->discoverProjectInstalledCodeEnvironements($tempDir);
+    $detected = $this->detector->discoverProjectInstalledCodeEnvironments($tempDir);
 
     expect($detected)->toContain('vscode');
     expect($detected)->toContain('cursor');

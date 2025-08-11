@@ -16,7 +16,7 @@ use Laravel\Boost\Install\CodeEnvironment\Windsurf;
 use Laravel\Boost\Install\CodeEnvironment\Zed;
 use Laravel\Boost\Install\Enums\Platform;
 
-class CodeEnvironementsDetector
+class CodeEnvironmentsDetector
 {
     /** @var array<string, class-string<CodeEnvironment>> */
     private array $programs = [
@@ -39,7 +39,7 @@ class CodeEnvironementsDetector
      *
      * @return array<string>
      */
-    public function discoverSystemInstalledCodeEnvironements(): array
+    public function discoverSystemInstalledCodeEnvironments(): array
     {
         $platform = Platform::current();
 
@@ -55,7 +55,7 @@ class CodeEnvironementsDetector
      *
      * @return array<string>
      */
-    public function discoverProjectInstalledCodeEnvironements(string $basePath): array
+    public function discoverProjectInstalledCodeEnvironments(string $basePath): array
     {
         return $this->getAllPrograms()
             ->filter(fn ($program) => $program->detectInProject($basePath))

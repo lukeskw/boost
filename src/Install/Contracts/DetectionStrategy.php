@@ -11,7 +11,7 @@ interface DetectionStrategy
     /**
      * Detect if the application is installed on the machine.
      *
-     * @param array $config
+     * @param array{command:string, ?files:array<string>, ?paths:array<string>} $config
      * @param ?Platform $platform
      * @return bool
      */

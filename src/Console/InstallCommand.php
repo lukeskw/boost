@@ -10,7 +10,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
 use Laravel\Boost\Install\Cli\DisplayHelper;
-use Laravel\Boost\Install\CodeEnvironementsDetector;
+use Laravel\Boost\Install\CodeEnvironmentsDetector;
 use Laravel\Boost\Install\GuidelineComposer;
 use Laravel\Boost\Install\GuidelineConfig;
 use Laravel\Boost\Install\GuidelineWriter;
@@ -32,7 +32,7 @@ class InstallCommand extends Command
 {
     use Colors;
 
-    private CodeEnvironementsDetector $codeEnvironmentsDetector;
+    private CodeEnvironmentsDetector $codeEnvironmentsDetector;
 
     private Herd $herd;
 
@@ -53,7 +53,7 @@ class InstallCommand extends Command
     private string $projectPurpose = '';
 
     /** @var array<non-empty-string> */
-    private array $systemInstalledCodeEnvironemnts = [];
+    private array $systemInstalledCodeEnvironments = [];
 
     private array $projectInstalledCodeEnvironments = [];
 
@@ -67,7 +67,7 @@ class InstallCommand extends Command
 
     private string $redCross;
 
-    public function handle(CodeEnvironementsDetector $codeEnvironmentsDetector, Herd $herd, Roster $roster, Terminal $terminal): void
+    public function handle(CodeEnvironmentsDetector $codeEnvironmentsDetector, Herd $herd, Roster $roster, Terminal $terminal): void
     {
         $this->bootstrapBoost($codeEnvironmentsDetector, $herd, $roster, $terminal);
 
@@ -78,7 +78,7 @@ class InstallCommand extends Command
         $this->outro();
     }
 
-    private function bootstrapBoost(CodeEnvironementsDetector $codeEnvironmentsDetector, Herd $herd, Roster $roster, Terminal $terminal): void
+    private function bootstrapBoost(CodeEnvironmentsDetector $codeEnvironmentsDetector, Herd $herd, Roster $roster, Terminal $terminal): void
     {
         $this->codeEnvironmentsDetector = $codeEnvironmentsDetector;
         $this->herd = $herd;
@@ -114,9 +114,10 @@ class InstallCommand extends Command
 
     private function discoverEnvironment(): void
     {
-        $this->systemInstalledCodeEnvironemnts = $this->discoverSystemInstalledCodeEnvironments();
-        $this->projectInstalledCodeEnvironments = $this->discoverProjectInstalledCodeEnvironemnts();
-        $this->projectInstalledAgents = $this->discoverProjectAgents();
+
+        $this->systemInstalledCodeEnvironments = $this->codeEnvironmentsDetector->discoverSystemInstalledCodeEnvironments();
+        $this->projectInstalledCodeEnvironments = $this->codeEnvironmentsDetector->discoverProjectInstalledCodeEnvironments(base_path());
+        $this->projectInstalledAgents = $this->codeEnvironmentsDetector->discoverProjectInstalledCodeEnvironments(base_path());
     }
 
     private function query()
@@ -143,23 +144,6 @@ class InstallCommand extends Command
         if (($this->installingMcp() || $this->installingHerdMcp()) && $this->idesToInstallTo->isNotEmpty()) {
             $this->enactMcpServers();
         }
-    }
-
-    /**
-     * Which IDEs are installed on this developer's machine?
-     */
-    private function discoverSystemInstalledCodeEnvironments(): array
-    {
-        return $this->codeEnvironmentsDetector->discoverSystemInstalledCodeEnvironements();
-    }
-
-    /**
-     * Specifically want to detect what's in use in _this_ project.
-     * Just because they have claude code installed doesn't mean they're using it.
-     */
-    private function discoverProjectInstalledCodeEnvironemnts(): array
-    {
-        return $this->codeEnvironmentsDetector->discoverProjectInstalledCodeEnvironements(base_path());
     }
 
     private function discoverTools(): array
@@ -303,7 +287,7 @@ class InstallCommand extends Command
     private function discoverProjectAgents(): array
     {
         $agents = [];
-        $projectAgents = $this->codeEnvironmentsDetector->discoverProjectInstalledCodeEnvironements(base_path());
+        $projectAgents = $this->codeEnvironmentsDetector->discoverProjectInstalledCodeEnvironments(base_path());
 
         // Map IDE detections to their corresponding agents
         $ideToAgentMap = [
@@ -321,7 +305,7 @@ class InstallCommand extends Command
         }
 
         // Also check installed IDEs that might not have project files yet
-        foreach ($this->systemInstalledCodeEnvironemnts as $ide) {
+        foreach ($this->systemInstalledCodeEnvironments as $ide) {
             if (isset($ideToAgentMap[$ide]) && ! in_array($ideToAgentMap[$ide], $agents)) {
                 $agents[] = $ideToAgentMap[$ide];
             }
@@ -417,7 +401,7 @@ class InstallCommand extends Command
 
         // Filter agents to only show those that are installed (for Windsurf)
         $filteredAgents = $agents;
-        if (! in_array('windsurf', $this->systemInstalledCodeEnvironemnts) && ! in_array('windsurf', $this->projectInstalledAgents)) {
+        if (! in_array('windsurf', $this->systemInstalledCodeEnvironments) && ! in_array('windsurf', $this->projectInstalledAgents)) {
             unset($filteredAgents['Laravel\\Boost\\Install\\Agents\\Windsurf']);
         }
 
