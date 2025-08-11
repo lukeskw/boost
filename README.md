@@ -1,4 +1,4 @@
-<p align="center"><img src="/art/boost.png" alt="Logo Laravel Boost"></p>
+<p align="center"><img src="/art/boost.svg" alt="Logo Laravel Boost"></p>
 
 <p align="center">
 <a href="https://github.com/laravel/boost/actions"><img src="https://github.com/laravel/boost/workflows/tests/badge.svg" alt="Build Status"></a>
