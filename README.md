@@ -7,23 +7,19 @@
 <a href="https://packagist.org/packages/laravel/boost"><img src="https://img.shields.io/packagist/l/boost" alt="License"></a>
 </p>
 
-> 1. Replace the `art/logo.svg` with the new package logo
-> 2. Replace the `public/favicon.ico` with the new package favicon (optional)
-> 3. Write a great README
-
 ## Introduction
 Laravel Boost gives you a jump-start with AI assisted coding by making it simple to add everything you need to help AI make good choices.
 
 Core features:
 - MCP server with 15+ tools
 - Composable AI guidelines for ecosystem packages
-- Documentation API with built-in MCP tool
+- Documentation API with built-in MCP tool, over 15, 000 pieces of knowledge, and semantic search with embeddings
 
 Other features:
 - Browser logs streamed to `log/storage/browser.log`
 
 > [!IMPORTANT]
-> Boost is in Beta and will be updated frequently.
+> Boost is in Beta and will be updated frequently. We need your feedback to make it incredible.
 
 ## Installation
 
@@ -39,12 +35,7 @@ php artisan boost:install
 
 You're ready to go!
 
-You can optionally publish the Boost config:
-```bash
-TODO: the command that allows that
-```
-
-## Current MCP Tools
+## Available MCP Tools
 
 | Name                       | Notes                                                                                                          |
 | -------------------------- |----------------------------------------------------------------------------------------------------------------|
@@ -65,10 +56,46 @@ TODO: the command that allows that
 | Search Docs                | Use hosted API service to retrieve docs based on installed packages                                            |
 | Tinker                     | Run arbitrary code within the context of the project                                                           |
 
+## Available AI Guidelines
+
+| Package | Versions Supported |
+|---------|-------------------|
+| Core & Boost | core |
+| Laravel Framework | core, v10, v11, v12 |
+| Livewire | core, v2, v3 |
+| Flux UI | core, free, pro |
+| Herd | core |
+| Filament | core, v3, v4 |
+| Inertia Laravel | core, v1, v2 |
+| Inertia React | core, v1, v2 |
+| Inertia Vue | core, v1, v2 |
+| Pest | core, v4 |
+| PHPUnit | core |
+| Pint | core |
+| TailwindCSS | core, v3, v4 |
+| Livewire Volt | core |
+| Laravel Folio | core |
+| Enforce tests | conditional |
+
+
+## Available documentation
+
+| Package | Versions Supported |
+|---------|-------------------|
+| Laravel Framework | v10, v11, v12 |
+| Filament | v3, v4 |
+| Flux UI | v2 Free, v2 Pro |
+| Inertia | v1, v2 |
+| Livewire | v1, v2, v3 |
+| Pest | v3, v4 |
+
 
 ## Adding your own AI guidelines
 
-Add `.blade.php` files to `.ai/guidelines/*` in your project, and they'll be included as part of `boost:install`.
+Add `.blade.php` files to `.ai/guidelines/*` in your project, and they'll be included with Boost guidelines when you run `boost:install`.
+
+## Adding Boost MCP manually
+
 
 ## Official Documentation
 
