@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Install\CodeEnvironment;
 
-use Laravel\Boost\Install\Enums\DetectionType;
 use Laravel\Boost\Install\Enums\Platform;
 
 class Zed extends CodeEnvironment
@@ -24,7 +23,6 @@ class Zed extends CodeEnvironment
         return match ($platform) {
             Platform::Darwin => [
                 'paths' => ['/Applications/Zed.app'],
-                'type' => DetectionType::Directory,
             ],
             Platform::Linux => [
                 'paths' => [
@@ -32,14 +30,12 @@ class Zed extends CodeEnvironment
                     '/usr/local/bin/zed',
                     '~/.local/bin/zed',
                 ],
-                'type' => DetectionType::Directory,
             ],
             Platform::Windows => [
                 'paths' => [
                     '%ProgramFiles%\\Zed',
                     '%LOCALAPPDATA%\\Programs\\Zed',
                 ],
-                'type' => DetectionType::Directory,
             ],
         };
     }
@@ -48,7 +44,6 @@ class Zed extends CodeEnvironment
     {
         return [
             'paths' => ['.zed'],
-            'type' => DetectionType::Directory,
         ];
     }
 

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Install\CodeEnvironment;
 
-use Laravel\Boost\Install\Enums\DetectionType;
 use Laravel\Boost\Install\Enums\Platform;
 
 class VSCode extends CodeEnvironment
@@ -24,18 +23,15 @@ class VSCode extends CodeEnvironment
         return match ($platform) {
             Platform::Darwin => [
                 'paths' => ['/Applications/Visual Studio Code.app'],
-                'type' => DetectionType::Directory,
             ],
             Platform::Linux => [
                 'command' => 'which code',
-                'type' => DetectionType::Command,
             ],
             Platform::Windows => [
                 'paths' => [
                     '%ProgramFiles%\\Microsoft VS Code',
                     '%LOCALAPPDATA%\\Programs\\Microsoft VS Code',
                 ],
-                'type' => DetectionType::Directory,
             ],
         };
     }
@@ -44,7 +40,6 @@ class VSCode extends CodeEnvironment
     {
         return [
             'paths' => ['.vscode'],
-            'type' => DetectionType::Directory,
         ];
     }
 

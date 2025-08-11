@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Install\CodeEnvironment;
 
-use Laravel\Boost\Install\Enums\DetectionType;
 use Laravel\Boost\Install\Enums\Platform;
 
 class PhpStorm extends CodeEnvironment
@@ -24,7 +23,6 @@ class PhpStorm extends CodeEnvironment
         return match ($platform) {
             Platform::Darwin => [
                 'paths' => ['/Applications/PhpStorm.app'],
-                'type' => DetectionType::Directory,
             ],
             Platform::Linux => [
                 'paths' => [
@@ -33,14 +31,12 @@ class PhpStorm extends CodeEnvironment
                     '/usr/local/bin/phpstorm',
                     '~/.local/share/JetBrains/Toolbox/apps/PhpStorm/ch-*',
                 ],
-                'type' => DetectionType::Directory,
             ],
             Platform::Windows => [
                 'paths' => [
                     '%ProgramFiles%\\JetBrains\\PhpStorm*',
                     '%LOCALAPPDATA%\\JetBrains\\Toolbox\\apps\\PhpStorm\\ch-*',
                 ],
-                'type' => DetectionType::Directory,
             ],
         };
     }
@@ -49,7 +45,6 @@ class PhpStorm extends CodeEnvironment
     {
         return [
             'paths' => ['.idea', '.junie'],
-            'type' => DetectionType::Directory,
         ];
     }
 

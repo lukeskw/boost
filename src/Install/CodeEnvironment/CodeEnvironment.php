@@ -52,9 +52,9 @@ abstract class CodeEnvironment
     public function detectOnSystem(Platform $platform): bool
     {
         $config = $this->systemDetectionConfig($platform);
-        $strategy = $this->strategyFactory->make($config['type']);
+        $strategy = $this->strategyFactory->makeFromConfig($config);
 
-        return $strategy->detect($config, $platform->value);
+        return $strategy->detect($config, $platform);
     }
 
     /**
@@ -66,7 +66,7 @@ abstract class CodeEnvironment
     public function detectInProject(string $basePath): bool
     {
         $config = array_merge($this->projectDetectionConfig(), ['basePath' => $basePath]);
-        $strategy = $this->strategyFactory->make($config['type']);
+        $strategy = $this->strategyFactory->makeFromConfig($config);
 
         return $strategy->detect($config);
     }

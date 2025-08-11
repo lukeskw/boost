@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Install\CodeEnvironment;
 
-use Laravel\Boost\Install\Enums\DetectionType;
 use Laravel\Boost\Install\Enums\Platform;
 
 class Copilot extends CodeEnvironment
@@ -23,7 +22,6 @@ class Copilot extends CodeEnvironment
     {
         // Copilot doesn't have system-wide detection as it's an extension/feature
         return [
-            'type' => DetectionType::File,
             'files' => [],
         ];
     }
@@ -32,7 +30,6 @@ class Copilot extends CodeEnvironment
     {
         return [
             'files' => ['.github/copilot-instructions.md'],
-            'type' => DetectionType::File,
         ];
     }
 

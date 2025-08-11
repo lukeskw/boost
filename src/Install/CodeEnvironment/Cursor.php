@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Install\CodeEnvironment;
 
-use Laravel\Boost\Install\Enums\DetectionType;
 use Laravel\Boost\Install\Enums\Platform;
 
 class Cursor extends CodeEnvironment
@@ -24,7 +23,6 @@ class Cursor extends CodeEnvironment
         return match ($platform) {
             Platform::Darwin => [
                 'paths' => ['/Applications/Cursor.app'],
-                'type' => DetectionType::Directory,
             ],
             Platform::Linux => [
                 'paths' => [
@@ -32,14 +30,12 @@ class Cursor extends CodeEnvironment
                     '/usr/local/bin/cursor',
                     '~/.local/bin/cursor',
                 ],
-                'type' => DetectionType::Directory,
             ],
             Platform::Windows => [
                 'paths' => [
                     '%ProgramFiles%\\Cursor',
                     '%LOCALAPPDATA%\\Programs\\Cursor',
                 ],
-                'type' => DetectionType::Directory,
             ],
         };
     }
@@ -48,7 +44,6 @@ class Cursor extends CodeEnvironment
     {
         return [
             'paths' => ['.cursor'],
-            'type' => DetectionType::Directory,
         ];
     }
 

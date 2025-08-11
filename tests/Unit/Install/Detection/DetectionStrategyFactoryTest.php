@@ -8,17 +8,10 @@ use Laravel\Boost\Install\Detection\CompositeDetectionStrategy;
 use Laravel\Boost\Install\Detection\DetectionStrategyFactory;
 use Laravel\Boost\Install\Detection\DirectoryDetectionStrategy;
 use Laravel\Boost\Install\Detection\FileDetectionStrategy;
-use Laravel\Boost\Install\Enums\DetectionType;
 
 beforeEach(function () {
     $this->container = new Container();
     $this->factory = new DetectionStrategyFactory($this->container);
-});
-
-test('creates directory strategy from enum', function () {
-    $strategy = $this->factory->make(DetectionType::Directory);
-
-    expect($strategy)->toBeInstanceOf(DirectoryDetectionStrategy::class);
 });
 
 test('creates directory strategy from string', function () {
@@ -27,37 +20,16 @@ test('creates directory strategy from string', function () {
     expect($strategy)->toBeInstanceOf(DirectoryDetectionStrategy::class);
 });
 
-test('creates file strategy from enum', function () {
-    $strategy = $this->factory->make(DetectionType::File);
-
-    expect($strategy)->toBeInstanceOf(FileDetectionStrategy::class);
-});
-
 test('creates file strategy from string', function () {
     $strategy = $this->factory->make('file');
 
     expect($strategy)->toBeInstanceOf(FileDetectionStrategy::class);
 });
 
-test('creates command strategy from enum', function () {
-    $strategy = $this->factory->make(DetectionType::Command);
-
-    expect($strategy)->toBeInstanceOf(CommandDetectionStrategy::class);
-});
-
 test('creates command strategy from string', function () {
     $strategy = $this->factory->make('command');
 
     expect($strategy)->toBeInstanceOf(CommandDetectionStrategy::class);
-});
-
-test('creates composite strategy from array of enums', function () {
-    $strategy = $this->factory->make([
-        DetectionType::Directory,
-        DetectionType::File,
-    ]);
-
-    expect($strategy)->toBeInstanceOf(CompositeDetectionStrategy::class);
 });
 
 test('creates composite strategy from array of strings', function () {
@@ -71,9 +43,9 @@ test('creates composite strategy from array of strings', function () {
 
 test('creates composite strategy from mixed array', function () {
     $strategy = $this->factory->make([
-        DetectionType::Directory,
+        'directory',
         'file',
-        DetectionType::Command,
+        'command',
     ]);
 
     expect($strategy)->toBeInstanceOf(CompositeDetectionStrategy::class);
@@ -81,16 +53,55 @@ test('creates composite strategy from mixed array', function () {
 
 test('throws exception for unknown string type', function () {
     expect(fn () => $this->factory->make('unknown'))
-        ->toThrow(\ValueError::class);
-});
-
-test('throws exception for invalid enum value', function () {
-    expect(fn () => $this->factory->make('invalid_type'))
-        ->toThrow(\ValueError::class);
+        ->toThrow(InvalidArgumentException::class);
 });
 
 test('empty array creates composite strategy', function () {
     $strategy = $this->factory->make([]);
 
     expect($strategy)->toBeInstanceOf(CompositeDetectionStrategy::class);
+});
+
+test('makeFromConfig infers directory type from paths key', function () {
+    $strategy = $this->factory->makeFromConfig([
+        'paths' => ['/some/path'],
+    ]);
+
+    expect($strategy)->toBeInstanceOf(DirectoryDetectionStrategy::class);
+});
+
+test('makeFromConfig infers file type from files key', function () {
+    $strategy = $this->factory->makeFromConfig([
+        'files' => ['file.txt'],
+    ]);
+
+    expect($strategy)->toBeInstanceOf(FileDetectionStrategy::class);
+});
+
+test('makeFromConfig infers command type from command key', function () {
+    $strategy = $this->factory->makeFromConfig([
+        'command' => 'which code',
+    ]);
+
+    expect($strategy)->toBeInstanceOf(CommandDetectionStrategy::class);
+});
+
+test('makeFromConfig creates composite strategy from multiple keys', function () {
+    $strategy = $this->factory->makeFromConfig([
+        'paths' => ['.claude'],
+        'files' => ['CLAUDE.md'],
+    ]);
+
+    expect($strategy)->toBeInstanceOf(CompositeDetectionStrategy::class);
+});
+
+test('makeFromConfig throws exception for unknown config keys', function () {
+    expect(fn () => $this->factory->makeFromConfig([
+        'unknown_key' => 'value',
+    ]))->toThrow(InvalidArgumentException::class, 'Cannot infer detection type from config keys');
+});
+
+test('makeFromConfig throws exception for empty config', function () {
+    expect(fn () => $this->factory->makeFromConfig([]))
+        ->toThrow(InvalidArgumentException::class, 'Cannot infer detection type from config keys');
 });

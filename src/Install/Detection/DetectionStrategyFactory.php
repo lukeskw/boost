@@ -7,7 +7,6 @@ namespace Laravel\Boost\Install\Detection;
 use Illuminate\Container\Container;
 use InvalidArgumentException;
 use Laravel\Boost\Install\Contracts\DetectionStrategy;
-use Laravel\Boost\Install\Enums\DetectionType;
 
 class DetectionStrategyFactory
 {
@@ -15,21 +14,49 @@ class DetectionStrategyFactory
     {
     }
 
-    public function make(DetectionType|string|array $type): DetectionStrategy
+    public function make(string|array $type, array $config = []): DetectionStrategy
     {
         if (is_array($type)) {
             return new CompositeDetectionStrategy(
-                array_map(fn ($singleType) => $this->make($singleType), $type)
+                array_map(fn ($singleType) => $this->make($singleType, $config), $type)
             );
         }
 
-        $detectionType = $type instanceof DetectionType ? $type : DetectionType::from($type);
-
-        return match ($detectionType) {
-            DetectionType::Directory => $this->container->make(DirectoryDetectionStrategy::class),
-            DetectionType::Command => $this->container->make(CommandDetectionStrategy::class),
-            DetectionType::File => $this->container->make(FileDetectionStrategy::class),
-            default => throw new InvalidArgumentException("Unknown detection type: {$detectionType->value}"),
+        return match ($type) {
+            'directory' => $this->container->make(DirectoryDetectionStrategy::class),
+            'command' => $this->container->make(CommandDetectionStrategy::class),
+            'file' => $this->container->make(FileDetectionStrategy::class),
+            default => throw new InvalidArgumentException("Unknown detection type: {$type}"),
         };
+    }
+
+    public function makeFromConfig(array $config): DetectionStrategy
+    {
+        $type = $this->inferTypeFromConfig($config);
+
+        return $this->make($type, $config);
+    }
+
+    private function inferTypeFromConfig(array $config): string|array
+    {
+        $types = [];
+
+        if (isset($config['files'])) {
+            $types[] = 'file';
+        }
+
+        if (isset($config['paths'])) {
+            $types[] = 'directory';
+        }
+
+        if (isset($config['command'])) {
+            $types[] = 'command';
+        }
+
+        if (empty($types)) {
+            throw new InvalidArgumentException('Cannot infer detection type from config keys. Expected one of: files, paths, command');
+        }
+
+        return count($types) === 1 ? $types[0] : $types;
     }
 }

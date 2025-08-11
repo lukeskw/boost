@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Install\CodeEnvironment;
 
-use Laravel\Boost\Install\Enums\DetectionType;
 use Laravel\Boost\Install\Enums\Platform;
 
 class Windsurf extends CodeEnvironment
@@ -24,7 +23,6 @@ class Windsurf extends CodeEnvironment
         return match ($platform) {
             Platform::Darwin => [
                 'paths' => ['/Applications/Windsurf.app'],
-                'type' => DetectionType::Directory,
             ],
             Platform::Linux => [
                 'paths' => [
@@ -32,7 +30,6 @@ class Windsurf extends CodeEnvironment
                     '/usr/local/bin/windsurf',
                     '~/.local/bin/windsurf',
                 ],
-                'type' => DetectionType::Directory,
             ],
             Platform::Windows => [
                 'paths' => [
@@ -40,7 +37,6 @@ class Windsurf extends CodeEnvironment
                     '%ProgramFiles(x86)%\\Windsurf',
                     '%LOCALAPPDATA%\\Programs\\Windsurf',
                 ],
-                'type' => DetectionType::Directory,
             ],
         };
     }
@@ -49,7 +45,6 @@ class Windsurf extends CodeEnvironment
     {
         return [
             'files' => ['.windsurfrules.md'],
-            'type' => DetectionType::File,
         ];
     }
 
