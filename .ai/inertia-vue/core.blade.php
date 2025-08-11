@@ -7,6 +7,7 @@
 </code-snippet>
 
 - For form handling, use `router.post` and related methods, do not use regular forms.
+@verbatim
 <code-snippet lang="vue" name="Form example">
     <script setup>
     import { reactive } from 'vue'
@@ -27,7 +28,7 @@
     </script>
 
     <template>
-        <h1>Create \{\{ page.modelName \}\}</h1>
+        <h1>Create {{ page.modelName }}</h1>
         <form @submit.prevent="submit">
             <label for="first_name">First name:</label>
             <input id="first_name" v-model="form.first_name" />
@@ -39,3 +40,4 @@
         </form>
     </template>
 </code-snippet>
+@endverbatim
