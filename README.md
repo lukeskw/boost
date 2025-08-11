@@ -34,7 +34,7 @@ composer require laravel/boost --dev
 
 Install the MCP server & guidelines
 ```bash
-./artisan boost:install
+php artisan boost:install
 ```
 
 You're ready to go!

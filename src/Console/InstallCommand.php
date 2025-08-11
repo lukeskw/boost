@@ -191,7 +191,7 @@ class InstallCommand extends Command
         $paddingLength = (int) (floor(($this->terminal->cols() - mb_strlen($text.$label)) / 2)) - 2;
 
         echo "\033[42m\033[2K".str_repeat(' ', $paddingLength); // Make the entire line have a green background
-        echo $this->black($this->bold($text.$link)).PHP_EOL;
+        echo $this->black($this->bold($text.$link)).$this->reset().PHP_EOL;
     }
 
     private function hyperlink(string $label, string $url): string
@@ -337,7 +337,7 @@ class InstallCommand extends Command
         }
 
         $selectedIdeClasses = collect(multiselect(
-            label: sprintf('Which IDEs do you use in %s? (space to select)', $this->projectName),
+            label: sprintf('Which code editors do you use in %s?', $this->projectName),
             options: $ides,
             default: $detectedClasses,
             scroll: 5,
@@ -546,7 +546,7 @@ class InstallCommand extends Command
             // Install Laravel Boost MCP if enabled
             if ($this->installingMcp()) {
                 try {
-                    $result = $ide->installMcp('laravel-boost', base_path('artisan'), ['boost:mcp']);
+                    $result = $ide->installMcp('laravel-boost', 'php', ['./artisan', 'boost:mcp']);
 
                     if ($result) {
                         $results[] = $this->greenTick.' Boost';

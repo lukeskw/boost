@@ -1,5 +1,5 @@
 ## Do Things the Laravel Way
-- Use `./artisan make:` commands to create new files (i.e. migrations, controllers, models, etc.).
+- Use `php artisan make:` commands to create new files (i.e. migrations, controllers, models, etc.).
 - If you're creating a generic PHP class, use `artisan make:class`.
 
 ## Database
@@ -11,7 +11,7 @@
 - Use Laravel's query builder for very complex database operations.
 
 ## Model Creation
-- When creating new models, create factories and seeders for them too. Ask the user if they need any other things, use `list-artisan-commands` to check the available options to `./artisan make:model`
+- When creating new models, create factories and seeders for them too. Ask the user if they need any other things, use `list-artisan-commands` to check the available options to `php artisan make:model`
 
 ## APIs and Eloquent Resources
 - For APIs, use Eloquent API Resources and API versioning
