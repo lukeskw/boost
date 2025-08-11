@@ -23,7 +23,7 @@
 - **Job and queue patterns**: Use queued jobs for time-consuming operations with the `ShouldQueue` interface.
 
 ## Authentication and Authorization
-- Use Laravel built-in authentication and authorization features (Gates, Policies, Sanctum)
+- Use Laravel built-in authentication and authorization features (Gates, Policies, Sanctum).
 
 ## Config
 - **Use environment variables** via config files, never `env()` directly. Always use `config('app.name')` not `env('APP_NAME')`.
