@@ -67,16 +67,16 @@ class InstallCommand extends Command
 
     public function handle(CodeEnvironmentsDetector $codeEnvironmentsDetector, Herd $herd, Roster $roster, Terminal $terminal): void
     {
-        $this->bootstrapBoost($codeEnvironmentsDetector, $herd, $roster, $terminal);
+        $this->bootstrap($codeEnvironmentsDetector, $herd, $roster, $terminal);
 
         $this->displayBoostHeader();
         $this->discoverEnvironment();
-        $this->collectInstallationPreference();
+        $this->collectInstallationPreferences();
         $this->enact();
         $this->outro();
     }
 
-    private function bootstrapBoost(CodeEnvironmentsDetector $codeEnvironmentsDetector, Herd $herd, Roster $roster, Terminal $terminal): void
+    private function bootstrap(CodeEnvironmentsDetector $codeEnvironmentsDetector, Herd $herd, Roster $roster, Terminal $terminal): void
     {
         $this->codeEnvironmentsDetector = $codeEnvironmentsDetector;
         $this->herd = $herd;
@@ -120,7 +120,7 @@ class InstallCommand extends Command
         $this->projectInstalledAgents = $this->discoverProjectAgents();
     }
 
-    private function collectInstallationPreference(): void
+    private function collectInstallationPreferences(): void
     {
         $this->selectedBoostFeatures = $this->selectBoostFeatures();
         $this->enforceTests = $this->determineTestEnforcement(ask: false);
