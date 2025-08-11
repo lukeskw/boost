@@ -72,7 +72,7 @@ class InstallCommandMultiselectTest extends TestCase
      */
     public function test_multiselect_behavior_matches_install_command_expectations(): void
     {
-        // Test the exact same structure used in InstallCommand::boostToInstall()
+        // Test the exact same structure used in InstallCommand::selectBoostFeatures()
         // Note: mcp_server and ai_guidelines are already selected by default
         Prompt::fake([
             Key::DOWN,       // Move to ai_guidelines (already selected)

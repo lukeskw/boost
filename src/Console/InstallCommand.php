@@ -9,6 +9,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
+use Laravel\Boost\Contracts\Agent;
+use Laravel\Boost\Contracts\Ide;
 use Laravel\Boost\Install\Cli\DisplayHelper;
 use Laravel\Boost\Install\CodeEnvironmentsDetector;
 use Laravel\Boost\Install\GuidelineComposer;
@@ -25,7 +27,6 @@ use function Laravel\Prompts\intro;
 use function Laravel\Prompts\multiselect;
 use function Laravel\Prompts\note;
 use function Laravel\Prompts\select;
-use function Laravel\Prompts\text;
 
 #[AsCommand('boost:install', 'Install Laravel Boost')]
 class InstallCommand extends Command
@@ -40,17 +41,15 @@ class InstallCommand extends Command
 
     private Terminal $terminal;
 
-    /** @var Collection<int, \Laravel\Boost\Contracts\Agent> */
+    /** @var Collection<int, Agent> */
     private Collection $agentsToInstallTo;
 
-    /** @var Collection<int, \Laravel\Boost\Contracts\Ide> */
+    /** @var Collection<int, Ide> */
     private Collection $idesToInstallTo;
 
     private Collection $boostToInstall;
 
     private string $projectName;
-
-    private string $projectPurpose = '';
 
     /** @var array<non-empty-string> */
     private array $systemInstalledCodeEnvironments = [];
@@ -58,8 +57,6 @@ class InstallCommand extends Command
     private array $projectInstalledCodeEnvironments = [];
 
     private bool $enforceTests = true;
-
-    private array $boostToolsToDisable = [];
 
     private array $projectInstalledAgents = [];
 
@@ -73,7 +70,7 @@ class InstallCommand extends Command
 
         $this->displayBoostHeader();
         $this->discoverEnvironment();
-        $this->query();
+        $this->collectInstallationPreference();
         $this->enact();
         $this->outro();
     }
@@ -122,17 +119,12 @@ class InstallCommand extends Command
         $this->projectInstalledAgents = $this->codeEnvironmentsDetector->discoverProjectInstalledCodeEnvironments(base_path());
     }
 
-    private function query()
+    private function collectInstallationPreference(): void
     {
-        // Which parts of boost should we install
-        $this->boostToInstall = $this->boostToInstall();
-        //        $this->boostToolsToDisable = $this->boostToolsToDisable(); // Not useful to start
-
-        //        $this->projectPurpose = $this->projectPurpose();
-        $this->enforceTests = $this->shouldEnforceTests(ask: false);
-
-        $this->idesToInstallTo = $this->idesToInstallTo(); // To add boost:mcp to the correct file
-        $this->agentsToInstallTo = $this->agentsToInstallTo(); // AI Guidelines, which file do they go, are they separated, or all in one file?
+        $this->boostToInstall = $this->selectBoostFeatures();
+        $this->enforceTests = $this->determineTestEnforcement(ask: false);
+        $this->idesToInstallTo = $this->selectTargetIdes();
+        $this->agentsToInstallTo = $this->selectTargetAgents();
     }
 
     private function enact(): void
@@ -210,45 +202,38 @@ class InstallCommand extends Command
         return "\033]8;;{$url}\007{$label}\033]8;;\033\\";
     }
 
-    protected function projectPurpose(): string
-    {
-        return text(
-            label: sprintf('What does the %s project do? (optional)', $this->projectName),
-            placeholder: 'i.e. SaaS platform selling concert tickets, integrates with Stripe and Twilio, lots of CS using Nova backend',
-            default: config('boost.project_purpose') ?? '',
-            hint: 'This helps guides AI. How would you explain it to a new developer?'
-        );
-    }
-
     /**
      * We shouldn't add an AI guideline enforcing tests if they don't have a basic test setup.
-     * This would likely just create headaches for them, or be a waste of time as they
+     * This would likely just create headaches for them or be a waste of time as they
      * won't have the CI setup to make use of them anyway, so we're just wasting their
      * tokens/money by enforcing them.
+     *
+     * @param bool $ask
+     * @return bool
      */
-    protected function shouldEnforceTests(bool $ask = true): bool
+    protected function determineTestEnforcement(bool $ask = true): bool
     {
-        $enforce = Finder::create()
+        $hasMinimumTests = Finder::create()
             ->in(base_path('tests'))
             ->files()
             ->name('*.php')
             ->count() > 6;
 
-        if ($enforce === false && $ask === true) {
-            $enforce = select(
+        if (! $hasMinimumTests && ! $ask) {
+            $hasMinimumTests = select(
                 label: 'Should AI always create tests?',
                 options: ['Yes', 'No'],
                 default: 'Yes'
             ) === 'Yes';
         }
 
-        return $enforce;
+        return $hasMinimumTests;
     }
 
     /**
      * @return Collection<int, string>
      */
-    protected function boostToInstall(): Collection
+    private function selectBoostFeatures(): Collection
     {
         $defaultToInstallOptions = ['mcp_server', 'ai_guidelines'];
         $toInstallOptions = [
@@ -316,9 +301,9 @@ class InstallCommand extends Command
     }
 
     /**
-     * @return Collection<int, \Laravel\Boost\Contracts\Ide>
+     * @return Collection<int, Ide>
      */
-    private function idesToInstallTo(): Collection
+    private function selectTargetIdes(): Collection
     {
         $ides = [];
         if (! $this->installingMcp() && ! $this->installingHerdMcp()) {
@@ -338,7 +323,7 @@ class InstallCommand extends Command
             if (class_exists($className)) {
                 $reflection = new \ReflectionClass($className);
 
-                if ($reflection->implementsInterface(\Laravel\Boost\Contracts\Ide::class) && ! $reflection->isAbstract()) {
+                if ($reflection->implementsInterface(Ide::class) && ! $reflection->isAbstract()) {
                     $ides[$className] = Str::headline($ideFile->getBasename('.php'));
                 }
             }
@@ -370,9 +355,9 @@ class InstallCommand extends Command
     }
 
     /**
-     * @return Collection<int, \Laravel\Boost\Contracts\Agent>
+     * @return Collection<int, Agent>
      */
-    private function agentsToInstallTo(): Collection
+    private function selectTargetAgents(): Collection
     {
         $agents = [];
         if (! $this->installingGuidelines()) {
@@ -392,7 +377,7 @@ class InstallCommand extends Command
             if (class_exists($className)) {
                 $reflection = new \ReflectionClass($className);
 
-                if ($reflection->implementsInterface(\Laravel\Boost\Contracts\Agent::class)) {
+                if ($reflection->implementsInterface(Agent::class)) {
                     $agents[$className] = Str::headline($agentFile->getBasename('.php'));
                 }
             }
