@@ -28,7 +28,7 @@ class ClaudeCode extends CodeEnvironment
                 'type' => DetectionType::Command,
             ],
             Platform::Windows => [
-                'command' => 'where claude 2>nul',
+                'command' => 'where claude 2>null',
                 'type' => DetectionType::Command,
             ],
         };
@@ -41,19 +41,5 @@ class ClaudeCode extends CodeEnvironment
             'files' => ['CLAUDE.md'],
             'types' => [DetectionType::Directory, DetectionType::File],
         ];
-    }
-
-    public function detectInProject(string $basePath): bool
-    {
-        $config = array_merge($this->projectDetectionConfig(), ['basePath' => $basePath]);
-        $types = $config['types'] ?? $config['type'] ?? null;
-
-        if (! $types) {
-            return false;
-        }
-
-        $strategy = $this->strategyFactory->make($types);
-
-        return $strategy->detect($config);
     }
 }

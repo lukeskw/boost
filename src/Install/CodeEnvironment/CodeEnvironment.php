@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Laravel\Boost\Install\Contracts;
+namespace Laravel\Boost\Install\CodeEnvironment;
 
 use Laravel\Boost\Install\Detection\DetectionStrategyFactory;
 use Laravel\Boost\Install\Enums\Platform;
