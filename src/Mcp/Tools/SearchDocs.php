@@ -16,9 +16,7 @@ class SearchDocs extends Tool
 {
     use MakesHttpRequests;
 
-    public function __construct(protected Roster $roster)
-    {
-    }
+    public function __construct(protected Roster $roster) {}
 
     public function description(): string
     {
@@ -88,6 +86,7 @@ class SearchDocs extends Tool
             'queries' => $queries,
             'packages' => $packages,
             'token_limit' => $tokenLimit,
+            'format' => 'markdown',
         ];
         try {
             $response = $this->client()->asJson()->post($apiUrl, $payload);
