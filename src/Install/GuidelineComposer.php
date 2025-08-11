@@ -19,9 +19,12 @@ class GuidelineComposer
 
     protected GuidelineConfig $config;
 
+    protected GuidelineAssist $guidelineAssist;
+
     public function __construct(protected Roster $roster, protected Herd $herd)
     {
         $this->config = new GuidelineConfig;
+        $this->guidelineAssist = new GuidelineAssist;
     }
 
     public function config(GuidelineConfig $config): self
@@ -47,9 +50,9 @@ class GuidelineComposer
      */
     public static function composeGuidelines(Collection $guidelines): string
     {
-        return $guidelines
-            ->map(fn ($content, $key) => "\n=== {$key} ===\n\n{$content}")
-            ->join("\n\n");
+        return trim($guidelines
+            ->map(fn ($content, $key) => "\n=== {$key} rules ===\n\n{$content}")
+            ->join("\n\n"));
     }
 
     /**
@@ -83,9 +86,11 @@ class GuidelineComposer
         $guidelines->put('core', $this->guideline('core'));
         $guidelines->put('boost/core', $this->guideline('boost/core'));
 
-        $phpMajorMinor = PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;
         $guidelines->put('php/core', $this->guideline('php/core'));
-        $guidelines->put('php/v'.$phpMajorMinor, $this->guidelinesDir('php/'.$phpMajorMinor));
+
+        // TODO: AI-48: Use composer target version, not PHP version. Production could be 8.1, but local is 8.4
+        // $phpMajorMinor = PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;
+        // $guidelines->put('php/v'.$phpMajorMinor, $this->guidelinesDir('php/'.$phpMajorMinor));
 
         if (str_contains(config('app.url'), '.test') && $this->herd->isInstalled()) {
             $guidelines->put('herd/core', $this->guideline('herd/core'));
@@ -201,7 +206,9 @@ class GuidelineComposer
         ];
 
         $content = str_replace(array_keys($placeholders), array_values($placeholders), $content);
-        $rendered = Blade::render($content);
+        $rendered = Blade::render($content, [
+            'assist' => $this->guidelineAssist,
+        ]);
         $rendered = str_replace(array_values($placeholders), array_keys($placeholders), $rendered);
 
         return trim($rendered);
