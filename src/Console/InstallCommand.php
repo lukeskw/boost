@@ -23,85 +23,103 @@ use Symfony\Component\Finder\Finder;
 
 use function Laravel\Prompts\intro;
 use function Laravel\Prompts\multiselect;
+use function Laravel\Prompts\note;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 
 #[AsCommand('boost:install', 'Install Laravel Boost')]
 class InstallCommand extends Command
 {
-    private $colors;
+    use Colors;
 
-    // Used for nicer install experience
-    protected string $projectName;
+    private ApplicationDetector $appDetector;
 
-    // Used as part of AI Guidelines
-    protected string $projectPurpose = '';
+    private Herd $herd;
 
-    /** @var string[] */
-    protected array $installedIdes = [];
+    private Roster $roster;
 
-    protected array $detectedProjectIdes = [];
-
-    protected bool $enforceTests = true;
-
-    /** @var Collection<int, \Laravel\Boost\Contracts\Ide> */
-    protected Collection $idesToInstallTo;
-
-    protected Collection $boostToInstall;
-
-    protected array $boostToolsToDisable = [];
-
-    protected array $detectedProjectAgents = [];
+    private Terminal $terminal;
 
     /** @var Collection<int, \Laravel\Boost\Contracts\Agent> */
-    protected Collection $agentsToInstallTo;
+    private Collection $agentsToInstallTo = collect();
 
-    protected Roster $roster;
+    /** @var Collection<int, \Laravel\Boost\Contracts\Ide> */
+    private Collection $idesToInstallTo = collect();
 
-    protected Herd $herd;
+    private Collection $boostToInstall;
 
-    protected ApplicationDetector $appDetector;
+    private string $projectName;
+
+    private string $projectPurpose = '';
+
+    /** @var array<non-empty-string> */
+    private array $installedIdes = [];
+
+    private array $detectedProjectIdes = [];
+
+    private bool $enforceTests = true;
+
+    private array $boostToolsToDisable = [];
+
+    private array $detectedProjectAgents = [];
 
     private string $greenTick;
 
     private string $redCross;
 
-    private Terminal $terminal;
-
-    public function handle(Roster $roster, Herd $herd): void
+    public function handle(ApplicationDetector $appDetector, Herd $herd, Roster $roster, Terminal $terminal): void
     {
-        $this->terminal = new Terminal;
-        $this->terminal->initDimensions();
-        $this->agentsToInstallTo = collect();
-        $this->idesToInstallTo = collect();
-        $this->roster = $roster;
-        $this->herd = $herd;
-        $this->appDetector = new ApplicationDetector;
+        $this->bootstrapBoost($appDetector, $herd, $roster, $terminal);
 
-        $this->colors = new class
-        {
-            use Colors;
-        };
-        $this->greenTick = $this->colors->green('✓');
-        $this->redCross = $this->colors->red('✗');
-
-        $this->projectName = basename(base_path());
-
-        $this->intro();
+        $this->displayBoostHeader();
         $this->detect();
         $this->query();
         $this->enact();
         $this->outro();
     }
 
-    protected function detect()
+    private function bootstrapBoost(ApplicationDetector $appDetector, Herd $herd, Roster $roster, Terminal $terminal): void
+    {
+        $this->appDetector = $appDetector;
+        $this->herd = $herd;
+        $this->roster = $roster;
+        $this->terminal = $terminal;
+
+        $this->terminal->initDimensions();
+        $this->greenTick = $this->green('✓');
+        $this->redCross = $this->red('✗');
+
+        $this->projectName = basename(base_path());
+    }
+
+    private function displayBoostHeader(): void
+    {
+        note($this->boostLogo());
+        intro('✦ Laravel Boost :: Install :: We Must Ship ✦');
+        note("Let's give {$this->bgYellow($this->black($this->bold($this->projectName)))} a Boost");
+    }
+
+    private function boostLogo(): string
+    {
+        return
+         <<<'HEADER'
+        ██████╗   ██████╗   ██████╗  ███████╗ ████████╗
+        ██╔══██╗ ██╔═══██╗ ██╔═══██╗ ██╔════╝ ╚══██╔══╝
+        ██████╔╝ ██║   ██║ ██║   ██║ ███████╗    ██║
+        ██╔══██╗ ██║   ██║ ██║   ██║ ╚════██║    ██║
+        ██████╔╝ ╚██████╔╝ ╚██████╔╝ ███████║    ██║
+        ╚═════╝   ╚═════╝   ╚═════╝  ╚══════╝    ╚═╝
+        HEADER;
+    }
+
+    private function detect()
     {
         $this->installedIdes = $this->detectInstalledIdes();
         $this->detectedProjectIdes = $this->detectIdesUsedInProject();
         $this->detectedProjectAgents = $this->detectProjectAgents();
     }
 
-    protected function query()
+    private function query()
     {
         // Which parts of boost should we install
         $this->boostToInstall = $this->boostToInstall();
@@ -114,7 +132,7 @@ class InstallCommand extends Command
         $this->agentsToInstallTo = $this->agentsToInstallTo(); // AI Guidelines, which file do they go, are they separated, or all in one file?
     }
 
-    protected function enact(): void
+    private function enact(): void
     {
         if ($this->installingGuidelines() && ! empty($this->agentsToInstallTo)) {
             $this->enactGuidelines();
@@ -130,7 +148,7 @@ class InstallCommand extends Command
     /**
      * Which IDEs are installed on this developer's machine?
      */
-    protected function detectInstalledIdes(): array
+    private function detectInstalledIdes(): array
     {
         return $this->appDetector->detectInstalled();
     }
@@ -139,12 +157,12 @@ class InstallCommand extends Command
      * Specifically want to detect what's in use in _this_ project.
      * Just because they have claude code installed doesn't mean they're using it.
      */
-    protected function detectIdesUsedInProject(): array
+    private function detectIdesUsedInProject(): array
     {
         return $this->appDetector->detectInProject(base_path());
     }
 
-    protected function discoverTools(): array
+    private function discoverTools(): array
     {
         $tools = [];
         $toolDir = implode(DIRECTORY_SEPARATOR, [__DIR__, '..', 'Mcp', 'Tools']);
@@ -163,25 +181,6 @@ class InstallCommand extends Command
         ksort($tools);
 
         return $tools;
-    }
-
-    private function intro()
-    {
-        $this->newline();
-        $header = <<<'HEADER'
- ██████╗   ██████╗   ██████╗  ███████╗ ████████╗
- ██╔══██╗ ██╔═══██╗ ██╔═══██╗ ██╔════╝ ╚══██╔══╝
- ██████╔╝ ██║   ██║ ██║   ██║ ███████╗    ██║
- ██╔══██╗ ██║   ██║ ██║   ██║ ╚════██║    ██║
- ██████╔╝ ╚██████╔╝ ╚██████╔╝ ███████║    ██║
- ╚═════╝   ╚═════╝   ╚═════╝  ╚══════╝    ╚═╝
-HEADER;
-        foreach (explode(PHP_EOL, $header) as $i => $line) {
-            echo "{$line}\n";
-        }
-
-        intro('✦ Laravel Boost :: Install :: We Must Ship ✦');
-        $this->line(' Let\'s give '.$this->colors->bgYellow($this->colors->black($this->projectName)).' a Boost');
     }
 
     private function outro(): void
@@ -217,7 +216,7 @@ HEADER;
         $paddingLength = (int) (floor(($this->terminal->cols() - mb_strlen($text.$label)) / 2)) - 2;
 
         echo "\033[42m\033[2K".str_repeat(' ', $paddingLength); // Make the entire line have a green background
-        echo $this->colors->black($this->colors->bold($text.$link)).PHP_EOL;
+        echo $this->black($this->bold($text.$link)).PHP_EOL;
     }
 
     private function hyperlink(string $label, string $url): string
