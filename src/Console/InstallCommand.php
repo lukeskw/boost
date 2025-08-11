@@ -42,12 +42,13 @@ class InstallCommand extends Command
     private Terminal $terminal;
 
     /** @var Collection<int, Agent> */
-    private Collection $agentsToInstallTo;
+    private Collection $selectedTargetAgents;
 
     /** @var Collection<int, Ide> */
-    private Collection $idesToInstallTo;
+    private Collection $selectedTargetIdes;
 
-    private Collection $boostToInstall;
+    /** @var Collection<int, string> */
+    private Collection $selectedBoostFeatures;
 
     private string $projectName;
 
@@ -86,8 +87,8 @@ class InstallCommand extends Command
         $this->greenTick = $this->green('✓');
         $this->redCross = $this->red('✗');
 
-        $this->agentsToInstallTo = collect();
-        $this->idesToInstallTo = collect();
+        $this->selectedTargetAgents = collect();
+        $this->selectedTargetIdes = collect();
 
         $this->projectName = basename(base_path());
     }
@@ -121,21 +122,21 @@ class InstallCommand extends Command
 
     private function collectInstallationPreference(): void
     {
-        $this->boostToInstall = $this->selectBoostFeatures();
+        $this->selectedBoostFeatures = $this->selectBoostFeatures();
         $this->enforceTests = $this->determineTestEnforcement(ask: false);
-        $this->idesToInstallTo = $this->selectTargetIdes();
-        $this->agentsToInstallTo = $this->selectTargetAgents();
+        $this->selectedTargetIdes = $this->selectTargetIdes();
+        $this->selectedTargetAgents = $this->selectTargetAgents();
     }
 
     private function enact(): void
     {
-        if ($this->installingGuidelines() && ! empty($this->agentsToInstallTo)) {
+        if ($this->installingGuidelines() && ! empty($this->selectedTargetAgents)) {
             $this->enactGuidelines();
         }
 
         usleep(750000);
 
-        if (($this->installingMcp() || $this->installingHerdMcp()) && $this->idesToInstallTo->isNotEmpty()) {
+        if (($this->installingMcp() || $this->installingHerdMcp()) && $this->selectedTargetIdes->isNotEmpty()) {
             $this->enactMcpServers();
         }
     }
@@ -168,9 +169,9 @@ class InstallCommand extends Command
         // Build install data - CSV format with type prefixes
         $data = [];
 
-        $ideNames = $this->idesToInstallTo->map(fn ($ide) => 'i:'.class_basename($ide))->toArray();
-        $agentNames = $this->agentsToInstallTo->map(fn ($agent) => 'a:'.class_basename($agent))->toArray();
-        $boostFeatures = $this->boostToInstall->map(fn ($feature) => 'b:'.$feature)->toArray();
+        $ideNames = $this->selectedTargetIdes->map(fn ($ide) => 'i:'.class_basename($ide))->toArray();
+        $agentNames = $this->selectedTargetAgents->map(fn ($agent) => 'a:'.class_basename($agent))->toArray();
+        $boostFeatures = $this->selectedBoostFeatures->map(fn ($feature) => 'b:'.$feature)->toArray();
 
         // Guidelines installed (prefix: g)
         $guidelines = [];
@@ -219,7 +220,7 @@ class InstallCommand extends Command
             ->name('*.php')
             ->count() > 6;
 
-        if (! $hasMinimumTests && ! $ask) {
+        if (! $hasMinimumTests && $ask) {
             $hasMinimumTests = select(
                 label: 'Should AI always create tests?',
                 options: ['Yes', 'No'],
@@ -412,7 +413,7 @@ class InstallCommand extends Command
             return;
         }
 
-        if ($this->agentsToInstallTo->isEmpty()) {
+        if ($this->selectedTargetAgents->isEmpty()) {
             $this->info('No agents selected for guideline installation.');
 
             return;
@@ -436,8 +437,8 @@ class InstallCommand extends Command
         $failed = [];
         $composedAiGuidelines = $composer->compose();
 
-        $longestAgentName = max(1, ...$this->agentsToInstallTo->map(fn ($agent) => Str::length(class_basename($agent)))->toArray());
-        foreach ($this->agentsToInstallTo as $agent) {
+        $longestAgentName = max(1, ...$this->selectedTargetAgents->map(fn ($agent) => Str::length(class_basename($agent)))->toArray());
+        foreach ($this->selectedTargetAgents as $agent) {
             $agentName = class_basename($agent);
             $displayAgentName = str_pad($agentName, $longestAgentName, ' ', STR_PAD_RIGHT);
             $this->output->write("  {$displayAgentName}... ");
@@ -468,22 +469,22 @@ class InstallCommand extends Command
 
     protected function installingGuidelines(): bool
     {
-        return $this->boostToInstall->contains('ai_guidelines');
+        return $this->selectedBoostFeatures->contains('ai_guidelines');
     }
 
     protected function installingStyleGuidelines(): bool
     {
-        return $this->boostToInstall->contains('style_guidelines');
+        return $this->selectedBoostFeatures->contains('style_guidelines');
     }
 
     protected function installingMcp(): bool
     {
-        return $this->boostToInstall->contains('mcp_server');
+        return $this->selectedBoostFeatures->contains('mcp_server');
     }
 
     protected function installingHerdMcp(): bool
     {
-        return $this->boostToInstall->contains('herd_mcp');
+        return $this->selectedBoostFeatures->contains('herd_mcp');
     }
 
     protected function publishAndUpdateConfig(): void
@@ -541,9 +542,9 @@ class InstallCommand extends Command
         usleep(750000);
 
         $failed = [];
-        $longestIdeName = max(1, ...$this->idesToInstallTo->map(fn ($ide) => Str::length(class_basename($ide)))->toArray());
+        $longestIdeName = max(1, ...$this->selectedTargetIdes->map(fn ($ide) => Str::length(class_basename($ide)))->toArray());
 
-        foreach ($this->idesToInstallTo as $ide) {
+        foreach ($this->selectedTargetIdes as $ide) {
             $ideName = class_basename($ide);
             $ideDisplay = str_pad($ideName, $longestIdeName, ' ', STR_PAD_RIGHT);
             $this->output->write("  {$ideDisplay}... ");
