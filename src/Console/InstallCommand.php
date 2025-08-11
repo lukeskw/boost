@@ -41,10 +41,10 @@ class InstallCommand extends Command
     private Terminal $terminal;
 
     /** @var Collection<int, \Laravel\Boost\Contracts\Agent> */
-    private Collection $agentsToInstallTo = collect();
+    private Collection $agentsToInstallTo;
 
     /** @var Collection<int, \Laravel\Boost\Contracts\Ide> */
-    private Collection $idesToInstallTo = collect();
+    private Collection $idesToInstallTo;
 
     private Collection $boostToInstall;
 
@@ -88,6 +88,9 @@ class InstallCommand extends Command
         $this->terminal->initDimensions();
         $this->greenTick = $this->green('✓');
         $this->redCross = $this->red('✗');
+
+        $this->agentsToInstallTo = collect();
+        $this->idesToInstallTo = collect();
 
         $this->projectName = basename(base_path());
     }
