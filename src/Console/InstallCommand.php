@@ -233,7 +233,6 @@ class InstallCommand extends Command
         $installOptions = [
             'mcp_server' => 'Boost MCP Server',
             'ai_guidelines' => 'Package AI Guidelines (i.e. Framework, Inertia, Pest)',
-            'style_guidelines' => 'Laravel Style AI Guidelines',
         ];
 
         if ($this->herd->isMcpAvailable()) {
@@ -245,7 +244,6 @@ class InstallCommand extends Command
             options: $installOptions,
             default: $defaultInstallOptions,
             required: true,
-            hint: 'Style guidelines are best for new projects',
         ));
     }
 
@@ -467,7 +465,7 @@ class InstallCommand extends Command
 
     private function shouldInstallStyleGuidelines(): bool
     {
-        return $this->selectedBoostFeatures->contains('style_guidelines');
+        return false;
     }
 
     private function shouldInstallMcp(): bool
