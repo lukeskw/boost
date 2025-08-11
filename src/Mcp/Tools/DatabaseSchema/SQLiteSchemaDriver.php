@@ -31,12 +31,12 @@ class SQLiteSchemaDriver extends DatabaseSchemaDriver
         return [];
     }
 
-    public function getTriggers(string $table = null): array
+    public function getTriggers(?string $table = null): array
     {
         try {
             $sql = "SELECT name, sql FROM sqlite_master WHERE type = 'trigger'";
             if ($table) {
-                $sql .= " AND tbl_name = ?";
+                $sql .= ' AND tbl_name = ?';
 
                 return DB::connection($this->connection)->select($sql, [$table]);
             }

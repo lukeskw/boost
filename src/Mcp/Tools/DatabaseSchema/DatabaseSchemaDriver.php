@@ -19,7 +19,7 @@ abstract class DatabaseSchemaDriver
 
     abstract public function getFunctions(): array;
 
-    abstract public function getTriggers(string $table = null): array;
+    abstract public function getTriggers(?string $table = null): array;
 
     abstract public function getCheckConstraints(string $table): array;
 

@@ -51,16 +51,16 @@ class PostgreSQLSchemaDriver extends DatabaseSchemaDriver
         }
     }
 
-    public function getTriggers(string $table = null): array
+    public function getTriggers(?string $table = null): array
     {
         try {
-            $sql = "
+            $sql = '
                 SELECT trigger_name, event_manipulation, event_object_table, action_statement
                 FROM information_schema.triggers
                 WHERE trigger_schema = current_schema()
-            ";
+            ';
             if ($table) {
-                $sql .= " AND event_object_table = ?";
+                $sql .= ' AND event_object_table = ?';
 
                 return DB::connection($this->connection)->select($sql, [$table]);
             }
@@ -88,11 +88,11 @@ class PostgreSQLSchemaDriver extends DatabaseSchemaDriver
     public function getSequences(): array
     {
         try {
-            return DB::connection($this->connection)->select("
+            return DB::connection($this->connection)->select('
                 SELECT sequence_name, start_value, minimum_value, maximum_value, increment
                 FROM information_schema.sequences
                 WHERE sequence_schema = current_schema()
-            ");
+            ');
         } catch (\Exception $e) {
             return [];
         }

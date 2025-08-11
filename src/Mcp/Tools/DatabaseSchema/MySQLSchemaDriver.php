@@ -11,11 +11,11 @@ class MySQLSchemaDriver extends DatabaseSchemaDriver
     public function getViews(): array
     {
         try {
-            return DB::connection($this->connection)->select("
+            return DB::connection($this->connection)->select('
                 SELECT TABLE_NAME as name, VIEW_DEFINITION as definition
                 FROM information_schema.VIEWS
                 WHERE TABLE_SCHEMA = DATABASE()
-            ");
+            ');
         } catch (\Exception $e) {
             return [];
         }
@@ -24,7 +24,7 @@ class MySQLSchemaDriver extends DatabaseSchemaDriver
     public function getStoredProcedures(): array
     {
         try {
-            return DB::connection($this->connection)->select("SHOW PROCEDURE STATUS WHERE Db = DATABASE()");
+            return DB::connection($this->connection)->select('SHOW PROCEDURE STATUS WHERE Db = DATABASE()');
         } catch (\Exception $e) {
             return [];
         }
@@ -33,20 +33,20 @@ class MySQLSchemaDriver extends DatabaseSchemaDriver
     public function getFunctions(): array
     {
         try {
-            return DB::connection($this->connection)->select("SHOW FUNCTION STATUS WHERE Db = DATABASE()");
+            return DB::connection($this->connection)->select('SHOW FUNCTION STATUS WHERE Db = DATABASE()');
         } catch (\Exception $e) {
             return [];
         }
     }
 
-    public function getTriggers(string $table = null): array
+    public function getTriggers(?string $table = null): array
     {
         try {
             if ($table) {
-                return DB::connection($this->connection)->select("SHOW TRIGGERS WHERE `Table` = ?", [$table]);
+                return DB::connection($this->connection)->select('SHOW TRIGGERS WHERE `Table` = ?', [$table]);
             }
 
-            return DB::connection($this->connection)->select("SHOW TRIGGERS");
+            return DB::connection($this->connection)->select('SHOW TRIGGERS');
         } catch (\Exception $e) {
             return [];
         }
@@ -55,12 +55,12 @@ class MySQLSchemaDriver extends DatabaseSchemaDriver
     public function getCheckConstraints(string $table): array
     {
         try {
-            return DB::connection($this->connection)->select("
+            return DB::connection($this->connection)->select('
                 SELECT CONSTRAINT_NAME, CHECK_CLAUSE
                 FROM information_schema.CHECK_CONSTRAINTS
                 WHERE CONSTRAINT_SCHEMA = DATABASE()
                 AND TABLE_NAME = ?
-            ", [$table]);
+            ', [$table]);
         } catch (\Exception $e) {
             return [];
         }
