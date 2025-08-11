@@ -183,9 +183,9 @@ class InstallCommand extends Command
         $allData = array_merge($ideNames, $agentNames, $boostFeatures, $guidelines);
 
         // Create compact CSV string and base64 encode
-        $trackingData = base64_encode(implode(',', $allData));
+        $installData = base64_encode(implode(',', $allData));
 
-        $link = $this->hyperlink($label, 'https://boost.laravel.com/installed/?d='.$trackingData);
+        $link = $this->hyperlink($label, 'https://boost.laravel.com/installed/?d='.$installData);
 
         $text = 'Enjoy the boost 🚀 ';
         $paddingLength = (int) (floor(($this->terminal->cols() - mb_strlen($text.$label)) / 2)) - 2;
