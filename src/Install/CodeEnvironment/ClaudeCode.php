@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Install\CodeEnvironment;
 
-use Laravel\Boost\Install\Contracts\CodeEnvironment;
 use Laravel\Boost\Install\Enums\DetectionType;
 use Laravel\Boost\Install\Enums\Platform;
 
@@ -39,7 +38,7 @@ class ClaudeCode extends CodeEnvironment
         return [
             'paths' => ['.claude'],
             'files' => ['CLAUDE.md'],
-            'types' => [DetectionType::Directory, DetectionType::File],
+            'type' => [DetectionType::Directory, DetectionType::File],
         ];
     }
 }
