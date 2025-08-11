@@ -53,9 +53,9 @@ class InstallCommand extends Command
     private string $projectPurpose = '';
 
     /** @var array<non-empty-string> */
-    private array $systemInstalledDevelopemntEnvironemnts = [];
+    private array $systemInstalledCodeEnvironemnts = [];
 
-    private array $projectInstalledDevelopmentEnironments = [];
+    private array $projectInstalledCodeEnvironments = [];
 
     private bool $enforceTests = true;
 
@@ -114,8 +114,8 @@ class InstallCommand extends Command
 
     private function discoverEnvironment(): void
     {
-        $this->systemInstalledDevelopemntEnvironemnts = $this->discoverSystemInstalledIdes();
-        $this->projectInstalledDevelopmentEnironments = $this->discoverIdesUsedInProject();
+        $this->systemInstalledCodeEnvironemnts = $this->discoverSystemInstalledCodeEnvironments();
+        $this->projectInstalledCodeEnvironments = $this->discoverProjectInstalledCodeEnvironemnts();
         $this->projectInstalledAgents = $this->discoverProjectAgents();
     }
 
@@ -148,7 +148,7 @@ class InstallCommand extends Command
     /**
      * Which IDEs are installed on this developer's machine?
      */
-    private function discoverSystemInstalledIdes(): array
+    private function discoverSystemInstalledCodeEnvironments(): array
     {
         return $this->codeEnvironmentsDetector->discoverSystemInstalledCodeEnvironements();
     }
@@ -157,7 +157,7 @@ class InstallCommand extends Command
      * Specifically want to detect what's in use in _this_ project.
      * Just because they have claude code installed doesn't mean they're using it.
      */
-    private function discoverIdesUsedInProject(): array
+    private function discoverProjectInstalledCodeEnvironemnts(): array
     {
         return $this->codeEnvironmentsDetector->discoverProjectInstalledCodeEnvironements(base_path());
     }
@@ -321,7 +321,7 @@ class InstallCommand extends Command
         }
 
         // Also check installed IDEs that might not have project files yet
-        foreach ($this->systemInstalledDevelopemntEnvironemnts as $ide) {
+        foreach ($this->systemInstalledCodeEnvironemnts as $ide) {
             if (isset($ideToAgentMap[$ide]) && ! in_array($ideToAgentMap[$ide], $agents)) {
                 $agents[] = $ideToAgentMap[$ide];
             }
@@ -363,7 +363,7 @@ class InstallCommand extends Command
 
         // Map detected IDE keys to class names
         $detectedClasses = [];
-        foreach ($this->projectInstalledDevelopmentEnironments as $ideKey) {
+        foreach ($this->projectInstalledCodeEnvironments as $ideKey) {
             foreach ($ides as $className => $displayName) {
                 if (strtolower($ideKey) === strtolower(class_basename($className))) {
                     $detectedClasses[] = $className;
@@ -417,7 +417,7 @@ class InstallCommand extends Command
 
         // Filter agents to only show those that are installed (for Windsurf)
         $filteredAgents = $agents;
-        if (! in_array('windsurf', $this->systemInstalledDevelopemntEnvironemnts) && ! in_array('windsurf', $this->projectInstalledAgents)) {
+        if (! in_array('windsurf', $this->systemInstalledCodeEnvironemnts) && ! in_array('windsurf', $this->projectInstalledAgents)) {
             unset($filteredAgents['Laravel\\Boost\\Install\\Agents\\Windsurf']);
         }
 
