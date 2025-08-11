@@ -14,11 +14,11 @@ it('is true', function () {
 </code-snippet>
 
 # Running Tests
-- Run the minimal number of tests, using an appropriate filter, before finalizing.
+- Run the minimal number of tests, using an appropriate filter, before finalizing code edits.
 - Run all tests: `php artisan test`.
 - Run all tests in a file: `php artisan test tests/Feature/ExampleTest.php`.
 - Filter on particular test name: `php artisan test --filter=testName` (recommended after making a change to a related file).
-- When the tests relating to your feature are passing, make sure to also run the entire test suite to ensure everything is still passing.
+- When the tests relating to your changes are passing, ask the user if they'd like to run the entire test suite to ensure everything is still passing.
 
 ## Pest Assertions
 - When asserting status codes on a response, use the specific method like `assertForbidden`, `assertNotFound` etc, instead of using `assertStatus(403)` or similar, e.g.:

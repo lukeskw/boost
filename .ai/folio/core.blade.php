@@ -6,16 +6,17 @@ i.e. Pages are in `resources/views/pages/`. The file structure determines routes
 - `pages/auth/login.blade.php` → `/auth/login`
 - List available Folio routes using `artisan folio:list` or using Boost's `list-routes` tool.
 
-### New pages & routes
+### Folio: New pages & routes
 - Always create new `folio` pages and routes using `artisan folio:page [name]` following existing naming conventions.
 
 @verbatim
 <code-snippet name="Example folio:page commands for automatic routing" lang="shell">
+    // Creates: resources/views/pages/products.blade.php → /products
     php artisan folio:page 'products'
-    # Creates: resources/views/pages/products.blade.php → /products
 
+
+    // Creates: resources/views/pages/products/[id].blade.php → /products/{id}
     php artisan folio:page 'products/[id]'
-    # Creates: resources/views/pages/products/[id].blade.php → /products/{id}
 </code-snippet>
 @endverbatim
 
@@ -29,7 +30,7 @@ name('products.index');
 @endverbatim
 
 
-### Support & Docs
+### Folio: Support & Docs
 - Folio supports: middleware, serving pages from multiple paths, subdomain routing, named routes, nested routes, index routes, route parameters, and route model binding.
 - If available, use Boost's `search-docs` tool to use Folio to its full potential and help the user effectively.
 
