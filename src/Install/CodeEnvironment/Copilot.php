@@ -10,7 +10,6 @@ use Laravel\Boost\Install\Enums\Platform;
 
 class Copilot extends CodeEnvironment
 {
-
     public function name(): string
     {
         return 'copilot';
@@ -42,6 +41,5 @@ class Copilot extends CodeEnvironment
     {
         return false;
     }
-
 
 }

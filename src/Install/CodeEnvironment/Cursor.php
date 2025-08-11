@@ -10,7 +10,6 @@ use Laravel\Boost\Install\Enums\Platform;
 
 class Cursor extends CodeEnvironment
 {
-
     public function name(): string
     {
         return 'cursor';
@@ -53,6 +52,5 @@ class Cursor extends CodeEnvironment
             'type' => DetectionType::Directory,
         ];
     }
-
 
 }

@@ -10,7 +10,6 @@ use Laravel\Boost\Install\Enums\Platform;
 
 class Zed extends CodeEnvironment
 {
-
     public function name(): string
     {
         return 'zed';
@@ -53,6 +52,5 @@ class Zed extends CodeEnvironment
             'type' => DetectionType::Directory,
         ];
     }
-
 
 }

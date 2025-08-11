@@ -19,7 +19,7 @@ class DetectionStrategyFactory
     {
         if (is_array($type)) {
             return new CompositeDetectionStrategy(
-                array_map(fn($singleType) => $this->make($singleType), $type)
+                array_map(fn ($singleType) => $this->make($singleType), $type)
             );
         }
 

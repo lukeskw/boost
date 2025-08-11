@@ -10,7 +10,6 @@ use Laravel\Boost\Install\Enums\Platform;
 
 class Windsurf extends CodeEnvironment
 {
-
     public function name(): string
     {
         return 'windsurf';
@@ -54,6 +53,5 @@ class Windsurf extends CodeEnvironment
             'type' => DetectionType::File,
         ];
     }
-
 
 }

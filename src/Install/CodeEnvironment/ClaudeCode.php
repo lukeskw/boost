@@ -10,7 +10,6 @@ use Laravel\Boost\Install\Enums\Platform;
 
 class ClaudeCode extends CodeEnvironment
 {
-
     public function name(): string
     {
         return 'claudecode';
@@ -43,8 +42,6 @@ class ClaudeCode extends CodeEnvironment
             'types' => [DetectionType::Directory, DetectionType::File],
         ];
     }
-
-
 
     public function detectInProject(string $basePath): bool
     {

@@ -80,12 +80,12 @@ test('creates composite strategy from mixed array', function () {
 });
 
 test('throws exception for unknown string type', function () {
-    expect(fn() => $this->factory->make('unknown'))
+    expect(fn () => $this->factory->make('unknown'))
         ->toThrow(\ValueError::class);
 });
 
 test('throws exception for invalid enum value', function () {
-    expect(fn() => $this->factory->make('invalid_type'))
+    expect(fn () => $this->factory->make('invalid_type'))
         ->toThrow(\ValueError::class);
 });
 

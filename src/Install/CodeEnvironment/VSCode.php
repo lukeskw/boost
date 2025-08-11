@@ -10,7 +10,6 @@ use Laravel\Boost\Install\Enums\Platform;
 
 class VSCode extends CodeEnvironment
 {
-
     public function name(): string
     {
         return 'vscode';
@@ -49,6 +48,5 @@ class VSCode extends CodeEnvironment
             'type' => DetectionType::Directory,
         ];
     }
-
 
 }

@@ -126,7 +126,7 @@ test('detects files with special characters', function () {
 
 function removeDirectoryForFileTests(string $dir): void
 {
-    if (!is_dir($dir)) {
+    if (! is_dir($dir)) {
         return;
     }
 

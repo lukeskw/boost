@@ -195,7 +195,7 @@ test('identifies absolute paths correctly', function () {
 
 function removeDirectory(string $dir): void
 {
-    if (!is_dir($dir)) {
+    if (! is_dir($dir)) {
         return;
     }
 

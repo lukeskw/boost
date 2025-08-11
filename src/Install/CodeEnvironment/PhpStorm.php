@@ -10,7 +10,6 @@ use Laravel\Boost\Install\Enums\Platform;
 
 class PhpStorm extends CodeEnvironment
 {
-
     public function name(): string
     {
         return 'phpstorm';
@@ -54,6 +53,5 @@ class PhpStorm extends CodeEnvironment
             'type' => DetectionType::Directory,
         ];
     }
-
 
 }
