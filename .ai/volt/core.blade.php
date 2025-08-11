@@ -4,7 +4,7 @@
 - You must check existing Volt components to find out if they're functional or class based. If you can't detect that, ask the user which they prefer before writing a Volt component.
 
 
-#### Volt Functional Component Example
+## Volt Functional Component Example
 @verbatim
 <code-snippet name="Volt Functional Component Example" lang="php">
 @volt
@@ -29,7 +29,7 @@ $double = computed(fn () => $this->count * 2);
 </code-snippet>
 @endverbatim
 
-### Volt Class based Component Example
+## Volt Class based Component Example
 To get started, define an anonymous class that extends Livewire\Volt\Component. Within the class, you may utilize all of the features of Livewire using traditional Livewire syntax:
 
 @verbatim
@@ -52,7 +52,7 @@ new class extends Component {
 </code-snippet>
 @endverbatim
 
-#### Testing Volt & Volt Components
+### Testing Volt & Volt Components
 - Use the existing location if tests already exist, otherwise fallback to `tests/Feature/Volt`
 
 <code-snippet name="Livewire Test Example" lang="php">
@@ -89,7 +89,7 @@ test('product form creates product', function () {
 </code-snippet>
 @endverbatim
 
-### Common Patterns
+## Common Patterns
 
 @verbatim
 <code-snippet name="CRUD with Volt" lang="php">
