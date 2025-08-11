@@ -65,7 +65,6 @@ You're ready to go!
 | Livewire | core, v2, v3 |
 | Flux UI | core, free, pro |
 | Herd | core |
-| Filament | core, v3, v4 |
 | Inertia Laravel | core, v1, v2 |
 | Inertia React | core, v1, v2 |
 | Inertia Vue | core, v1, v2 |
@@ -83,7 +82,6 @@ You're ready to go!
 | Package | Versions Supported |
 |---------|-------------------|
 | Laravel Framework | v10, v11, v12 |
-| Filament | v3, v4 |
 | Flux UI | v2 Free, v2 Pro |
 | Inertia | v1, v2 |
 | Livewire | v1, v2, v3 |
