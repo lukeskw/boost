@@ -56,7 +56,7 @@ class DetectionStrategyFactory
 
         if (empty($types)) {
             throw new InvalidArgumentException(
-                'Cannot infer detection type from config keys. Expected one of: ' . collect($typeMap)->keys()->join(', ')
+                'Cannot infer detection type from config keys. Expected one of: '.collect($typeMap)->keys()->join(', ')
             );
         }
 
