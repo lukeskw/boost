@@ -16,9 +16,7 @@ class SearchDocs extends Tool
 {
     use MakesHttpRequests;
 
-    public function __construct(protected Roster $roster)
-    {
-    }
+    public function __construct(protected Roster $roster) {}
 
     public function description(): string
     {
@@ -29,7 +27,7 @@ class SearchDocs extends Tool
     {
         return $schema
             ->string('queries')
-            ->description('### separated list of queries to perform. Useful to pass multiple if you aren\'t sure if it is "toggle" or "switch, or "infinite scroll" or "infinite load", for example.')->required()
+            ->description('### separated list of queries to perform. Useful to pass multiple if you aren\'t sure if it is "toggle" or "switch", or "infinite scroll" or "infinite load", for example.')->required()
 
             ->raw('packages', [
                 'description' => 'Package names to limit searching to from application-info. Useful if you know the package(s) you need. i.e. laravel/framework, inertiajs/inertia-laravel, @inertiajs/react',
@@ -100,18 +98,6 @@ class SearchDocs extends Tool
             return ToolResult::error('HTTP request failed: '.$e->getMessage());
         }
 
-        $data = $response->json();
-        $results = $data['results'] ?? [];
-
-        /** @var array<int, array{content?: string}> $results */
-        $concatenatedKnowledge = collect($results)
-            ->map(fn ($result) => $result['content'] ?? '')
-            ->filter()
-            ->join("\n\n---\n\n");
-
-        return ToolResult::json([
-            'knowledge_count' => count($results),
-            'knowledge' => $concatenatedKnowledge,
-        ]);
+        return ToolResult::text($response->body());
     }
 }
