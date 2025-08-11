@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Laravel\Boost\Install\Detection;
 
 use Laravel\Boost\Install\Contracts\DetectionStrategy;
+use Laravel\Boost\Install\Enums\Platform;
 
 class CompositeDetectionStrategy implements DetectionStrategy
 {
@@ -15,7 +16,7 @@ class CompositeDetectionStrategy implements DetectionStrategy
     {
     }
 
-    public function detect(array $config, ?string $platform = null): bool
+    public function detect(array $config, ?Platform $platform = null): bool
     {
         foreach ($this->strategies as $strategy) {
             if ($strategy->detect($config, $platform)) {

@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Laravel\Boost\Install\Detection;
 
 use Laravel\Boost\Install\Contracts\DetectionStrategy;
+use Laravel\Boost\Install\Enums\Platform;
 
 class DirectoryDetectionStrategy implements DetectionStrategy
 {
-    public function detect(array $config, ?string $platform = null): bool
+    public function detect(array $config, ?Platform $platform = null): bool
     {
         if (! isset($config['paths'])) {
             return false;
@@ -37,9 +38,9 @@ class DirectoryDetectionStrategy implements DetectionStrategy
         return false;
     }
 
-    private function expandPath(string $path, ?string $platform = null): string
+    private function expandPath(string $path, ?Platform $platform = null): string
     {
-        if ($platform === 'windows') {
+        if ($platform === Platform::Windows) {
             return preg_replace_callback('/%([^%]+)%/', function ($matches) {
                 return getenv($matches[1]) ?: $matches[0];
             }, $path);

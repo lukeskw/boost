@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Laravel\Boost\Install\Detection\DirectoryDetectionStrategy;
+use Laravel\Boost\Install\Enums\Platform;
 
 beforeEach(function () {
     $this->strategy = new DirectoryDetectionStrategy();
@@ -159,7 +160,7 @@ test('expands windows environment variables', function () {
     try {
         $result = $this->strategy->detect([
             'paths' => ['%TESTVAR%/windows_test'],
-        ], 'windows');
+        ], Platform::Windows);
 
         expect($result)->toBeTrue();
     } finally {
@@ -170,7 +171,7 @@ test('expands windows environment variables', function () {
 test('handles missing environment variable on windows', function () {
     $result = $this->strategy->detect([
         'paths' => ['%NONEXISTENT%/test'],
-    ], 'windows');
+    ], Platform::Windows);
 
     expect($result)->toBeFalse();
 });

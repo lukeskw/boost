@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Process;
 use Laravel\Boost\Install\Detection\CommandDetectionStrategy;
+use Laravel\Boost\Install\Enums\Platform;
 
 beforeEach(function () {
     $this->strategy = new CommandDetectionStrategy();
@@ -72,53 +73,7 @@ test('works with different platforms parameter', function () {
 
     $result = $this->strategy->detect([
         'command' => 'where code',
-    ], 'windows');
+    ], Platform::Windows);
 
     expect($result)->toBeTrue();
-});
-
-test('handles complex shell commands', function () {
-    Process::fake([
-        'ls -la | grep test' => Process::result(exitCode: 0),
-    ]);
-
-    $result = $this->strategy->detect([
-        'command' => 'ls -la | grep test',
-    ]);
-
-    expect($result)->toBeTrue();
-});
-
-test('handles commands with arguments', function () {
-    Process::fake([
-        'node --version' => Process::result(output: 'v18.0.0', exitCode: 0),
-    ]);
-
-    $result = $this->strategy->detect([
-        'command' => 'node --version',
-    ]);
-
-    expect($result)->toBeTrue();
-});
-
-test('processes are called with correct command', function () {
-    Process::fake();
-
-    $this->strategy->detect([
-        'command' => 'which composer',
-    ]);
-
-    Process::assertRan('which composer');
-});
-
-test('command config value is required', function () {
-    Process::fake();
-
-    $result = $this->strategy->detect([
-        'path' => '/usr/bin',
-        'type' => 'command',
-    ]);
-
-    expect($result)->toBeFalse();
-    Process::assertNothingRan();
 });

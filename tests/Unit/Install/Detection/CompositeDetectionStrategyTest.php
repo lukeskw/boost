@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Laravel\Boost\Install\Contracts\DetectionStrategy;
 use Laravel\Boost\Install\Detection\CompositeDetectionStrategy;
+use Laravel\Boost\Install\Enums\Platform;
 
 beforeEach(function () {
     $this->firstStrategy = Mockery::mock(DetectionStrategy::class);
@@ -62,19 +63,19 @@ test('returns false when all strategies fail', function () {
     $this->firstStrategy
         ->shouldReceive('detect')
         ->once()
-        ->with(['config' => 'value'], 'linux')
+        ->with(['config' => 'value'], Platform::Linux)
         ->andReturn(false);
 
     $this->secondStrategy
         ->shouldReceive('detect')
         ->once()
-        ->with(['config' => 'value'], 'linux')
+        ->with(['config' => 'value'], Platform::Linux)
         ->andReturn(false);
 
     $this->thirdStrategy
         ->shouldReceive('detect')
         ->once()
-        ->with(['config' => 'value'], 'linux')
+        ->with(['config' => 'value'], Platform::Linux)
         ->andReturn(false);
 
     $composite = new CompositeDetectionStrategy([
@@ -83,7 +84,7 @@ test('returns false when all strategies fail', function () {
         $this->thirdStrategy,
     ]);
 
-    $result = $composite->detect(['config' => 'value'], 'linux');
+    $result = $composite->detect(['config' => 'value'], Platform::Linux);
 
     expect($result)->toBeFalse();
 });
@@ -92,13 +93,13 @@ test('stops execution after first success', function () {
     $this->firstStrategy
         ->shouldReceive('detect')
         ->once()
-        ->with(['paths' => ['test']], 'darwin')
+        ->with(['paths' => ['test']], Platform::Darwin)
         ->andReturn(false);
 
     $this->secondStrategy
         ->shouldReceive('detect')
         ->once()
-        ->with(['paths' => ['test']], 'darwin')
+        ->with(['paths' => ['test']], Platform::Darwin)
         ->andReturn(true);
 
     $this->thirdStrategy
@@ -110,7 +111,7 @@ test('stops execution after first success', function () {
         $this->thirdStrategy,
     ]);
 
-    $result = $composite->detect(['paths' => ['test']], 'darwin');
+    $result = $composite->detect(['paths' => ['test']], Platform::Darwin);
 
     expect($result)->toBeTrue();
 });
@@ -143,13 +144,13 @@ test('passes platform parameter to all strategies', function () {
     $this->firstStrategy
         ->shouldReceive('detect')
         ->once()
-        ->with(['config' => 'test'], 'windows')
+        ->with(['config' => 'test'], Platform::Windows)
         ->andReturn(false);
 
     $this->secondStrategy
         ->shouldReceive('detect')
         ->once()
-        ->with(['config' => 'test'], 'windows')
+        ->with(['config' => 'test'], Platform::Windows)
         ->andReturn(false);
 
     $composite = new CompositeDetectionStrategy([
@@ -157,7 +158,7 @@ test('passes platform parameter to all strategies', function () {
         $this->secondStrategy,
     ]);
 
-    $result = $composite->detect(['config' => 'test'], 'windows');
+    $result = $composite->detect(['config' => 'test'], Platform::Windows);
 
     expect($result)->toBeFalse();
 });

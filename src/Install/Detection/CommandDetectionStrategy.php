@@ -6,10 +6,11 @@ namespace Laravel\Boost\Install\Detection;
 
 use Illuminate\Support\Facades\Process;
 use Laravel\Boost\Install\Contracts\DetectionStrategy;
+use Laravel\Boost\Install\Enums\Platform;
 
 class CommandDetectionStrategy implements DetectionStrategy
 {
-    public function detect(array $config, ?string $platform = null): bool
+    public function detect(array $config, ?Platform $platform = null): bool
     {
         if (! isset($config['command'])) {
             return false;
