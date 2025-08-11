@@ -603,6 +603,6 @@ class InstallCommand extends Command
         $actuallyUsing = false;
 
         /** @phpstan-ignore-next-line  */
-        return is_dir(base_path('lang')) && $actuallyUsing;
+        return $actuallyUsing && is_dir(base_path('lang'));
     }
 }

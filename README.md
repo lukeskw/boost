@@ -46,24 +46,24 @@ TODO: the command that allows that
 
 ## Current MCP Tools
 
-| Name                       | Notes                                                        |
-| -------------------------- | ------------------------------------------------------------ |
+| Name                       | Notes                                                                                                          |
+| -------------------------- |----------------------------------------------------------------------------------------------------------------|
 | Application Info           | Shares PHP & Laravel versions, database engine, list of ecosystem packages with versions, and Eloquent models. |
-| Browser Logs               | Read logs & errors from the browser                          |
-| Database Connections       | List database connections, and the default                   |
-| Database Query             |                                                              |
-| Database Schema            |                                                              |
-| Get Absolute Url           | Converts relative path to absolute so AI doesn't give you invalid URLs |
-| Get Config                 | Get specific value from config using dot notation            |
-| Last Error                 | From the log files                                           |
-| List Artisan Commands      |                                                              |
-| List Available Config Keys |                                                              |
-| List Available Env Vars    | Keys only                                                    |
-| List Routes                | Regular & folio routes are combined. Ability to filter routes too |
-| Read Log Entries           | Last X entries                                               |
-| Report Feedback            | Share Boost & Laravel AI feedback with the team              |
-| Search Docs                | Use hosted API service to retrieve docs based on installed packages |
-| Tinker                     | Run arbitrary code within the context of the project         |
+| Browser Logs               | Read logs & errors from the browser                                                                            |
+| Database Connections       | List database connections, and the default                                                                     |
+| Database Query             |                                                                                                                |
+| Database Schema            |                                                                                                                |
+| Get Absolute Url           | Converts relative path to absolute so AI doesn't give you invalid URLs                                         |
+| Get Config                 | Get specific value from config using dot notation                                                              |
+| Last Error                 | From the log files                                                                                             |
+| List Artisan Commands      |                                                                                                                |
+| List Available Config Keys |                                                                                                                |
+| List Available Env Vars    | Keys only                                                                                                      |
+| List Routes                | Regular & folio routes are combined. Ability to filter routes too                                              |
+| Read Log Entries           | Last X entries                                                                                                 |
+| Report Feedback            | Share Boost & Laravel AI feedback with the team, just say "give Boost feedback: x, y, and z"                    |
+| Search Docs                | Use hosted API service to retrieve docs based on installed packages                                            |
+| Tinker                     | Run arbitrary code within the context of the project                                                           |
 
 
 ## Adding your own AI guidelines
