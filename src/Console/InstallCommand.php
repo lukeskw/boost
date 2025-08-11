@@ -9,8 +9,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
-use Laravel\Boost\Install\ApplicationDetector;
 use Laravel\Boost\Install\Cli\DisplayHelper;
+use Laravel\Boost\Install\CodeEnvironementsDetector;
 use Laravel\Boost\Install\GuidelineComposer;
 use Laravel\Boost\Install\GuidelineConfig;
 use Laravel\Boost\Install\GuidelineWriter;
@@ -32,7 +32,7 @@ class InstallCommand extends Command
 {
     use Colors;
 
-    private ApplicationDetector $appDetector;
+    private CodeEnvironementsDetector $appDetector;
 
     private Herd $herd;
 
@@ -53,32 +53,32 @@ class InstallCommand extends Command
     private string $projectPurpose = '';
 
     /** @var array<non-empty-string> */
-    private array $installedIdes = [];
+    private array $systemInstalledDevelopemntEnvironemnts = [];
 
-    private array $detectedProjectIdes = [];
+    private array $projectInstalledDevelopmentEnironments = [];
 
     private bool $enforceTests = true;
 
     private array $boostToolsToDisable = [];
 
-    private array $detectedProjectAgents = [];
+    private array $projectInstalledAgents = [];
 
     private string $greenTick;
 
     private string $redCross;
 
-    public function handle(ApplicationDetector $appDetector, Herd $herd, Roster $roster, Terminal $terminal): void
+    public function handle(CodeEnvironementsDetector $appDetector, Herd $herd, Roster $roster, Terminal $terminal): void
     {
         $this->bootstrapBoost($appDetector, $herd, $roster, $terminal);
 
         $this->displayBoostHeader();
-        $this->detect();
+        $this->discoverEnvironment();
         $this->query();
         $this->enact();
         $this->outro();
     }
 
-    private function bootstrapBoost(ApplicationDetector $appDetector, Herd $herd, Roster $roster, Terminal $terminal): void
+    private function bootstrapBoost(CodeEnvironementsDetector $appDetector, Herd $herd, Roster $roster, Terminal $terminal): void
     {
         $this->appDetector = $appDetector;
         $this->herd = $herd;
@@ -112,11 +112,11 @@ class InstallCommand extends Command
         HEADER;
     }
 
-    private function detect()
+    private function discoverEnvironment(): void
     {
-        $this->installedIdes = $this->detectInstalledIdes();
-        $this->detectedProjectIdes = $this->detectIdesUsedInProject();
-        $this->detectedProjectAgents = $this->detectProjectAgents();
+        $this->systemInstalledDevelopemntEnvironemnts = $this->discoverSystemInstalledIdes();
+        $this->projectInstalledDevelopmentEnironments = $this->discoverIdesUsedInProject();
+        $this->projectInstalledAgents = $this->discoverProjectAgents();
     }
 
     private function query()
@@ -148,18 +148,18 @@ class InstallCommand extends Command
     /**
      * Which IDEs are installed on this developer's machine?
      */
-    private function detectInstalledIdes(): array
+    private function discoverSystemInstalledIdes(): array
     {
-        return $this->appDetector->detectInstalled();
+        return $this->appDetector->discoverSystemInstalledCodeEnvironements();
     }
 
     /**
      * Specifically want to detect what's in use in _this_ project.
      * Just because they have claude code installed doesn't mean they're using it.
      */
-    private function detectIdesUsedInProject(): array
+    private function discoverIdesUsedInProject(): array
     {
-        return $this->appDetector->detectInProject(base_path());
+        return $this->appDetector->discoverProjectInstalledCodeEnvironements(base_path());
     }
 
     private function discoverTools(): array
@@ -300,10 +300,10 @@ class InstallCommand extends Command
     /**
      * @return array<int, string>
      */
-    protected function detectProjectAgents(): array
+    private function discoverProjectAgents(): array
     {
         $agents = [];
-        $projectAgents = $this->appDetector->detectInProject(base_path());
+        $projectAgents = $this->appDetector->discoverProjectInstalledCodeEnvironements(base_path());
 
         // Map IDE detections to their corresponding agents
         $ideToAgentMap = [
@@ -321,7 +321,7 @@ class InstallCommand extends Command
         }
 
         // Also check installed IDEs that might not have project files yet
-        foreach ($this->installedIdes as $ide) {
+        foreach ($this->systemInstalledDevelopemntEnvironemnts as $ide) {
             if (isset($ideToAgentMap[$ide]) && ! in_array($ideToAgentMap[$ide], $agents)) {
                 $agents[] = $ideToAgentMap[$ide];
             }
@@ -333,7 +333,7 @@ class InstallCommand extends Command
     /**
      * @return Collection<int, \Laravel\Boost\Contracts\Ide>
      */
-    protected function idesToInstallTo(): Collection
+    private function idesToInstallTo(): Collection
     {
         $ides = [];
         if (! $this->installingMcp() && ! $this->installingHerdMcp()) {
@@ -363,7 +363,7 @@ class InstallCommand extends Command
 
         // Map detected IDE keys to class names
         $detectedClasses = [];
-        foreach ($this->detectedProjectIdes as $ideKey) {
+        foreach ($this->projectInstalledDevelopmentEnironments as $ideKey) {
             foreach ($ides as $className => $displayName) {
                 if (strtolower($ideKey) === strtolower(class_basename($className))) {
                     $detectedClasses[] = $className;
@@ -387,7 +387,7 @@ class InstallCommand extends Command
     /**
      * @return Collection<int, \Laravel\Boost\Contracts\Agent>
      */
-    protected function agentsToInstallTo(): Collection
+    private function agentsToInstallTo(): Collection
     {
         $agents = [];
         if (! $this->installingGuidelines()) {
@@ -417,13 +417,13 @@ class InstallCommand extends Command
 
         // Filter agents to only show those that are installed (for Windsurf)
         $filteredAgents = $agents;
-        if (! in_array('windsurf', $this->installedIdes) && ! in_array('windsurf', $this->detectedProjectAgents)) {
+        if (! in_array('windsurf', $this->systemInstalledDevelopemntEnvironemnts) && ! in_array('windsurf', $this->projectInstalledAgents)) {
             unset($filteredAgents['Laravel\\Boost\\Install\\Agents\\Windsurf']);
         }
 
         // Map detected agent keys to class names
         $detectedClasses = [];
-        foreach ($this->detectedProjectAgents as $agentKey) {
+        foreach ($this->projectInstalledAgents as $agentKey) {
             foreach ($agents as $className => $displayName) {
                 if (strtolower($agentKey) === strtolower(class_basename($className))) {
                     $detectedClasses[] = $className;

@@ -2,63 +2,130 @@
 
 declare(strict_types=1);
 
-use Laravel\Boost\Install\ApplicationDetector;
+use Laravel\Boost\Install\CodeEnvironementsDetector;
+use Laravel\Boost\Install\Contracts\CodeEnvironment;
+use Laravel\Boost\Install\Enums\Platform;
 
 beforeEach(function () {
-    $this->detector = new ApplicationDetector;
+    $this->container = new \Illuminate\Container\Container();
+    $this->detector = new CodeEnvironementsDetector($this->container);
 });
 
-test('getPlatform returns correct platform identifier', function () {
-    $reflection = new ReflectionClass($this->detector);
-    $method = $reflection->getMethod('getPlatform');
-    $method->setAccessible(true);
-
-    $platform = $method->invoke($this->detector);
-
-    expect($platform)->toBeIn(['darwin', 'linux', 'windows']);
+afterEach(function () {
+    Mockery::close();
 });
 
-test('expandPath expands Windows environment variables', function () {
-    $reflection = new ReflectionClass($this->detector);
-    $method = $reflection->getMethod('expandPath');
-    $method->setAccessible(true);
+test('discoverSystemInstalledCodeEnvironements returns detected programs', function () {
+    // Create mock programs
+    $program1 = Mockery::mock(CodeEnvironment::class);
+    $program1->shouldReceive('detectOnSystem')->with(Mockery::type(Platform::class))->andReturn(true);
+    $program1->shouldReceive('name')->andReturn('phpstorm');
 
-    // Mock environment variable
-    putenv('TEST_VAR=C:\\TestPath');
+    $program2 = Mockery::mock(CodeEnvironment::class);
+    $program2->shouldReceive('detectOnSystem')->with(Mockery::type(Platform::class))->andReturn(false);
+    $program2->shouldReceive('name')->andReturn('vscode');
 
-    $expanded = $method->invoke($this->detector, '%TEST_VAR%\\SubFolder', 'windows');
+    $program3 = Mockery::mock(CodeEnvironment::class);
+    $program3->shouldReceive('detectOnSystem')->with(Mockery::type(Platform::class))->andReturn(true);
+    $program3->shouldReceive('name')->andReturn('cursor');
 
-    expect($expanded)->toBe('C:\\TestPath\\SubFolder');
+    // Mock all other programs that might be instantiated
+    $otherProgram = Mockery::mock(CodeEnvironment::class);
+    $otherProgram->shouldReceive('detectOnSystem')->with(Mockery::type(Platform::class))->andReturn(false);
+    $otherProgram->shouldReceive('name')->andReturn('other');
 
-    // Clean up
-    putenv('TEST_VAR');
+    // Bind mocked programs to container
+    $container = new \Illuminate\Container\Container();
+    $container->bind(\Laravel\Boost\Install\CodeEnvironment\PhpStorm::class, fn () => $program1);
+    $container->bind(\Laravel\Boost\Install\CodeEnvironment\VSCode::class, fn () => $program2);
+    $container->bind(\Laravel\Boost\Install\CodeEnvironment\Cursor::class, fn () => $program3);
+    $container->bind(\Laravel\Boost\Install\CodeEnvironment\Windsurf::class, fn () => $otherProgram);
+    $container->bind(\Laravel\Boost\Install\CodeEnvironment\ClaudeCode::class, fn () => $otherProgram);
+    $container->bind(\Laravel\Boost\Install\CodeEnvironment\Zed::class, fn () => $otherProgram);
+    $container->bind(\Laravel\Boost\Install\CodeEnvironment\Copilot::class, fn () => $otherProgram);
+
+    $detector = new CodeEnvironementsDetector($container);
+    $detected = $detector->discoverSystemInstalledCodeEnvironements();
+
+    expect($detected)->toBe(['phpstorm', 'cursor']);
 });
 
-test('expandPath expands Unix home directory', function () {
-    $reflection = new ReflectionClass($this->detector);
-    $method = $reflection->getMethod('expandPath');
-    $method->setAccessible(true);
+test('discoverSystemInstalledCodeEnvironements returns empty array when no programs detected', function () {
+    $program1 = Mockery::mock(CodeEnvironment::class);
+    $program1->shouldReceive('detectOnSystem')->with(Mockery::type(Platform::class))->andReturn(false);
+    $program1->shouldReceive('name')->andReturn('phpstorm');
 
-    // Mock HOME environment variable
-    $originalHome = getenv('HOME');
-    putenv('HOME=/home/testuser');
+    // Mock all other programs that might be instantiated
+    $otherProgram = Mockery::mock(CodeEnvironment::class);
+    $otherProgram->shouldReceive('detectOnSystem')->with(Mockery::type(Platform::class))->andReturn(false);
+    $otherProgram->shouldReceive('name')->andReturn('other');
 
-    $expanded = $method->invoke($this->detector, '~/.config/app', 'linux');
+    // Bind mocked program to container
+    $container = new \Illuminate\Container\Container();
+    $container->bind(\Laravel\Boost\Install\CodeEnvironment\PhpStorm::class, fn() => $program1);
+    $container->bind(\Laravel\Boost\Install\CodeEnvironment\VSCode::class, fn() => $otherProgram);
+    $container->bind(\Laravel\Boost\Install\CodeEnvironment\Cursor::class, fn() => $otherProgram);
+    $container->bind(\Laravel\Boost\Install\CodeEnvironment\Windsurf::class, fn() => $otherProgram);
+    $container->bind(\Laravel\Boost\Install\CodeEnvironment\ClaudeCode::class, fn() => $otherProgram);
+    $container->bind(\Laravel\Boost\Install\CodeEnvironment\Zed::class, fn() => $otherProgram);
+    $container->bind(\Laravel\Boost\Install\CodeEnvironment\Copilot::class, fn() => $otherProgram);
 
-    expect($expanded)->toBe('/home/testuser/.config/app');
+    $detector = new CodeEnvironementsDetector($container);
+    $detected = $detector->discoverSystemInstalledCodeEnvironements();
 
-    // Restore original HOME
-    if ($originalHome) {
-        putenv("HOME=$originalHome");
-    }
+    expect($detected)->toBeEmpty();
 });
 
-test('detectInProject detects applications by directory', function () {
+test('discoverProjectInstalledCodeEnvironements detects programs in project', function () {
+    $basePath = '/path/to/project';
+
+    $program1 = Mockery::mock(CodeEnvironment::class);
+    $program1->shouldReceive('detectInProject')->with($basePath)->andReturn(true);
+    $program1->shouldReceive('name')->andReturn('vscode');
+
+    $program2 = Mockery::mock(CodeEnvironment::class);
+    $program2->shouldReceive('detectInProject')->with($basePath)->andReturn(false);
+    $program2->shouldReceive('name')->andReturn('phpstorm');
+
+    $program3 = Mockery::mock(CodeEnvironment::class);
+    $program3->shouldReceive('detectInProject')->with($basePath)->andReturn(true);
+    $program3->shouldReceive('name')->andReturn('claudecode');
+
+    // Bind mocked programs to container
+    $container = new \Illuminate\Container\Container();
+    $container->bind(\Laravel\Boost\Install\CodeEnvironment\VSCode::class, fn() => $program1);
+    $container->bind(\Laravel\Boost\Install\CodeEnvironment\PhpStorm::class, fn() => $program2);
+    $container->bind(\Laravel\Boost\Install\CodeEnvironment\ClaudeCode::class, fn() => $program3);
+
+    $detector = new CodeEnvironementsDetector($container);
+    $detected = $detector->discoverProjectInstalledCodeEnvironements($basePath);
+
+    expect($detected)->toBe(['vscode', 'claudecode']);
+});
+
+test('discoverProjectInstalledCodeEnvironements returns empty array when no programs detected in project', function () {
+    $basePath = '/path/to/project';
+
+    $program1 = Mockery::mock(CodeEnvironment::class);
+    $program1->shouldReceive('detectInProject')->with($basePath)->andReturn(false);
+    $program1->shouldReceive('name')->andReturn('vscode');
+
+    // Bind mocked program to container
+    $container = new \Illuminate\Container\Container();
+    $container->bind(\Laravel\Boost\Install\CodeEnvironment\VSCode::class, fn() => $program1);
+
+    $detector = new CodeEnvironementsDetector($container);
+    $detected = $detector->discoverProjectInstalledCodeEnvironements($basePath);
+
+    expect($detected)->toBeEmpty();
+});
+
+test('discoverProjectInstalledCodeEnvironements detects applications by directory', function () {
     $tempDir = sys_get_temp_dir().'/boost_test_'.uniqid();
     mkdir($tempDir);
     mkdir($tempDir.'/.vscode');
 
-    $detected = $this->detector->detectInProject($tempDir);
+    $detected = $this->detector->discoverProjectInstalledCodeEnvironements($tempDir);
 
     expect($detected)->toContain('vscode');
 
@@ -67,12 +134,12 @@ test('detectInProject detects applications by directory', function () {
     rmdir($tempDir);
 });
 
-test('detectInProject detects applications by file', function () {
+test('discoverProjectInstalledCodeEnvironements detects applications by file', function () {
     $tempDir = sys_get_temp_dir().'/boost_test_'.uniqid();
     mkdir($tempDir);
     file_put_contents($tempDir.'/.windsurfrules.md', 'test');
 
-    $detected = $this->detector->detectInProject($tempDir);
+    $detected = $this->detector->discoverProjectInstalledCodeEnvironements($tempDir);
 
     expect($detected)->toContain('windsurf');
 
@@ -81,12 +148,12 @@ test('detectInProject detects applications by file', function () {
     rmdir($tempDir);
 });
 
-test('detectInProject detects applications with mixed type', function () {
+test('discoverProjectInstalledCodeEnvironements detects applications with mixed type', function () {
     $tempDir = sys_get_temp_dir().'/boost_test_'.uniqid();
     mkdir($tempDir);
     file_put_contents($tempDir.'/CLAUDE.md', 'test');
 
-    $detected = $this->detector->detectInProject($tempDir);
+    $detected = $this->detector->discoverProjectInstalledCodeEnvironements($tempDir);
 
     expect($detected)->toContain('claudecode');
 
@@ -95,13 +162,13 @@ test('detectInProject detects applications with mixed type', function () {
     rmdir($tempDir);
 });
 
-test('detectInProject detects copilot with nested file path', function () {
+test('discoverProjectInstalledCodeEnvironements detects copilot with nested file path', function () {
     $tempDir = sys_get_temp_dir().'/boost_test_'.uniqid();
     mkdir($tempDir);
     mkdir($tempDir.'/.github');
     file_put_contents($tempDir.'/.github/copilot-instructions.md', 'test');
 
-    $detected = $this->detector->detectInProject($tempDir);
+    $detected = $this->detector->discoverProjectInstalledCodeEnvironements($tempDir);
 
     expect($detected)->toContain('copilot');
 
@@ -111,113 +178,79 @@ test('detectInProject detects copilot with nested file path', function () {
     rmdir($tempDir);
 });
 
-test('addDetectionConfig adds configuration for specific platform', function () {
-    $this->detector->addDetectionConfig('testapp', [
-        'paths' => ['/test/path'],
-        'type' => 'directory',
-    ], 'darwin');
+test('discoverProjectInstalledCodeEnvironements detects claude code with directory', function () {
+    $tempDir = sys_get_temp_dir().'/boost_test_'.uniqid();
+    mkdir($tempDir);
+    mkdir($tempDir.'/.claude');
 
-    $reflection = new ReflectionClass($this->detector);
-    $property = $reflection->getProperty('detectionConfig');
-    $property->setAccessible(true);
-    $config = $property->getValue($this->detector);
+    $detected = $this->detector->discoverProjectInstalledCodeEnvironements($tempDir);
 
-    expect($config['darwin'])->toHaveKey('testapp');
-    expect($config['darwin']['testapp']['paths'])->toContain('/test/path');
+    expect($detected)->toContain('claudecode');
+
+    // Cleanup
+    rmdir($tempDir.'/.claude');
+    rmdir($tempDir);
 });
 
-test('addDetectionConfig adds configuration for all platforms when platform is null', function () {
-    $this->detector->addDetectionConfig('testapp', [
-        'paths' => ['/test/path'],
-        'type' => 'directory',
-    ]);
+test('discoverProjectInstalledCodeEnvironements detects phpstorm with idea directory', function () {
+    $tempDir = sys_get_temp_dir().'/boost_test_'.uniqid();
+    mkdir($tempDir);
+    mkdir($tempDir.'/.idea');
 
-    $reflection = new ReflectionClass($this->detector);
-    $property = $reflection->getProperty('detectionConfig');
-    $property->setAccessible(true);
-    $config = $property->getValue($this->detector);
+    $detected = $this->detector->discoverProjectInstalledCodeEnvironements($tempDir);
 
-    expect($config['darwin'])->toHaveKey('testapp');
-    expect($config['linux'])->toHaveKey('testapp');
-    expect($config['windows'])->toHaveKey('testapp');
+    expect($detected)->toContain('phpstorm');
+
+    // Cleanup
+    rmdir($tempDir.'/.idea');
+    rmdir($tempDir);
 });
 
-test('addProjectDetectionConfig adds project detection configuration', function () {
-    $this->detector->addProjectDetectionConfig('testapp', [
-        'files' => ['.testapp'],
-        'type' => 'file',
-    ]);
+test('discoverProjectInstalledCodeEnvironements detects phpstorm with junie directory', function () {
+    $tempDir = sys_get_temp_dir().'/boost_test_'.uniqid();
+    mkdir($tempDir);
+    mkdir($tempDir.'/.junie');
 
-    $reflection = new ReflectionClass($this->detector);
-    $property = $reflection->getProperty('projectDetectionConfig');
-    $property->setAccessible(true);
-    $config = $property->getValue($this->detector);
+    $detected = $this->detector->discoverProjectInstalledCodeEnvironements($tempDir);
 
-    expect($config)->toHaveKey('testapp');
-    expect($config['testapp']['files'])->toContain('.testapp');
+    expect($detected)->toContain('phpstorm');
+
+    // Cleanup
+    rmdir($tempDir.'/.junie');
+    rmdir($tempDir);
 });
 
-test('detectInstalled respects platform-specific configuration', function () {
-    $detector = new ApplicationDetector;
+test('discoverProjectInstalledCodeEnvironements detects cursor with cursor directory', function () {
+    $tempDir = sys_get_temp_dir().'/boost_test_'.uniqid();
+    mkdir($tempDir);
+    mkdir($tempDir.'/.cursor');
 
-    // Get the actual platform
-    $reflection = new ReflectionClass($detector);
-    $getPlatform = $reflection->getMethod('getPlatform');
-    $getPlatform->setAccessible(true);
-    $platform = $getPlatform->invoke($detector);
+    $detected = $this->detector->discoverProjectInstalledCodeEnvironements($tempDir);
 
-    // Set up a test configuration with a non-existent path
-    $property = $reflection->getProperty('detectionConfig');
-    $property->setAccessible(true);
-    $property->setValue($detector, [
-        $platform => [
-            'testapp' => [
-                'paths' => ['/this/path/does/not/exist/testapp'],
-                'type' => 'directory',
-            ],
-        ],
-        // Different platform should not be detected
-        'other_platform' => [
-            'otherapp' => [
-                'paths' => ['/some/other/path'],
-                'type' => 'directory',
-            ],
-        ],
-    ]);
+    expect($detected)->toContain('cursor');
 
-    $detected = $detector->detectInstalled();
-
-    expect($detected)->not->toContain('testapp');
-    expect($detected)->not->toContain('otherapp');
+    // Cleanup
+    rmdir($tempDir.'/.cursor');
+    rmdir($tempDir);
 });
 
-test('detectInstalled returns empty array for unsupported platform', function () {
-    $detector = new ApplicationDetector;
+test('discoverProjectInstalledCodeEnvironements handles multiple detections', function () {
+    $tempDir = sys_get_temp_dir().'/boost_test_'.uniqid();
+    mkdir($tempDir);
+    mkdir($tempDir.'/.vscode');
+    mkdir($tempDir.'/.cursor');
+    file_put_contents($tempDir.'/CLAUDE.md', 'test');
 
-    // Clear detection config
-    $reflection = new ReflectionClass($detector);
-    $property = $reflection->getProperty('detectionConfig');
-    $property->setAccessible(true);
-    $property->setValue($detector, []);
+    $detected = $this->detector->discoverProjectInstalledCodeEnvironements($tempDir);
 
-    $detected = $detector->detectInstalled();
+    expect($detected)->toContain('vscode');
+    expect($detected)->toContain('cursor');
+    expect($detected)->toContain('claudecode');
+    expect(count($detected))->toBeGreaterThanOrEqual(3);
 
-    expect($detected)->toBeEmpty();
-});
-
-test('isAppInstalled handles wildcards in paths', function () {
-    $reflection = new ReflectionClass($this->detector);
-    $method = $reflection->getMethod('isAppInstalled');
-    $method->setAccessible(true);
-
-    // This test would need to mock glob() function, which is difficult
-    // In a real scenario, you might use a virtual file system
-    $config = [
-        'paths' => ['/nonexistent/path/*'],
-        'type' => 'directory',
-    ];
-
-    $result = $method->invoke($this->detector, $config, 'darwin');
-
-    expect($result)->toBeFalse();
+    // Cleanup
+    rmdir($tempDir.'/.vscode');
+    rmdir($tempDir.'/.cursor');
+    unlink($tempDir.'/CLAUDE.md');
+    rmdir($tempDir);
 });
