@@ -126,13 +126,13 @@ class InstallCommand extends Command
 
     private function enact(): void
     {
-        if ($this->installingGuidelines() && ! empty($this->selectedTargetAgents)) {
+        if ($this->shouldInstallAiGuidelines() && ! empty($this->selectedTargetAgents)) {
             $this->enactGuidelines();
         }
 
         usleep(750000);
 
-        if (($this->installingMcp() || $this->installingHerdMcp()) && $this->selectedTargetIdes->isNotEmpty()) {
+        if (($this->shouldInstallMcp() || $this->shouldInstallHerdMcp()) && $this->selectedTargetIdes->isNotEmpty()) {
             $this->enactMcpServers();
         }
     }
@@ -171,11 +171,11 @@ class InstallCommand extends Command
 
         // Guidelines installed (prefix: g)
         $guidelines = [];
-        if ($this->installingGuidelines()) {
+        if ($this->shouldInstallAiGuidelines()) {
             $guidelines[] = 'g:ai';
         }
 
-        if ($this->installingStyleGuidelines()) {
+        if ($this->shouldInstallStyleGuidelines()) {
             $guidelines[] = 'g:style';
         }
 
@@ -229,21 +229,20 @@ class InstallCommand extends Command
      */
     private function selectBoostFeatures(): Collection
     {
-        $defaultToInstallOptions = ['mcp_server', 'ai_guidelines'];
-        $toInstallOptions = [
+        $defaultInstallOptions = ['mcp_server', 'ai_guidelines'];
+        $installOptions = [
             'mcp_server' => 'Boost MCP Server',
             'ai_guidelines' => 'Package AI Guidelines (i.e. Framework, Inertia, Pest)',
-            //            'style_guidelines' => 'Laravel Style AI Guidelines',
         ];
 
         if ($this->herd->isMcpAvailable()) {
-            $toInstallOptions['herd_mcp'] = 'Herd MCP Server';
+            $installOptions['herd_mcp'] = 'Herd MCP Server';
         }
 
         return collect(multiselect(
             label: 'What shall we install?',
-            options: $toInstallOptions,
-            default: $defaultToInstallOptions,
+            options: $installOptions,
+            default: $defaultInstallOptions,
             required: true,
         ));
     }
@@ -401,7 +400,7 @@ class InstallCommand extends Command
 
     protected function enactGuidelines(): void
     {
-        if (! $this->installingGuidelines()) {
+        if (! $this->shouldInstallAiGuidelines()) {
             return;
         }
 
@@ -459,24 +458,22 @@ class InstallCommand extends Command
         }
     }
 
-    protected function installingGuidelines(): bool
+    private function shouldInstallAiGuidelines(): bool
     {
         return $this->selectedBoostFeatures->contains('ai_guidelines');
     }
 
-    protected function installingStyleGuidelines(): bool
+    private function shouldInstallStyleGuidelines(): bool
     {
         return false;
-
-        return $this->selectedBoostFeatures->contains('style_guidelines');
     }
 
-    protected function installingMcp(): bool
+    private function shouldInstallMcp(): bool
     {
         return $this->selectedBoostFeatures->contains('mcp_server');
     }
 
-    protected function installingHerdMcp(): bool
+    private function shouldInstallHerdMcp(): bool
     {
         return $this->selectedBoostFeatures->contains('herd_mcp');
     }
@@ -545,7 +542,7 @@ class InstallCommand extends Command
             $results = [];
 
             // Install Laravel Boost MCP if enabled
-            if ($this->installingMcp()) {
+            if ($this->shouldInstallMcp()) {
                 try {
                     $result = $ide->installMcp('laravel-boost', 'php', ['./artisan', 'boost:mcp']);
 
@@ -562,7 +559,7 @@ class InstallCommand extends Command
             }
 
             // Install Herd MCP if enabled
-            if ($this->installingHerdMcp()) {
+            if ($this->shouldInstallHerdMcp()) {
                 try {
                     $result = $ide->installMcp(
                         key: 'herd',
