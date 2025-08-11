@@ -293,7 +293,6 @@ class InstallCommand extends Command
             'phpstorm' => 'junie',
             'claudecode' => 'claudecode',
             'cursor' => 'cursor',
-            'windsurf' => 'windsurf',
             'copilot' => 'copilot',
         ];
 
@@ -398,12 +397,6 @@ class InstallCommand extends Command
 
         ksort($agents);
 
-        // Filter agents to only show those that are installed (for Windsurf)
-        $filteredAgents = $agents;
-        if (! in_array('windsurf', $this->systemInstalledCodeEnvironments) && ! in_array('windsurf', $this->projectInstalledAgents)) {
-            unset($filteredAgents['Laravel\\Boost\\Install\\Agents\\Windsurf']);
-        }
-
         // Map detected agent keys to class names
         $detectedClasses = [];
         foreach ($this->projectInstalledAgents as $agentKey) {
@@ -417,7 +410,7 @@ class InstallCommand extends Command
 
         $selectedAgentClasses = collect(multiselect(
             label: sprintf('Which agents need AI guidelines for %s?', $this->projectName),
-            options: $filteredAgents,
+            options: $agents,
             default: $detectedClasses,
             scroll: 4,
         ))->sort();

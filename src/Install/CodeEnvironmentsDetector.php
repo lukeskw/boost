@@ -12,7 +12,6 @@ use Laravel\Boost\Install\CodeEnvironment\Copilot;
 use Laravel\Boost\Install\CodeEnvironment\Cursor;
 use Laravel\Boost\Install\CodeEnvironment\PhpStorm;
 use Laravel\Boost\Install\CodeEnvironment\VSCode;
-use Laravel\Boost\Install\CodeEnvironment\Windsurf;
 use Laravel\Boost\Install\CodeEnvironment\Zed;
 use Laravel\Boost\Install\Enums\Platform;
 
@@ -23,7 +22,6 @@ class CodeEnvironmentsDetector
         'phpstorm' => PhpStorm::class,
         'vscode' => VSCode::class,
         'cursor' => Cursor::class,
-        'windsurf' => Windsurf::class,
         'claudecode' => ClaudeCode::class,
         'zed' => Zed::class,
         'copilot' => Copilot::class,

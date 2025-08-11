@@ -39,7 +39,6 @@ test('discoverSystemInstalledCodeEnvironments returns detected programs', functi
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\PhpStorm::class, fn () => $program1);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\VSCode::class, fn () => $program2);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\Cursor::class, fn () => $program3);
-    $container->bind(\Laravel\Boost\Install\CodeEnvironment\Windsurf::class, fn () => $otherProgram);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\ClaudeCode::class, fn () => $otherProgram);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\Zed::class, fn () => $otherProgram);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\Copilot::class, fn () => $otherProgram);
@@ -65,7 +64,6 @@ test('discoverSystemInstalledCodeEnvironments returns empty array when no progra
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\PhpStorm::class, fn () => $program1);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\VSCode::class, fn () => $otherProgram);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\Cursor::class, fn () => $otherProgram);
-    $container->bind(\Laravel\Boost\Install\CodeEnvironment\Windsurf::class, fn () => $otherProgram);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\ClaudeCode::class, fn () => $otherProgram);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\Zed::class, fn () => $otherProgram);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\Copilot::class, fn () => $otherProgram);
@@ -131,20 +129,6 @@ test('discoverProjectInstalledCodeEnvironments detects applications by directory
 
     // Cleanup
     rmdir($tempDir.'/.vscode');
-    rmdir($tempDir);
-});
-
-test('discoverProjectInstalledCodeEnvironments detects applications by file', function () {
-    $tempDir = sys_get_temp_dir().'/boost_test_'.uniqid();
-    mkdir($tempDir);
-    file_put_contents($tempDir.'/.windsurfrules.md', 'test');
-
-    $detected = $this->detector->discoverProjectInstalledCodeEnvironments($tempDir);
-
-    expect($detected)->toContain('windsurf');
-
-    // Cleanup
-    unlink($tempDir.'/.windsurfrules.md');
     rmdir($tempDir);
 });
 
