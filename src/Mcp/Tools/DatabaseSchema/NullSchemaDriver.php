@@ -21,7 +21,7 @@ class NullSchemaDriver extends DatabaseSchemaDriver
         return [];
     }
 
-    public function getTriggers(string $table = null): array
+    public function getTriggers(?string $table = null): array
     {
         return [];
     }
