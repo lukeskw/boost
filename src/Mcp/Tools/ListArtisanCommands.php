@@ -26,7 +26,7 @@ class ListArtisanCommands extends Tool
     }
 
     /**
-     * @param  array<string>  $arguments
+     * @param array<string> $arguments
      */
     public function handle(array $arguments): ToolResult
     {

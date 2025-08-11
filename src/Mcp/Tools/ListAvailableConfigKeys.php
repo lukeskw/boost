@@ -25,7 +25,7 @@ class ListAvailableConfigKeys extends Tool
     }
 
     /**
-     * @param  array<string>  $arguments
+     * @param array<string> $arguments
      */
     public function handle(array $arguments): ToolResult
     {
@@ -39,7 +39,7 @@ class ListAvailableConfigKeys extends Tool
     /**
      * Flatten a multi-dimensional config array into dot notation keys.
      *
-     * @param  array<int|string, string|array<int|string, string>>  $array
+     * @param array<int|string, string|array<int|string, string>> $array
      * @return array<int|string, int|string>
      */
     private function flattenToDotNotation(array $array, string $prefix = ''): array

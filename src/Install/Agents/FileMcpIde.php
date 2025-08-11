@@ -16,8 +16,8 @@ abstract class FileMcpIde implements Ide
     }
 
     /**
-     * @param  array<int, string>  $args
-     * @param  array<string, string>  $env
+     * @param array<int, string> $args
+     * @param array<string, string> $env
      */
     public function installMcp(string $key, string $command, array $args = [], array $env = []): bool
     {
