@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Laravel\Boost\Install\GuidelineAssist;
 use Laravel\Boost\Mcp\Tools\ApplicationInfo;
 use Laravel\Mcp\Server\Tools\ToolResult;
 use Laravel\Roster\Enums\Packages;
@@ -18,7 +19,13 @@ test('it returns application info with packages', function () {
     $roster = Mockery::mock(Roster::class);
     $roster->shouldReceive('packages')->andReturn($packages);
 
-    $tool = new ApplicationInfo($roster);
+    $guidelineAssist = Mockery::mock(GuidelineAssist::class);
+    $guidelineAssist->shouldReceive('models')->andReturn([
+        'App\\Models\\User' => '/app/Models/User.php',
+        'App\\Models\\Post' => '/app/Models/Post.php',
+    ]);
+
+    $tool = new ApplicationInfo($roster, $guidelineAssist);
     $result = $tool->handle([]);
 
     expect($result)->toBeInstanceOf(ToolResult::class);
@@ -38,13 +45,19 @@ test('it returns application info with packages', function () {
     expect($content['packages'][1]['package_name'])->toBe('pestphp/pest');
     expect($content['packages'][1]['version'])->toBe('2.0.0');
     expect($content['models'])->toBeArray();
+    expect($content['models'])->toHaveCount(2);
+    expect($content['models'])->toContain('App\\Models\\User');
+    expect($content['models'])->toContain('App\\Models\\Post');
 });
 
 test('it returns application info with no packages', function () {
     $roster = Mockery::mock(Roster::class);
     $roster->shouldReceive('packages')->andReturn(new PackageCollection([]));
 
-    $tool = new ApplicationInfo($roster);
+    $guidelineAssist = Mockery::mock(GuidelineAssist::class);
+    $guidelineAssist->shouldReceive('models')->andReturn([]);
+
+    $tool = new ApplicationInfo($roster, $guidelineAssist);
     $result = $tool->handle([]);
 
     expect($result)->toBeInstanceOf(ToolResult::class);
@@ -59,4 +72,5 @@ test('it returns application info with no packages', function () {
     expect($content['database_engine'])->toBe(config('database.default'));
     expect($content['packages'])->toHaveCount(0);
     expect($content['models'])->toBeArray();
+    expect($content['models'])->toHaveCount(0);
 });

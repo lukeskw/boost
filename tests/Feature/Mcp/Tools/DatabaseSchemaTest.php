@@ -16,13 +16,9 @@ beforeEach(function () {
         'prefix' => '',
     ]);
 
-    // Ensure the DB file *and* schema folder exist.
+    // Ensure the DB file exists
     if (! is_file($file = database_path('testing.sqlite'))) {
         touch($file);
-    }
-
-    if (! is_dir($path = database_path('schema'))) {
-        mkdir($path, 0777, true);
     }
 
     // Build a throw-away table that we expect in the dump.
@@ -37,23 +33,65 @@ afterEach(function () {
     if (File::exists($dbFile)) {
         File::delete($dbFile);
     }
-
-    $schemaDir = database_path('schema');
-    if (File::isDirectory($schemaDir)) {
-        File::deleteDirectory($schemaDir);
-    }
 });
 
-test('it dumps the schema and returns it in the tool response', function () {
+test('it returns structured database schema', function () {
     $tool = new DatabaseSchema;
     $response = $tool->handle([]);
 
-    $sql = $response->toArray()['content'][0]['text'];
+    $responseArray = $response->toArray();
+    expect($responseArray['isError'])->toBeFalse();
 
-    expect($sql)->toContain(
-        'CREATE TABLE IF NOT EXISTS "examples"'
-    );
+    $schemaArray = json_decode($responseArray['content'][0]['text'], true);
 
-    $this->assertDirectoryIsReadable(database_path('schema'));
-    expect(glob(database_path('schema/*.sql')))->toBeEmpty();
+    expect($schemaArray)->toHaveKey('engine');
+    expect($schemaArray['engine'])->toBe('sqlite');
+
+    expect($schemaArray)->toHaveKey('tables');
+    expect($schemaArray['tables'])->toHaveKey('examples');
+
+    $exampleTable = $schemaArray['tables']['examples'];
+    expect($exampleTable)->toHaveKey('columns');
+    expect($exampleTable['columns'])->toHaveKey('id');
+    expect($exampleTable['columns'])->toHaveKey('name');
+
+    expect($exampleTable['columns']['id']['type'])->toBe('integer');
+    expect($exampleTable['columns']['name']['type'])->toBe('varchar');
+
+    expect($exampleTable)->toHaveKey('indexes');
+    expect($exampleTable)->toHaveKey('foreign_keys');
+    expect($exampleTable)->toHaveKey('triggers');
+    expect($exampleTable)->toHaveKey('check_constraints');
+
+    expect($schemaArray)->toHaveKey('global');
+    expect($schemaArray['global'])->toHaveKey('views');
+    expect($schemaArray['global'])->toHaveKey('stored_procedures');
+    expect($schemaArray['global'])->toHaveKey('functions');
+    expect($schemaArray['global'])->toHaveKey('sequences');
+});
+
+test('it filters tables by name', function () {
+    // Create another table
+    Schema::create('users', function (Blueprint $table) {
+        $table->id();
+        $table->string('email');
+    });
+
+    $tool = new DatabaseSchema;
+
+    // Test filtering for 'example'
+    $response = $tool->handle(['filter' => 'example']);
+    $responseArray = $response->toArray();
+    $schemaArray = json_decode($responseArray['content'][0]['text'], true);
+
+    expect($schemaArray['tables'])->toHaveKey('examples');
+    expect($schemaArray['tables'])->not->toHaveKey('users');
+
+    // Test filtering for 'user'
+    $response = $tool->handle(['filter' => 'user']);
+    $responseArray = $response->toArray();
+    $schemaArray = json_decode($responseArray['content'][0]['text'], true);
+
+    expect($schemaArray['tables'])->toHaveKey('users');
+    expect($schemaArray['tables'])->not->toHaveKey('examples');
 });
