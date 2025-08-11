@@ -51,6 +51,7 @@ class GuidelineComposer
     public static function composeGuidelines(Collection $guidelines): string
     {
         return trim($guidelines
+            ->filter(fn ($content) => !empty(trim($content)))
             ->map(fn ($content, $key) => "\n=== {$key} rules ===\n\n{$content}")
             ->join("\n\n"));
     }
