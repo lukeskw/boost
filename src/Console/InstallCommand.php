@@ -19,7 +19,6 @@ use Laravel\Boost\Install\GuidelineWriter;
 use Laravel\Boost\Install\Herd;
 use Laravel\Prompts\Concerns\Colors;
 use Laravel\Prompts\Terminal;
-use Laravel\Roster\Roster;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Finder\Finder;
 
@@ -36,8 +35,6 @@ class InstallCommand extends Command
     private CodeEnvironmentsDetector $codeEnvironmentsDetector;
 
     private Herd $herd;
-
-    private Roster $roster;
 
     private Terminal $terminal;
 
@@ -65,9 +62,9 @@ class InstallCommand extends Command
 
     private string $redCross;
 
-    public function handle(CodeEnvironmentsDetector $codeEnvironmentsDetector, Herd $herd, Roster $roster, Terminal $terminal): void
+    public function handle(CodeEnvironmentsDetector $codeEnvironmentsDetector, Herd $herd, Terminal $terminal): void
     {
-        $this->bootstrap($codeEnvironmentsDetector, $herd, $roster, $terminal);
+        $this->bootstrap($codeEnvironmentsDetector, $herd, $terminal);
 
         $this->displayBoostHeader();
         $this->discoverEnvironment();
@@ -76,11 +73,10 @@ class InstallCommand extends Command
         $this->outro();
     }
 
-    private function bootstrap(CodeEnvironmentsDetector $codeEnvironmentsDetector, Herd $herd, Roster $roster, Terminal $terminal): void
+    private function bootstrap(CodeEnvironmentsDetector $codeEnvironmentsDetector, Herd $herd, Terminal $terminal): void
     {
         $this->codeEnvironmentsDetector = $codeEnvironmentsDetector;
         $this->herd = $herd;
-        $this->roster = $roster;
         $this->terminal = $terminal;
 
         $this->terminal->initDimensions();
@@ -208,9 +204,6 @@ class InstallCommand extends Command
      * This would likely just create headaches for them or be a waste of time as they
      * won't have the CI setup to make use of them anyway, so we're just wasting their
      * tokens/money by enforcing them.
-     *
-     * @param bool $ask
-     * @return bool
      */
     protected function determineTestEnforcement(bool $ask = true): bool
     {
