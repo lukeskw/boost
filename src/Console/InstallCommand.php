@@ -114,7 +114,6 @@ class InstallCommand extends Command
 
     private function discoverEnvironment(): void
     {
-
         $this->systemInstalledCodeEnvironments = $this->codeEnvironmentsDetector->discoverSystemInstalledCodeEnvironments();
         $this->projectInstalledCodeEnvironments = $this->codeEnvironmentsDetector->discoverProjectInstalledCodeEnvironments(base_path());
         $this->projectInstalledAgents = $this->codeEnvironmentsDetector->discoverProjectInstalledCodeEnvironments(base_path());
