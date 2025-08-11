@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Laravel\Boost\Install\CodeEnvironementsDetector;
-use Laravel\Boost\Install\Contracts\CodeEnvironment;
+use Laravel\Boost\Install\CodeEnvironment\CodeEnvironment;
 use Laravel\Boost\Install\Enums\Platform;
 
 beforeEach(function () {

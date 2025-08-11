@@ -7,13 +7,13 @@ namespace Laravel\Boost\Install;
 use Illuminate\Container\Container;
 use Illuminate\Support\Collection;
 use Laravel\Boost\Install\CodeEnvironment\ClaudeCode;
+use Laravel\Boost\Install\CodeEnvironment\CodeEnvironment;
 use Laravel\Boost\Install\CodeEnvironment\Copilot;
 use Laravel\Boost\Install\CodeEnvironment\Cursor;
 use Laravel\Boost\Install\CodeEnvironment\PhpStorm;
 use Laravel\Boost\Install\CodeEnvironment\VSCode;
 use Laravel\Boost\Install\CodeEnvironment\Windsurf;
 use Laravel\Boost\Install\CodeEnvironment\Zed;
-use Laravel\Boost\Install\Contracts\CodeEnvironment;
 use Laravel\Boost\Install\Enums\Platform;
 
 class CodeEnvironementsDetector
