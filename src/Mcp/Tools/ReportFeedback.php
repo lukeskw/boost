@@ -28,7 +28,7 @@ class ReportFeedback extends Tool
     }
 
     /**
-     * @param  array<string, string>  $arguments
+     * @param array<string, string> $arguments
      */
     public function handle(array $arguments): ToolResult|Generator
     {

@@ -1,5 +1,5 @@
 ## Do Things the Laravel Way
-- Use `./artisan make:` commands to create new files (i.e. migrations, controllers, models, etc.). You can list available artisan commands with the `list-artisan-commands` tool.
+- Use `php artisan make:` commands to create new files (i.e. migrations, controllers, models, etc.). You can list available artisan commands with the `list-artisan-commands` tool.
 - If you're creating a generic PHP class, use `artisan make:class`.
 
 ## Database
@@ -14,7 +14,7 @@
 - **Validation rule style**: Check sibling form requests to see if the project uses array or string based validation rules.
 
 ## Model Creation
-- When creating new models, create useful factories and seeders for them too. Ask the user if they need any other things, use `list-artisan-commands` to check the available options to `./artisan make:model`
+- When creating new models, create useful factories and seeders for them too. Ask the user if they need any other things, use `list-artisan-commands` to check the available options to `php artisan make:model`
 
 ## APIs and Eloquent Resources
 - For APIs, default to using Eloquent API Resources and API versioning, unless existing API routes do not, then you should follow existing convention.

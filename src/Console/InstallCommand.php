@@ -9,142 +9,135 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
-use Laravel\Boost\Install\ApplicationDetector;
+use Laravel\Boost\Contracts\Agent;
+use Laravel\Boost\Contracts\Ide;
 use Laravel\Boost\Install\Cli\DisplayHelper;
+use Laravel\Boost\Install\CodeEnvironmentsDetector;
 use Laravel\Boost\Install\GuidelineComposer;
 use Laravel\Boost\Install\GuidelineConfig;
 use Laravel\Boost\Install\GuidelineWriter;
 use Laravel\Boost\Install\Herd;
 use Laravel\Prompts\Concerns\Colors;
 use Laravel\Prompts\Terminal;
-use Laravel\Roster\Roster;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Finder\Finder;
 
 use function Laravel\Prompts\intro;
 use function Laravel\Prompts\multiselect;
+use function Laravel\Prompts\note;
 use function Laravel\Prompts\select;
-use function Laravel\Prompts\text;
 
 #[AsCommand('boost:install', 'Install Laravel Boost')]
 class InstallCommand extends Command
 {
-    private $colors;
+    use Colors;
 
-    // Used for nicer install experience
-    protected string $projectName;
+    private CodeEnvironmentsDetector $codeEnvironmentsDetector;
 
-    // Used as part of AI Guidelines
-    protected string $projectPurpose = '';
+    private Herd $herd;
 
-    /** @var string[] */
-    protected array $installedIdes = [];
+    private Terminal $terminal;
 
-    protected array $detectedProjectIdes = [];
+    /** @var Collection<int, Agent> */
+    private Collection $selectedTargetAgents;
 
-    protected bool $enforceTests = true;
+    /** @var Collection<int, Ide> */
+    private Collection $selectedTargetIdes;
 
-    /** @var Collection<int, \Laravel\Boost\Contracts\Ide> */
-    protected Collection $idesToInstallTo;
+    /** @var Collection<int, string> */
+    private Collection $selectedBoostFeatures;
 
-    protected Collection $boostToInstall;
+    private string $projectName;
 
-    protected array $boostToolsToDisable = [];
+    /** @var array<non-empty-string> */
+    private array $systemInstalledCodeEnvironments = [];
 
-    protected array $detectedProjectAgents = [];
+    private array $projectInstalledCodeEnvironments = [];
 
-    /** @var Collection<int, \Laravel\Boost\Contracts\Agent> */
-    protected Collection $agentsToInstallTo;
+    private bool $enforceTests = true;
 
-    protected Roster $roster;
-
-    protected Herd $herd;
-
-    protected ApplicationDetector $appDetector;
+    private array $projectInstalledAgents = [];
 
     private string $greenTick;
 
     private string $redCross;
 
-    private Terminal $terminal;
-
-    public function handle(Roster $roster, Herd $herd): void
+    public function handle(CodeEnvironmentsDetector $codeEnvironmentsDetector, Herd $herd, Terminal $terminal): void
     {
-        $this->terminal = new Terminal;
-        $this->terminal->initDimensions();
-        $this->agentsToInstallTo = collect();
-        $this->idesToInstallTo = collect();
-        $this->roster = $roster;
-        $this->herd = $herd;
-        $this->appDetector = new ApplicationDetector;
+        $this->bootstrap($codeEnvironmentsDetector, $herd, $terminal);
 
-        $this->colors = new class
-        {
-            use Colors;
-        };
-        $this->greenTick = $this->colors->green('✓');
-        $this->redCross = $this->colors->red('✗');
-
-        $this->projectName = basename(base_path());
-
-        $this->intro();
-        $this->detect();
-        $this->query();
+        $this->displayBoostHeader();
+        $this->discoverEnvironment();
+        $this->collectInstallationPreferences();
         $this->enact();
         $this->outro();
     }
 
-    protected function detect()
+    private function bootstrap(CodeEnvironmentsDetector $codeEnvironmentsDetector, Herd $herd, Terminal $terminal): void
     {
-        $this->installedIdes = $this->detectInstalledIdes();
-        $this->detectedProjectIdes = $this->detectIdesUsedInProject();
-        $this->detectedProjectAgents = $this->detectProjectAgents();
+        $this->codeEnvironmentsDetector = $codeEnvironmentsDetector;
+        $this->herd = $herd;
+        $this->terminal = $terminal;
+
+        $this->terminal->initDimensions();
+        $this->greenTick = $this->green('✓');
+        $this->redCross = $this->red('✗');
+
+        $this->selectedTargetAgents = collect();
+        $this->selectedTargetIdes = collect();
+
+        $this->projectName = basename(base_path());
     }
 
-    protected function query()
+    private function displayBoostHeader(): void
     {
-        // Which parts of boost should we install
-        $this->boostToInstall = $this->boostToInstall();
-        //        $this->boostToolsToDisable = $this->boostToolsToDisable(); // Not useful to start
-
-        //        $this->projectPurpose = $this->projectPurpose();
-        $this->enforceTests = $this->shouldEnforceTests(ask: false);
-
-        $this->idesToInstallTo = $this->idesToInstallTo(); // To add boost:mcp to the correct file
-        $this->agentsToInstallTo = $this->agentsToInstallTo(); // AI Guidelines, which file do they go, are they separated, or all in one file?
+        note($this->boostLogo());
+        intro('✦ Laravel Boost :: Install :: We Must Ship ✦');
+        note("Let's give {$this->bgYellow($this->black($this->bold($this->projectName)))} a Boost");
     }
 
-    protected function enact(): void
+    private function boostLogo(): string
     {
-        if ($this->installingGuidelines() && ! empty($this->agentsToInstallTo)) {
+        return
+         <<<'HEADER'
+        ██████╗   ██████╗   ██████╗  ███████╗ ████████╗
+        ██╔══██╗ ██╔═══██╗ ██╔═══██╗ ██╔════╝ ╚══██╔══╝
+        ██████╔╝ ██║   ██║ ██║   ██║ ███████╗    ██║
+        ██╔══██╗ ██║   ██║ ██║   ██║ ╚════██║    ██║
+        ██████╔╝ ╚██████╔╝ ╚██████╔╝ ███████║    ██║
+        ╚═════╝   ╚═════╝   ╚═════╝  ╚══════╝    ╚═╝
+        HEADER;
+    }
+
+    private function discoverEnvironment(): void
+    {
+        $this->systemInstalledCodeEnvironments = $this->codeEnvironmentsDetector->discoverSystemInstalledCodeEnvironments();
+        $this->projectInstalledCodeEnvironments = $this->codeEnvironmentsDetector->discoverProjectInstalledCodeEnvironments(base_path());
+        $this->projectInstalledAgents = $this->discoverProjectAgents();
+    }
+
+    private function collectInstallationPreferences(): void
+    {
+        $this->selectedBoostFeatures = $this->selectBoostFeatures();
+        $this->enforceTests = $this->determineTestEnforcement(ask: false);
+        $this->selectedTargetIdes = $this->selectTargetIdes();
+        $this->selectedTargetAgents = $this->selectTargetAgents();
+    }
+
+    private function enact(): void
+    {
+        if ($this->installingGuidelines() && ! empty($this->selectedTargetAgents)) {
             $this->enactGuidelines();
         }
 
         usleep(750000);
 
-        if (($this->installingMcp() || $this->installingHerdMcp()) && $this->idesToInstallTo->isNotEmpty()) {
+        if (($this->installingMcp() || $this->installingHerdMcp()) && $this->selectedTargetIdes->isNotEmpty()) {
             $this->enactMcpServers();
         }
     }
 
-    /**
-     * Which IDEs are installed on this developer's machine?
-     */
-    protected function detectInstalledIdes(): array
-    {
-        return $this->appDetector->detectInstalled();
-    }
-
-    /**
-     * Specifically want to detect what's in use in _this_ project.
-     * Just because they have claude code installed doesn't mean they're using it.
-     */
-    protected function detectIdesUsedInProject(): array
-    {
-        return $this->appDetector->detectInProject(base_path());
-    }
-
-    protected function discoverTools(): array
+    private function discoverTools(): array
     {
         $tools = [];
         $toolDir = implode(DIRECTORY_SEPARATOR, [__DIR__, '..', 'Mcp', 'Tools']);
@@ -165,25 +158,6 @@ class InstallCommand extends Command
         return $tools;
     }
 
-    private function intro()
-    {
-        $this->newline();
-        $header = <<<'HEADER'
- ██████╗   ██████╗   ██████╗  ███████╗ ████████╗
- ██╔══██╗ ██╔═══██╗ ██╔═══██╗ ██╔════╝ ╚══██╔══╝
- ██████╔╝ ██║   ██║ ██║   ██║ ███████╗    ██║
- ██╔══██╗ ██║   ██║ ██║   ██║ ╚════██║    ██║
- ██████╔╝ ╚██████╔╝ ╚██████╔╝ ███████║    ██║
- ╚═════╝   ╚═════╝   ╚═════╝  ╚══════╝    ╚═╝
-HEADER;
-        foreach (explode(PHP_EOL, $header) as $i => $line) {
-            echo "{$line}\n";
-        }
-
-        intro('✦ Laravel Boost :: Install :: We Must Ship ✦');
-        $this->line(' Let\'s give '.$this->colors->bgYellow($this->colors->black($this->projectName)).' a Boost');
-    }
-
     private function outro(): void
     {
         $label = 'https://boost.laravel.com/installed';
@@ -191,9 +165,9 @@ HEADER;
         // Build install data - CSV format with type prefixes
         $data = [];
 
-        $ideNames = $this->idesToInstallTo->map(fn ($ide) => 'i:'.class_basename($ide))->toArray();
-        $agentNames = $this->agentsToInstallTo->map(fn ($agent) => 'a:'.class_basename($agent))->toArray();
-        $boostFeatures = $this->boostToInstall->map(fn ($feature) => 'b:'.$feature)->toArray();
+        $ideNames = $this->selectedTargetIdes->map(fn ($ide) => 'i:'.class_basename($ide))->toArray();
+        $agentNames = $this->selectedTargetAgents->map(fn ($agent) => 'a:'.class_basename($agent))->toArray();
+        $boostFeatures = $this->selectedBoostFeatures->map(fn ($feature) => 'b:'.$feature)->toArray();
 
         // Guidelines installed (prefix: g)
         $guidelines = [];
@@ -209,15 +183,15 @@ HEADER;
         $allData = array_merge($ideNames, $agentNames, $boostFeatures, $guidelines);
 
         // Create compact CSV string and base64 encode
-        $trackingData = base64_encode(implode(',', $allData));
+        $installData = base64_encode(implode(',', $allData));
 
-        $link = $this->hyperlink($label, 'https://boost.laravel.com/installed/?d='.$trackingData);
+        $link = $this->hyperlink($label, 'https://boost.laravel.com/installed/?d='.$installData);
 
         $text = 'Enjoy the boost 🚀 ';
         $paddingLength = (int) (floor(($this->terminal->cols() - mb_strlen($text.$label)) / 2)) - 2;
 
         echo "\033[42m\033[2K".str_repeat(' ', $paddingLength); // Make the entire line have a green background
-        echo $this->colors->black($this->colors->bold($text.$link)).PHP_EOL;
+        echo $this->black($this->bold($text.$link)).$this->reset().PHP_EOL;
     }
 
     private function hyperlink(string $label, string $url): string
@@ -225,45 +199,35 @@ HEADER;
         return "\033]8;;{$url}\007{$label}\033]8;;\033\\";
     }
 
-    protected function projectPurpose(): string
-    {
-        return text(
-            label: sprintf('What does the %s project do? (optional)', $this->projectName),
-            placeholder: 'i.e. SaaS platform selling concert tickets, integrates with Stripe and Twilio, lots of CS using Nova backend',
-            default: config('boost.project_purpose') ?? '',
-            hint: 'This helps guides AI. How would you explain it to a new developer?'
-        );
-    }
-
     /**
      * We shouldn't add an AI guideline enforcing tests if they don't have a basic test setup.
-     * This would likely just create headaches for them, or be a waste of time as they
+     * This would likely just create headaches for them or be a waste of time as they
      * won't have the CI setup to make use of them anyway, so we're just wasting their
      * tokens/money by enforcing them.
      */
-    protected function shouldEnforceTests(bool $ask = true): bool
+    protected function determineTestEnforcement(bool $ask = true): bool
     {
-        $enforce = Finder::create()
+        $hasMinimumTests = Finder::create()
             ->in(base_path('tests'))
             ->files()
             ->name('*.php')
             ->count() > 6;
 
-        if ($enforce === false && $ask === true) {
-            $enforce = select(
+        if (! $hasMinimumTests && $ask) {
+            $hasMinimumTests = select(
                 label: 'Should AI always create tests?',
                 options: ['Yes', 'No'],
                 default: 'Yes'
             ) === 'Yes';
         }
 
-        return $enforce;
+        return $hasMinimumTests;
     }
 
     /**
      * @return Collection<int, string>
      */
-    protected function boostToInstall(): Collection
+    private function selectBoostFeatures(): Collection
     {
         $defaultToInstallOptions = ['mcp_server', 'ai_guidelines'];
         $toInstallOptions = [
@@ -300,17 +264,16 @@ HEADER;
     /**
      * @return array<int, string>
      */
-    protected function detectProjectAgents(): array
+    private function discoverProjectAgents(): array
     {
         $agents = [];
-        $projectAgents = $this->appDetector->detectInProject(base_path());
+        $projectAgents = $this->codeEnvironmentsDetector->discoverProjectInstalledCodeEnvironments(base_path());
 
         // Map IDE detections to their corresponding agents
         $ideToAgentMap = [
             'phpstorm' => 'junie',
             'claudecode' => 'claudecode',
             'cursor' => 'cursor',
-            'windsurf' => 'windsurf',
             'copilot' => 'copilot',
         ];
 
@@ -321,7 +284,7 @@ HEADER;
         }
 
         // Also check installed IDEs that might not have project files yet
-        foreach ($this->installedIdes as $ide) {
+        foreach ($this->systemInstalledCodeEnvironments as $ide) {
             if (isset($ideToAgentMap[$ide]) && ! in_array($ideToAgentMap[$ide], $agents)) {
                 $agents[] = $ideToAgentMap[$ide];
             }
@@ -331,9 +294,9 @@ HEADER;
     }
 
     /**
-     * @return Collection<int, \Laravel\Boost\Contracts\Ide>
+     * @return Collection<int, Ide>
      */
-    protected function idesToInstallTo(): Collection
+    private function selectTargetIdes(): Collection
     {
         $ides = [];
         if (! $this->installingMcp() && ! $this->installingHerdMcp()) {
@@ -353,7 +316,7 @@ HEADER;
             if (class_exists($className)) {
                 $reflection = new \ReflectionClass($className);
 
-                if ($reflection->implementsInterface(\Laravel\Boost\Contracts\Ide::class) && ! $reflection->isAbstract()) {
+                if ($reflection->implementsInterface(Ide::class) && ! $reflection->isAbstract()) {
                     $ides[$className] = Str::headline($ideFile->getBasename('.php'));
                 }
             }
@@ -363,7 +326,7 @@ HEADER;
 
         // Map detected IDE keys to class names
         $detectedClasses = [];
-        foreach ($this->detectedProjectIdes as $ideKey) {
+        foreach ($this->projectInstalledCodeEnvironments as $ideKey) {
             foreach ($ides as $className => $displayName) {
                 if (strtolower($ideKey) === strtolower(class_basename($className))) {
                     $detectedClasses[] = $className;
@@ -373,7 +336,7 @@ HEADER;
         }
 
         $selectedIdeClasses = collect(multiselect(
-            label: sprintf('Which IDEs do you use in %s? (space to select)', $this->projectName),
+            label: sprintf('Which code editors do you use in %s?', $this->projectName),
             options: $ides,
             default: $detectedClasses,
             scroll: 5,
@@ -385,9 +348,9 @@ HEADER;
     }
 
     /**
-     * @return Collection<int, \Laravel\Boost\Contracts\Agent>
+     * @return Collection<int, Agent>
      */
-    protected function agentsToInstallTo(): Collection
+    private function selectTargetAgents(): Collection
     {
         $agents = [];
         if (! $this->installingGuidelines()) {
@@ -407,7 +370,7 @@ HEADER;
             if (class_exists($className)) {
                 $reflection = new \ReflectionClass($className);
 
-                if ($reflection->implementsInterface(\Laravel\Boost\Contracts\Agent::class)) {
+                if ($reflection->implementsInterface(Agent::class)) {
                     $agents[$className] = Str::headline($agentFile->getBasename('.php'));
                 }
             }
@@ -415,15 +378,9 @@ HEADER;
 
         ksort($agents);
 
-        // Filter agents to only show those that are installed (for Windsurf)
-        $filteredAgents = $agents;
-        if (! in_array('windsurf', $this->installedIdes) && ! in_array('windsurf', $this->detectedProjectAgents)) {
-            unset($filteredAgents['Laravel\\Boost\\Install\\Agents\\Windsurf']);
-        }
-
         // Map detected agent keys to class names
         $detectedClasses = [];
-        foreach ($this->detectedProjectAgents as $agentKey) {
+        foreach ($this->projectInstalledAgents as $agentKey) {
             foreach ($agents as $className => $displayName) {
                 if (strtolower($agentKey) === strtolower(class_basename($className))) {
                     $detectedClasses[] = $className;
@@ -434,7 +391,7 @@ HEADER;
 
         $selectedAgentClasses = collect(multiselect(
             label: sprintf('Which agents need AI guidelines for %s?', $this->projectName),
-            options: $filteredAgents,
+            options: $agents,
             default: $detectedClasses,
             scroll: 4,
         ))->sort();
@@ -448,7 +405,7 @@ HEADER;
             return;
         }
 
-        if ($this->agentsToInstallTo->isEmpty()) {
+        if ($this->selectedTargetAgents->isEmpty()) {
             $this->info('No agents selected for guideline installation.');
 
             return;
@@ -472,8 +429,8 @@ HEADER;
         $failed = [];
         $composedAiGuidelines = $composer->compose();
 
-        $longestAgentName = max(1, ...$this->agentsToInstallTo->map(fn ($agent) => Str::length(class_basename($agent)))->toArray());
-        foreach ($this->agentsToInstallTo as $agent) {
+        $longestAgentName = max(1, ...$this->selectedTargetAgents->map(fn ($agent) => Str::length(class_basename($agent)))->toArray());
+        foreach ($this->selectedTargetAgents as $agent) {
             $agentName = class_basename($agent);
             $displayAgentName = str_pad($agentName, $longestAgentName, ' ', STR_PAD_RIGHT);
             $this->output->write("  {$displayAgentName}... ");
@@ -504,24 +461,24 @@ HEADER;
 
     protected function installingGuidelines(): bool
     {
-        return $this->boostToInstall->contains('ai_guidelines');
+        return $this->selectedBoostFeatures->contains('ai_guidelines');
     }
 
     protected function installingStyleGuidelines(): bool
     {
         return false;
 
-        return $this->boostToInstall->contains('style_guidelines');
+        return $this->selectedBoostFeatures->contains('style_guidelines');
     }
 
     protected function installingMcp(): bool
     {
-        return $this->boostToInstall->contains('mcp_server');
+        return $this->selectedBoostFeatures->contains('mcp_server');
     }
 
     protected function installingHerdMcp(): bool
     {
-        return $this->boostToInstall->contains('herd_mcp');
+        return $this->selectedBoostFeatures->contains('herd_mcp');
     }
 
     protected function publishAndUpdateConfig(): void
@@ -579,9 +536,9 @@ HEADER;
         usleep(750000);
 
         $failed = [];
-        $longestIdeName = max(1, ...$this->idesToInstallTo->map(fn ($ide) => Str::length(class_basename($ide)))->toArray());
+        $longestIdeName = max(1, ...$this->selectedTargetIdes->map(fn ($ide) => Str::length(class_basename($ide)))->toArray());
 
-        foreach ($this->idesToInstallTo as $ide) {
+        foreach ($this->selectedTargetIdes as $ide) {
             $ideName = class_basename($ide);
             $ideDisplay = str_pad($ideName, $longestIdeName, ' ', STR_PAD_RIGHT);
             $this->output->write("  {$ideDisplay}... ");
@@ -590,7 +547,7 @@ HEADER;
             // Install Laravel Boost MCP if enabled
             if ($this->installingMcp()) {
                 try {
-                    $result = $ide->installMcp('laravel-boost', base_path('artisan'), ['boost:mcp']);
+                    $result = $ide->installMcp('laravel-boost', 'php', ['./artisan', 'boost:mcp']);
 
                     if ($result) {
                         $results[] = $this->greenTick.' Boost';
