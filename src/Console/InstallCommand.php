@@ -119,7 +119,7 @@ class InstallCommand extends Command
     {
         $this->systemInstalledCodeEnvironments = $this->codeEnvironmentsDetector->discoverSystemInstalledCodeEnvironments();
         $this->projectInstalledCodeEnvironments = $this->codeEnvironmentsDetector->discoverProjectInstalledCodeEnvironments(base_path());
-        $this->projectInstalledAgents = $this->codeEnvironmentsDetector->discoverProjectInstalledCodeEnvironments(base_path());
+        $this->projectInstalledAgents = $this->discoverProjectAgents();
     }
 
     private function query()
