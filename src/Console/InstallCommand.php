@@ -241,7 +241,7 @@ class InstallCommand extends Command
         }
 
         return collect(multiselect(
-            label: 'What shall we install ?',
+            label: 'What shall we install?',
             options: $installOptions,
             default: $defaultInstallOptions,
             required: true,
