@@ -8,3 +8,4 @@ src/Console/AssistCommand.php
 composer.lock
 /phpunit.xml
 .phpunit.result.cache
+all.md
