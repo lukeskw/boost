@@ -32,7 +32,7 @@ class InstallCommand extends Command
 {
     use Colors;
 
-    private CodeEnvironementsDetector $appDetector;
+    private CodeEnvironementsDetector $codeEnvironmentsDetector;
 
     private Herd $herd;
 
@@ -67,9 +67,9 @@ class InstallCommand extends Command
 
     private string $redCross;
 
-    public function handle(CodeEnvironementsDetector $appDetector, Herd $herd, Roster $roster, Terminal $terminal): void
+    public function handle(CodeEnvironementsDetector $codeEnvironmentsDetector, Herd $herd, Roster $roster, Terminal $terminal): void
     {
-        $this->bootstrapBoost($appDetector, $herd, $roster, $terminal);
+        $this->bootstrapBoost($codeEnvironmentsDetector, $herd, $roster, $terminal);
 
         $this->displayBoostHeader();
         $this->discoverEnvironment();
@@ -78,9 +78,9 @@ class InstallCommand extends Command
         $this->outro();
     }
 
-    private function bootstrapBoost(CodeEnvironementsDetector $appDetector, Herd $herd, Roster $roster, Terminal $terminal): void
+    private function bootstrapBoost(CodeEnvironementsDetector $codeEnvironmentsDetector, Herd $herd, Roster $roster, Terminal $terminal): void
     {
-        $this->appDetector = $appDetector;
+        $this->codeEnvironmentsDetector = $codeEnvironmentsDetector;
         $this->herd = $herd;
         $this->roster = $roster;
         $this->terminal = $terminal;
@@ -150,7 +150,7 @@ class InstallCommand extends Command
      */
     private function discoverSystemInstalledIdes(): array
     {
-        return $this->appDetector->discoverSystemInstalledCodeEnvironements();
+        return $this->codeEnvironmentsDetector->discoverSystemInstalledCodeEnvironements();
     }
 
     /**
@@ -159,7 +159,7 @@ class InstallCommand extends Command
      */
     private function discoverIdesUsedInProject(): array
     {
-        return $this->appDetector->discoverProjectInstalledCodeEnvironements(base_path());
+        return $this->codeEnvironmentsDetector->discoverProjectInstalledCodeEnvironements(base_path());
     }
 
     private function discoverTools(): array
@@ -303,7 +303,7 @@ class InstallCommand extends Command
     private function discoverProjectAgents(): array
     {
         $agents = [];
-        $projectAgents = $this->appDetector->discoverProjectInstalledCodeEnvironements(base_path());
+        $projectAgents = $this->codeEnvironmentsDetector->discoverProjectInstalledCodeEnvironements(base_path());
 
         // Map IDE detections to their corresponding agents
         $ideToAgentMap = [
