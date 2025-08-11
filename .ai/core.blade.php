@@ -1,7 +1,7 @@
 # Laravel Boost Guidelines
 The Laravel Boost Guidelines are specifically curated by Laravel maintainers for this project. These guidelines should be followed closely to help enhance the user's experience and satisfaction.
 
-# Foundational Context
+## Foundational Context
 This project is a Laravel app and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure we abide by these specific packages & versions.
 
 - php - {{ PHP_VERSION }}

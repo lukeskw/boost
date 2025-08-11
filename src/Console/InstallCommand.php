@@ -233,7 +233,7 @@ class InstallCommand extends Command
         $toInstallOptions = [
             'mcp_server' => 'Boost MCP Server',
             'ai_guidelines' => 'Package AI Guidelines (i.e. Framework, Inertia, Pest)',
-            'style_guidelines' => 'Laravel Style AI Guidelines',
+            //            'style_guidelines' => 'Laravel Style AI Guidelines',
         ];
 
         if ($this->herd->isMcpAvailable()) {
@@ -245,7 +245,6 @@ class InstallCommand extends Command
             options: $toInstallOptions,
             default: $defaultToInstallOptions,
             required: true,
-            hint: 'Style guidelines are best for new projects',
         ));
     }
 
@@ -467,6 +466,8 @@ class InstallCommand extends Command
 
     protected function installingStyleGuidelines(): bool
     {
+        return false;
+
         return $this->selectedBoostFeatures->contains('style_guidelines');
     }
 
@@ -605,6 +606,6 @@ class InstallCommand extends Command
         $actuallyUsing = false;
 
         /** @phpstan-ignore-next-line  */
-        return is_dir(base_path('lang')) && $actuallyUsing;
+        return $actuallyUsing && is_dir(base_path('lang'));
     }
 }
