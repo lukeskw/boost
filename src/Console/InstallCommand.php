@@ -9,6 +9,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
+use Laravel\Boost\Contracts\Agent;
+use Laravel\Boost\Contracts\Ide;
 use Laravel\Boost\Install\Cli\DisplayHelper;
 use Laravel\Boost\Install\CodeEnvironmentsDetector;
 use Laravel\Boost\Install\GuidelineComposer;
@@ -25,7 +27,6 @@ use function Laravel\Prompts\intro;
 use function Laravel\Prompts\multiselect;
 use function Laravel\Prompts\note;
 use function Laravel\Prompts\select;
-use function Laravel\Prompts\text;
 
 #[AsCommand('boost:install', 'Install Laravel Boost')]
 class InstallCommand extends Command
@@ -40,17 +41,16 @@ class InstallCommand extends Command
 
     private Terminal $terminal;
 
-    /** @var Collection<int, \Laravel\Boost\Contracts\Agent> */
-    private Collection $agentsToInstallTo;
+    /** @var Collection<int, Agent> */
+    private Collection $selectedTargetAgents;
 
-    /** @var Collection<int, \Laravel\Boost\Contracts\Ide> */
-    private Collection $idesToInstallTo;
+    /** @var Collection<int, Ide> */
+    private Collection $selectedTargetIdes;
 
-    private Collection $boostToInstall;
+    /** @var Collection<int, string> */
+    private Collection $selectedBoostFeatures;
 
     private string $projectName;
-
-    private string $projectPurpose = '';
 
     /** @var array<non-empty-string> */
     private array $systemInstalledCodeEnvironments = [];
@@ -58,8 +58,6 @@ class InstallCommand extends Command
     private array $projectInstalledCodeEnvironments = [];
 
     private bool $enforceTests = true;
-
-    private array $boostToolsToDisable = [];
 
     private array $projectInstalledAgents = [];
 
@@ -73,7 +71,7 @@ class InstallCommand extends Command
 
         $this->displayBoostHeader();
         $this->discoverEnvironment();
-        $this->query();
+        $this->collectInstallationPreference();
         $this->enact();
         $this->outro();
     }
@@ -89,8 +87,8 @@ class InstallCommand extends Command
         $this->greenTick = $this->green('✓');
         $this->redCross = $this->red('✗');
 
-        $this->agentsToInstallTo = collect();
-        $this->idesToInstallTo = collect();
+        $this->selectedTargetAgents = collect();
+        $this->selectedTargetIdes = collect();
 
         $this->projectName = basename(base_path());
     }
@@ -122,28 +120,23 @@ class InstallCommand extends Command
         $this->projectInstalledAgents = $this->discoverProjectAgents();
     }
 
-    private function query()
+    private function collectInstallationPreference(): void
     {
-        // Which parts of boost should we install
-        $this->boostToInstall = $this->boostToInstall();
-        //        $this->boostToolsToDisable = $this->boostToolsToDisable(); // Not useful to start
-
-        //        $this->projectPurpose = $this->projectPurpose();
-        $this->enforceTests = $this->shouldEnforceTests(ask: false);
-
-        $this->idesToInstallTo = $this->idesToInstallTo(); // To add boost:mcp to the correct file
-        $this->agentsToInstallTo = $this->agentsToInstallTo(); // AI Guidelines, which file do they go, are they separated, or all in one file?
+        $this->selectedBoostFeatures = $this->selectBoostFeatures();
+        $this->enforceTests = $this->determineTestEnforcement(ask: false);
+        $this->selectedTargetIdes = $this->selectTargetIdes();
+        $this->selectedTargetAgents = $this->selectTargetAgents();
     }
 
     private function enact(): void
     {
-        if ($this->installingGuidelines() && ! empty($this->agentsToInstallTo)) {
+        if ($this->installingGuidelines() && ! empty($this->selectedTargetAgents)) {
             $this->enactGuidelines();
         }
 
         usleep(750000);
 
-        if (($this->installingMcp() || $this->installingHerdMcp()) && $this->idesToInstallTo->isNotEmpty()) {
+        if (($this->installingMcp() || $this->installingHerdMcp()) && $this->selectedTargetIdes->isNotEmpty()) {
             $this->enactMcpServers();
         }
     }
@@ -176,9 +169,9 @@ class InstallCommand extends Command
         // Build install data - CSV format with type prefixes
         $data = [];
 
-        $ideNames = $this->idesToInstallTo->map(fn ($ide) => 'i:'.class_basename($ide))->toArray();
-        $agentNames = $this->agentsToInstallTo->map(fn ($agent) => 'a:'.class_basename($agent))->toArray();
-        $boostFeatures = $this->boostToInstall->map(fn ($feature) => 'b:'.$feature)->toArray();
+        $ideNames = $this->selectedTargetIdes->map(fn ($ide) => 'i:'.class_basename($ide))->toArray();
+        $agentNames = $this->selectedTargetAgents->map(fn ($agent) => 'a:'.class_basename($agent))->toArray();
+        $boostFeatures = $this->selectedBoostFeatures->map(fn ($feature) => 'b:'.$feature)->toArray();
 
         // Guidelines installed (prefix: g)
         $guidelines = [];
@@ -210,45 +203,38 @@ class InstallCommand extends Command
         return "\033]8;;{$url}\007{$label}\033]8;;\033\\";
     }
 
-    protected function projectPurpose(): string
-    {
-        return text(
-            label: sprintf('What does the %s project do? (optional)', $this->projectName),
-            placeholder: 'i.e. SaaS platform selling concert tickets, integrates with Stripe and Twilio, lots of CS using Nova backend',
-            default: config('boost.project_purpose') ?? '',
-            hint: 'This helps guides AI. How would you explain it to a new developer?'
-        );
-    }
-
     /**
      * We shouldn't add an AI guideline enforcing tests if they don't have a basic test setup.
-     * This would likely just create headaches for them, or be a waste of time as they
+     * This would likely just create headaches for them or be a waste of time as they
      * won't have the CI setup to make use of them anyway, so we're just wasting their
      * tokens/money by enforcing them.
+     *
+     * @param bool $ask
+     * @return bool
      */
-    protected function shouldEnforceTests(bool $ask = true): bool
+    protected function determineTestEnforcement(bool $ask = true): bool
     {
-        $enforce = Finder::create()
+        $hasMinimumTests = Finder::create()
             ->in(base_path('tests'))
             ->files()
             ->name('*.php')
             ->count() > 6;
 
-        if ($enforce === false && $ask === true) {
-            $enforce = select(
+        if (! $hasMinimumTests && $ask) {
+            $hasMinimumTests = select(
                 label: 'Should AI always create tests?',
                 options: ['Yes', 'No'],
                 default: 'Yes'
             ) === 'Yes';
         }
 
-        return $enforce;
+        return $hasMinimumTests;
     }
 
     /**
      * @return Collection<int, string>
      */
-    protected function boostToInstall(): Collection
+    private function selectBoostFeatures(): Collection
     {
         $defaultToInstallOptions = ['mcp_server', 'ai_guidelines'];
         $toInstallOptions = [
@@ -316,9 +302,9 @@ class InstallCommand extends Command
     }
 
     /**
-     * @return Collection<int, \Laravel\Boost\Contracts\Ide>
+     * @return Collection<int, Ide>
      */
-    private function idesToInstallTo(): Collection
+    private function selectTargetIdes(): Collection
     {
         $ides = [];
         if (! $this->installingMcp() && ! $this->installingHerdMcp()) {
@@ -338,7 +324,7 @@ class InstallCommand extends Command
             if (class_exists($className)) {
                 $reflection = new \ReflectionClass($className);
 
-                if ($reflection->implementsInterface(\Laravel\Boost\Contracts\Ide::class) && ! $reflection->isAbstract()) {
+                if ($reflection->implementsInterface(Ide::class) && ! $reflection->isAbstract()) {
                     $ides[$className] = Str::headline($ideFile->getBasename('.php'));
                 }
             }
@@ -370,9 +356,9 @@ class InstallCommand extends Command
     }
 
     /**
-     * @return Collection<int, \Laravel\Boost\Contracts\Agent>
+     * @return Collection<int, Agent>
      */
-    private function agentsToInstallTo(): Collection
+    private function selectTargetAgents(): Collection
     {
         $agents = [];
         if (! $this->installingGuidelines()) {
@@ -392,7 +378,7 @@ class InstallCommand extends Command
             if (class_exists($className)) {
                 $reflection = new \ReflectionClass($className);
 
-                if ($reflection->implementsInterface(\Laravel\Boost\Contracts\Agent::class)) {
+                if ($reflection->implementsInterface(Agent::class)) {
                     $agents[$className] = Str::headline($agentFile->getBasename('.php'));
                 }
             }
@@ -427,7 +413,7 @@ class InstallCommand extends Command
             return;
         }
 
-        if ($this->agentsToInstallTo->isEmpty()) {
+        if ($this->selectedTargetAgents->isEmpty()) {
             $this->info('No agents selected for guideline installation.');
 
             return;
@@ -451,8 +437,8 @@ class InstallCommand extends Command
         $failed = [];
         $composedAiGuidelines = $composer->compose();
 
-        $longestAgentName = max(1, ...$this->agentsToInstallTo->map(fn ($agent) => Str::length(class_basename($agent)))->toArray());
-        foreach ($this->agentsToInstallTo as $agent) {
+        $longestAgentName = max(1, ...$this->selectedTargetAgents->map(fn ($agent) => Str::length(class_basename($agent)))->toArray());
+        foreach ($this->selectedTargetAgents as $agent) {
             $agentName = class_basename($agent);
             $displayAgentName = str_pad($agentName, $longestAgentName, ' ', STR_PAD_RIGHT);
             $this->output->write("  {$displayAgentName}... ");
@@ -483,22 +469,22 @@ class InstallCommand extends Command
 
     protected function installingGuidelines(): bool
     {
-        return $this->boostToInstall->contains('ai_guidelines');
+        return $this->selectedBoostFeatures->contains('ai_guidelines');
     }
 
     protected function installingStyleGuidelines(): bool
     {
-        return $this->boostToInstall->contains('style_guidelines');
+        return $this->selectedBoostFeatures->contains('style_guidelines');
     }
 
     protected function installingMcp(): bool
     {
-        return $this->boostToInstall->contains('mcp_server');
+        return $this->selectedBoostFeatures->contains('mcp_server');
     }
 
     protected function installingHerdMcp(): bool
     {
-        return $this->boostToInstall->contains('herd_mcp');
+        return $this->selectedBoostFeatures->contains('herd_mcp');
     }
 
     protected function publishAndUpdateConfig(): void
@@ -556,9 +542,9 @@ class InstallCommand extends Command
         usleep(750000);
 
         $failed = [];
-        $longestIdeName = max(1, ...$this->idesToInstallTo->map(fn ($ide) => Str::length(class_basename($ide)))->toArray());
+        $longestIdeName = max(1, ...$this->selectedTargetIdes->map(fn ($ide) => Str::length(class_basename($ide)))->toArray());
 
-        foreach ($this->idesToInstallTo as $ide) {
+        foreach ($this->selectedTargetIdes as $ide) {
             $ideName = class_basename($ide);
             $ideDisplay = str_pad($ideName, $longestIdeName, ' ', STR_PAD_RIGHT);
             $this->output->write("  {$ideDisplay}... ");
