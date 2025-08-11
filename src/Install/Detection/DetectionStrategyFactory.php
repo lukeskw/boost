@@ -10,6 +10,10 @@ use Laravel\Boost\Install\Contracts\DetectionStrategy;
 
 class DetectionStrategyFactory
 {
+    private const TYPE_DIRECTORY = 'directory';
+    private const TYPE_COMMAND = 'command';
+    private const TYPE_FILE = 'file';
+
     public function __construct(private readonly Container $container)
     {
     }
@@ -23,9 +27,9 @@ class DetectionStrategyFactory
         }
 
         return match ($type) {
-            'directory' => $this->container->make(DirectoryDetectionStrategy::class),
-            'command' => $this->container->make(CommandDetectionStrategy::class),
-            'file' => $this->container->make(FileDetectionStrategy::class),
+            self::TYPE_DIRECTORY => $this->container->make(DirectoryDetectionStrategy::class),
+            self::TYPE_COMMAND => $this->container->make(CommandDetectionStrategy::class),
+            self::TYPE_FILE => $this->container->make(FileDetectionStrategy::class),
             default => throw new InvalidArgumentException("Unknown detection type: {$type}"),
         };
     }
@@ -39,24 +43,23 @@ class DetectionStrategyFactory
 
     private function inferTypeFromConfig(array $config): string|array
     {
-        $types = [];
+        $typeMap = [
+            'files' => self::TYPE_FILE,
+            'paths' => self::TYPE_DIRECTORY,
+            'command' => self::TYPE_COMMAND,
+        ];
 
-        if (isset($config['files'])) {
-            $types[] = 'file';
-        }
-
-        if (isset($config['paths'])) {
-            $types[] = 'directory';
-        }
-
-        if (isset($config['command'])) {
-            $types[] = 'command';
-        }
+        $types = collect($typeMap)
+            ->only(array_keys($config))
+            ->values()
+            ->all();
 
         if (empty($types)) {
-            throw new InvalidArgumentException('Cannot infer detection type from config keys. Expected one of: files, paths, command');
+            throw new InvalidArgumentException(
+                'Cannot infer detection type from config keys. Expected one of: ' . collect($typeMap)->keys()->join(', ')
+            );
         }
 
-        return count($types) === 1 ? $types[0] : $types;
+        return count($types) > 1 ? $types : reset($types);
     }
 }
