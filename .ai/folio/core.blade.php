@@ -1,10 +1,9 @@
 
-- Laravel Folio is a file based router. With Laravel Folio, generating a route becomes as effortless as creating a Blade template within the correct directory.
-i.e. Pages are in `resources/views/pages/`. The file structure determines routes:
+- Laravel Folio is a file based router. With Laravel Folio, a new route is creatted for every Blade file within the correct directory. i.e. `Pages` are usually in in `resources/views/pages/` and the file structure determines routes:
 - `pages/index.blade.php` → `/`
 - `pages/profile/index.blade.php` → `/profile`
 - `pages/auth/login.blade.php` → `/auth/login`
-- List available Folio routes using `artisan folio:list` or using Boost's `list-routes` tool.
+- List available Folio routes using `php artisan folio:list` or using Boost's `list-routes` tool.
 
 ### Folio: New pages & routes
 - Always create new `folio` pages and routes using `artisan folio:page [name]` following existing naming conventions.
