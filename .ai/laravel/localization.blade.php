@@ -1,2 +1,0 @@
-- All strings displayed to users should be localized.
-- Use Laravel's built-in localization features for multi-language support.

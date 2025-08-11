@@ -269,7 +269,7 @@ HEADER;
         $toInstallOptions = [
             'mcp_server' => 'Boost MCP Server',
             'ai_guidelines' => 'Package AI Guidelines (i.e. Framework, Inertia, Pest)',
-            'style_guidelines' => 'Laravel Style AI Guidelines',
+            //            'style_guidelines' => 'Laravel Style AI Guidelines',
         ];
 
         if ($this->herd->isMcpAvailable()) {
@@ -510,6 +510,8 @@ HEADER;
 
     protected function installingStyleGuidelines(): bool
     {
+        return false;
+
         return $this->boostToInstall->contains('style_guidelines');
     }
 
@@ -648,6 +650,6 @@ HEADER;
         $actuallyUsing = false;
 
         /** @phpstan-ignore-next-line  */
-        return is_dir(base_path('lang')) && $actuallyUsing;
+        return $actuallyUsing && is_dir(base_path('lang'));
     }
 }
