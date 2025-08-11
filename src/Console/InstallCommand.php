@@ -281,7 +281,6 @@ HEADER;
             options: $toInstallOptions,
             default: $defaultToInstallOptions,
             required: true,
-            hint: 'Style guidelines are best for new projects',
         ));
     }
 
