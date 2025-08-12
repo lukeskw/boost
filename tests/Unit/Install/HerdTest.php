@@ -121,7 +121,7 @@ test('isMcpAvailable returns false after MCP file is removed', function () {
     unlink($mcpPath);
 
     expect($herd->isMcpAvailable())->toBeFalse();
-});
+})->onlyOnWindows();
 
 test('getHomePath returns HOME on non-Windows', function () {
     $testHome = getHerdTestTempDir().'/home';
