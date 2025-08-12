@@ -93,11 +93,24 @@ You're ready to go!
 Add `.blade.php` files to `.ai/guidelines/*` in your project, and they'll be included with Boost guidelines when you run `boost:install`.
 
 ## Adding Boost MCP manually
+Create the necessary config for your code editor using these details.
 
+<table>
+<tr><td><strong>Command</strong></td><td><code>php</code></td></tr>
+<tr><td><strong>Args</strong></td><td><code>./artisan boost:mcp</code></td></tr>
+</table>
 
-## Official Documentation
-
-Documentation for Boost can be found on the [Laravel website](https://laravel.com/docs).
+JSON Example
+```json
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "php",
+            "args": ["./artisan", "boost:mcp"]
+        }
+    }
+}
+```
 
 ## Contributing
 
@@ -113,4 +126,4 @@ Please review [our security policy](https://github.com/laravel/boost/security/po
 
 ## License
 
-Laravel AI Assistant is open-sourced software licensed under the [MIT license](LICENSE.md).
+Laravel Boost is open-sourced software licensed under the [MIT license](LICENSE.md).
