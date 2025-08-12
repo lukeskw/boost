@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Console;
 
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
 use Laravel\Boost\Contracts\Agent;
 use Laravel\Boost\Contracts\Ide;
@@ -19,6 +19,7 @@ use Laravel\Boost\Install\GuidelineWriter;
 use Laravel\Boost\Install\Herd;
 use Laravel\Prompts\Concerns\Colors;
 use Laravel\Prompts\Terminal;
+use ReflectionClass;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Finder\Finder;
 
@@ -162,9 +163,6 @@ class InstallCommand extends Command
     {
         $label = 'https://boost.laravel.com/installed';
 
-        // Build install data - CSV format with type prefixes
-        $data = [];
-
         $ideNames = $this->selectedTargetIdes->map(fn ($ide) => 'i:'.class_basename($ide))->toArray();
         $agentNames = $this->selectedTargetAgents->map(fn ($agent) => 'a:'.class_basename($agent))->toArray();
         $boostFeatures = $this->selectedBoostFeatures->map(fn ($feature) => 'b:'.$feature)->toArray();
@@ -182,7 +180,7 @@ class InstallCommand extends Command
         // Combine all data
         $allData = array_merge($ideNames, $agentNames, $boostFeatures, $guidelines);
 
-        // Create compact CSV string and base64 encode
+        // Create a compact CSV string and base64 encode
         $installData = base64_encode(implode(',', $allData));
 
         $link = $this->hyperlink($label, 'https://boost.laravel.com/installed/?d='.$installData);
@@ -191,12 +189,12 @@ class InstallCommand extends Command
         $paddingLength = (int) (floor(($this->terminal->cols() - mb_strlen($text.$label)) / 2)) - 2;
 
         echo "\033[42m\033[2K".str_repeat(' ', $paddingLength); // Make the entire line have a green background
-        echo $this->black($this->bold($text.$link)).$this->reset().PHP_EOL;
+        echo $this->black($this->bold($text.$link)).$this->reset(PHP_EOL);
     }
 
     private function hyperlink(string $label, string $url): string
     {
-        return "\033]8;;{$url}\007{$label}\033]8;;\033\\";
+        return "\033]8;;$url\007$label\033]8;;\033\\";
     }
 
     /**
@@ -282,7 +280,6 @@ class InstallCommand extends Command
             }
         }
 
-        // Also check installed IDEs that might not have project files yet
         foreach ($this->systemInstalledCodeEnvironments as $ide) {
             if (isset($ideToAgentMap[$ide]) && ! in_array($ideToAgentMap[$ide], $agents)) {
                 $agents[] = $ideToAgentMap[$ide];
@@ -298,7 +295,7 @@ class InstallCommand extends Command
     private function selectTargetIdes(): Collection
     {
         $ides = [];
-        if (! $this->installingMcp() && ! $this->installingHerdMcp()) {
+        if (! $this->shouldInstallMcp() && ! $this->shouldInstallHerdMcp()) {
             return collect();
         }
 
@@ -313,7 +310,7 @@ class InstallCommand extends Command
             $className = 'Laravel\\Boost\\Install\\Agents\\'.$ideFile->getBasename('.php');
 
             if (class_exists($className)) {
-                $reflection = new \ReflectionClass($className);
+                $reflection = new ReflectionClass($className);
 
                 if ($reflection->implementsInterface(Ide::class) && ! $reflection->isAbstract()) {
                     $ides[$className] = Str::headline($ideFile->getBasename('.php'));
@@ -323,7 +320,6 @@ class InstallCommand extends Command
 
         ksort($ides);
 
-        // Map detected IDE keys to class names
         $detectedClasses = [];
         foreach ($this->projectInstalledCodeEnvironments as $ideKey) {
             foreach ($ides as $className => $displayName) {
@@ -352,7 +348,7 @@ class InstallCommand extends Command
     private function selectTargetAgents(): Collection
     {
         $agents = [];
-        if (! $this->installingGuidelines()) {
+        if (! $this->shouldInstallAiGuidelines()) {
             return collect();
         }
 
@@ -367,7 +363,7 @@ class InstallCommand extends Command
             $className = 'Laravel\\Boost\\Install\\Agents\\'.$agentFile->getBasename('.php');
 
             if (class_exists($className)) {
-                $reflection = new \ReflectionClass($className);
+                $reflection = new ReflectionClass($className);
 
                 if ($reflection->implementsInterface(Agent::class)) {
                     $agents[$className] = Str::headline($agentFile->getBasename('.php'));
@@ -412,7 +408,7 @@ class InstallCommand extends Command
 
         $guidelineConfig = new GuidelineConfig;
         $guidelineConfig->enforceTests = $this->enforceTests;
-        $guidelineConfig->laravelStyle = $this->installingStyleGuidelines();
+        $guidelineConfig->laravelStyle = $this->shouldInstallStyleGuidelines();
         $guidelineConfig->caresAboutLocalization = $this->detectLocalization();
         $guidelineConfig->hasAnApi = false;
 
@@ -431,15 +427,15 @@ class InstallCommand extends Command
         $longestAgentName = max(1, ...$this->selectedTargetAgents->map(fn ($agent) => Str::length(class_basename($agent)))->toArray());
         foreach ($this->selectedTargetAgents as $agent) {
             $agentName = class_basename($agent);
-            $displayAgentName = str_pad($agentName, $longestAgentName, ' ', STR_PAD_RIGHT);
-            $this->output->write("  {$displayAgentName}... ");
+            $displayAgentName = str_pad($agentName, $longestAgentName);
+            $this->output->write("  $displayAgentName... ");
 
             try {
                 (new GuidelineWriter($agent))
                     ->write($composedAiGuidelines);
 
                 $this->line($this->greenTick);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $failed[$agentName] = $e->getMessage();
                 $this->line($this->redCross);
             }
@@ -453,7 +449,7 @@ class InstallCommand extends Command
                 count($failed) === 1 ? '' : 's'
             ));
             foreach ($failed as $agentName => $error) {
-                $this->line("  - {$agentName}: {$error}");
+                $this->line("  - $agentName: $error");
             }
         }
     }
@@ -478,53 +474,7 @@ class InstallCommand extends Command
         return $this->selectedBoostFeatures->contains('herd_mcp');
     }
 
-    protected function publishAndUpdateConfig(): void
-    {
-        $configPath = config_path('boost.php');
-
-        // Publish config if it doesn't exist
-        if (! file_exists($configPath)) {
-            $this->newLine();
-            $this->info(' Publishing Boost configuration file...');
-
-            Artisan::call('vendor:publish', [
-                '--provider' => 'Laravel\\Boost\\BoostServiceProvider',
-                '--tag' => 'boost-config',
-                '--force' => false,
-            ]);
-
-            $this->line('  Configuration published '.$this->greenTick);
-            $this->newLine();
-        }
-
-        //        $updated = $this->updateProjectPurposeInConfig($configPath, $this->projectPurpose);
-    }
-
-    protected function updateProjectPurposeInConfig(string $configPath, ?string $purpose): bool
-    {
-        if (empty($purpose) || $purpose === config('boost.project_purpose', '')) {
-            return false;
-        }
-
-        $content = file_get_contents($configPath);
-        if ($content === false) {
-            return false;
-        }
-
-        $purposeExists = preg_match('/\'project_purpose\'\s+\=\>\s+(.+),/', $content, $matches);
-
-        if (! $purposeExists) { // This shouldn't be possible
-            return false;
-        }
-
-        $newPurpose = addcslashes($purpose, "'");
-        $newPurposeLine = "'project_purpose' => '{$newPurpose}',";
-        $content = str_replace($matches[0], $newPurposeLine, $content);
-
-        return file_put_contents($configPath, $content) !== false;
-    }
-
-    protected function enactMcpServers(): void
+    private function enactMcpServers(): void
     {
         $this->newLine();
         $this->info(' Installing MCP servers to your selected IDEs');
@@ -537,8 +487,8 @@ class InstallCommand extends Command
 
         foreach ($this->selectedTargetIdes as $ide) {
             $ideName = class_basename($ide);
-            $ideDisplay = str_pad($ideName, $longestIdeName, ' ', STR_PAD_RIGHT);
-            $this->output->write("  {$ideDisplay}... ");
+            $ideDisplay = str_pad($ideName, $longestIdeName);
+            $this->output->write("  $ideDisplay... ");
             $results = [];
 
             // Install Laravel Boost MCP if enabled
@@ -552,7 +502,7 @@ class InstallCommand extends Command
                         $results[] = $this->redCross.' Boost';
                         $failed[$ideName]['boost'] = 'Failed to write configuration';
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $results[] = $this->redCross.' Boost';
                     $failed[$ideName]['boost'] = $e->getMessage();
                 }
@@ -574,7 +524,7 @@ class InstallCommand extends Command
                         $results[] = $this->redCross.' Herd';
                         $failed[$ideName]['herd'] = 'Failed to write configuration';
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $results[] = $this->redCross.' Herd';
                     $failed[$ideName]['herd'] = $e->getMessage();
                 }
@@ -589,7 +539,7 @@ class InstallCommand extends Command
             $this->error(sprintf('%s Some MCP servers failed to install:', $this->redCross));
             foreach ($failed as $ideName => $errors) {
                 foreach ($errors as $server => $error) {
-                    $this->line("  - {$ideName} ({$server}): {$error}");
+                    $this->line("  - $ideName ($server): $error");
                 }
             }
         }
@@ -598,7 +548,7 @@ class InstallCommand extends Command
     /**
      * Is the project actually using localization for their new features?
      */
-    protected function detectLocalization(): bool
+    private function detectLocalization(): bool
     {
         $actuallyUsing = false;
 
