@@ -1,13 +1,15 @@
-## Inertia v2 Core
+## Inertia v2
 
-- Make use of all Inertia features from v1 & v2
+- Make use of all Inertia features from v1 & v2. Check the documentation before making any changes to ensure we are taking the correct approach.
 
-## Inertia v2 New Features
+### Inertia v2 New Features
 
 - Polling
 - Prefetching
 - Deferred props
-- Infinite scrolling using merging props and WhenVisible
+- Infinite scrolling using merging props and `WhenVisible`
 - Lazy loading data on scroll
 
-- When using deferred props on the frontend we should add a nice empty state with pulsing / animated skeleton. Check the docs before making any changes to ensure we are approaching this in the correct way.
+### Deferred Props & Empty States
+
+- When using deferred props on the frontend, you should add a nice empty state with pulsing / animated skeleton.
