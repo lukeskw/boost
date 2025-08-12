@@ -1,3 +1,5 @@
+## Livewire 2
+
 - `wire:model` is live by default.
 - **Namespace**: Components typically exist in `App\Http\Livewire`.
 - **Events**: Use `emit()`, `emitTo()`, `emitSelf()` and `dispatchBrowserEvent()` for events.
