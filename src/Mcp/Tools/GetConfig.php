@@ -34,7 +34,7 @@ class GetConfig extends Tool
         $key = $arguments['key'];
 
         if (! Config::has($key)) {
-            return ToolResult::error("Config key '$key' not found.");
+            return ToolResult::error("Config key '{$key}' not found.");
         }
 
         return ToolResult::json([

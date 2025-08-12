@@ -44,7 +44,7 @@ class DatabaseSchema extends Tool
     {
         $connection = $arguments['database'] ?? config('database.default');
         $filter = $arguments['filter'] ?? '';
-        $cacheKey = "boost:mcp:database-schema:$connection:$filter";
+        $cacheKey = "boost:mcp:database-schema:{$connection}:{$filter}";
 
         $schema = Cache::remember($cacheKey, 20, function () use ($connection, $filter) {
             return $this->getDatabaseStructure($connection, $filter);
