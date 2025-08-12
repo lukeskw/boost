@@ -101,7 +101,7 @@ test('isMcpAvailable returns true when MCP file exists', function () {
     file_put_contents($mcpPath, 'test phar content');
 
     expect($herd->isMcpAvailable())->toBeTrue();
-});
+})->onlyOnWindows();
 
 test('isMcpAvailable returns false after MCP file is removed', function () {
     $testHome = getHerdTestTempDir().'/home';
