@@ -182,7 +182,7 @@ class InstallCommand extends Command
         $paddingLength = (int) (floor(($this->terminal->cols() - mb_strlen($text.$label)) / 2)) - 2;
 
         echo "\033[42m\033[2K".str_repeat(' ', $paddingLength); // Make the entire line have a green background
-        echo $this->black($this->bold($text.$link)).$this->reset(PHP_EOL);
+        echo $this->black($this->bold($text.$link)).$this->reset(PHP_EOL).$this->reset(PHP_EOL);
     }
 
     private function hyperlink(string $label, string $url): string
@@ -268,7 +268,7 @@ class InstallCommand extends Command
 
         return $this->selectCodeEnvironments(
             McpClient::class,
-            sprintf('Which code editors do you use in %s?', $this->projectName)
+            sprintf('Which code editors do you use to work on %s?', $this->projectName)
         );
     }
 
