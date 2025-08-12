@@ -9,6 +9,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Laravel\Boost\Contracts\CodingAgent;
 use Laravel\Boost\Install\Cli\DisplayHelper;
 use Laravel\Boost\Install\CodeEnvironment\CodeEnvironment;
 use Laravel\Boost\Install\CodeEnvironmentsDetector;
@@ -366,6 +367,7 @@ class InstallCommand extends Command
         $composedAiGuidelines = $composer->compose();
 
         $longestAgentName = max(1, ...$this->selectedTargetAgents->map(fn ($agent) => Str::length($agent->agentName()))->toArray());
+        /** @var CodingAgent $agent */
         foreach ($this->selectedTargetAgents as $agent) {
             $agentName = $agent->agentName();
             $displayAgentName = str_pad($agentName, $longestAgentName);
