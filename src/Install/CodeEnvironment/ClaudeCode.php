@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Install\CodeEnvironment;
 
-use Laravel\Boost\Contracts\CodingAgent;
+use Laravel\Boost\Contracts\Agent;
 use Laravel\Boost\Contracts\McpClient;
 use Laravel\Boost\Install\Enums\McpInstallationStrategy;
 use Laravel\Boost\Install\Enums\Platform;
 
-class ClaudeCode extends CodeEnvironment implements CodingAgent, McpClient
+class ClaudeCode extends CodeEnvironment implements McpClient, Agent
 {
     public function name(): string
     {
@@ -54,10 +54,5 @@ class ClaudeCode extends CodeEnvironment implements CodingAgent, McpClient
     public function guidelinesPath(): string
     {
         return 'CLAUDE.md';
-    }
-
-    public function frontmatter(): bool
-    {
-        return false;
     }
 }

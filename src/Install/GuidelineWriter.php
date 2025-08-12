@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Install;
 
-use Laravel\Boost\Contracts\CodingAgent;
+use Laravel\Boost\Contracts\Agent;
+use RuntimeException;
 
 class GuidelineWriter
 {
@@ -16,7 +17,7 @@ class GuidelineWriter
 
     public const NOOP = 3;
 
-    public function __construct(protected CodingAgent $agent)
+    public function __construct(protected Agent $agent)
     {
     }
 
@@ -34,13 +35,13 @@ class GuidelineWriter
         $directory = dirname($filePath);
         if (! is_dir($directory)) {
             if (! mkdir($directory, 0755, true)) {
-                throw new \RuntimeException("Failed to create directory: {$directory}");
+                throw new RuntimeException("Failed to create directory: {$directory}");
             }
         }
 
         $handle = fopen($filePath, 'c+');
         if (! $handle) {
-            throw new \RuntimeException("Failed to open file: {$filePath}");
+            throw new RuntimeException("Failed to open file: {$filePath}");
         }
 
         try {
@@ -72,11 +73,11 @@ class GuidelineWriter
             }
 
             if (ftruncate($handle, 0) === false || fseek($handle, 0) === -1) {
-                throw new \RuntimeException("Failed to reset file pointer: {$filePath}");
+                throw new RuntimeException("Failed to reset file pointer: {$filePath}");
             }
 
             if (fwrite($handle, $newContent) === false) {
-                throw new \RuntimeException("Failed to write to file: {$filePath}");
+                throw new RuntimeException("Failed to write to file: {$filePath}");
             }
 
             flock($handle, LOCK_UN);
@@ -100,7 +101,7 @@ class GuidelineWriter
             $attempts++;
 
             if ($attempts >= $maxRetries) {
-                throw new \RuntimeException("Failed to acquire lock on file after {$maxRetries} attempts: {$filePath}");
+                throw new RuntimeException("Failed to acquire lock on file after {$maxRetries} attempts: {$filePath}");
             }
 
             // Exponential backoff with jitter

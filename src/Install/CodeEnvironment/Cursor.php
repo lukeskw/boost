@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Install\CodeEnvironment;
 
-use Laravel\Boost\Contracts\CodingAgent;
+use Laravel\Boost\Contracts\Agent;
 use Laravel\Boost\Contracts\McpClient;
-use Laravel\Boost\Install\Enums\McpInstallationStrategy;
 use Laravel\Boost\Install\Enums\Platform;
 
-class Cursor extends CodeEnvironment implements CodingAgent, McpClient
+class Cursor extends CodeEnvironment implements Agent, McpClient
 {
     public function name(): string
     {
@@ -48,11 +47,6 @@ class Cursor extends CodeEnvironment implements CodingAgent, McpClient
         return [
             'paths' => ['.cursor'],
         ];
-    }
-
-    public function mcpInstallationStrategy(): McpInstallationStrategy
-    {
-        return McpInstallationStrategy::File;
     }
 
     public function mcpConfigPath(): string

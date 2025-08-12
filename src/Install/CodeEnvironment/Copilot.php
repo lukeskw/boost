@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Install\CodeEnvironment;
 
-use Laravel\Boost\Contracts\CodingAgent;
+use Laravel\Boost\Contracts\Agent;
 use Laravel\Boost\Install\Enums\Platform;
 
-class Copilot extends CodeEnvironment implements CodingAgent
+class Copilot extends CodeEnvironment implements Agent
 {
     public function name(): string
     {
@@ -47,10 +47,5 @@ class Copilot extends CodeEnvironment implements CodingAgent
     public function guidelinesPath(): string
     {
         return '.github/copilot-instructions.md';
-    }
-
-    public function frontmatter(): bool
-    {
-        return false;
     }
 }

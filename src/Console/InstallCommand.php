@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Laravel\Boost\Contracts\CodingAgent;
+use Laravel\Boost\Contracts\Agent;
 use Laravel\Boost\Install\Cli\DisplayHelper;
 use Laravel\Boost\Install\CodeEnvironment\CodeEnvironment;
 use Laravel\Boost\Install\CodeEnvironmentsDetector;
@@ -297,7 +297,7 @@ class InstallCommand extends Command
 
         $availableEnvironments = $allEnvironments->filter(function (CodeEnvironment $environment) use ($type) {
             return ($type === 'ide' && $environment->isMcpClient()) ||
-                   ($type === 'agent' && $environment->IsCodingAgent());
+                   ($type === 'agent' && $environment->IsAgent());
         });
 
         if ($availableEnvironments->isEmpty()) {
@@ -372,7 +372,7 @@ class InstallCommand extends Command
             $agentName = $agent->agentName();
             $displayAgentName = str_pad($agentName, $longestAgentName);
             $this->output->write("  {$displayAgentName}... ");
-            /** @var CodingAgent $agent */
+            /** @var Agent $agent */
             try {
                 (new GuidelineWriter($agent))
                     ->write($composedAiGuidelines);

@@ -7,7 +7,7 @@ namespace Laravel\Boost\Contracts;
 /**
  * Agent contract for AI coding assistants that receive guidelines.
  */
-interface CodingAgent
+interface Agent
 {
     /**
      * Get the file path where AI guidelines should be written.

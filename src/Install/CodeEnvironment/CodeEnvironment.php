@@ -7,7 +7,7 @@ namespace Laravel\Boost\Install\CodeEnvironment;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
-use Laravel\Boost\Contracts\CodingAgent;
+use Laravel\Boost\Contracts\Agent;
 use Laravel\Boost\Contracts\McpClient;
 use Laravel\Boost\Install\Detection\DetectionStrategyFactory;
 use Laravel\Boost\Install\Enums\McpInstallationStrategy;
@@ -15,46 +15,39 @@ use Laravel\Boost\Install\Enums\Platform;
 
 abstract class CodeEnvironment
 {
-    public function __construct(
-        protected readonly DetectionStrategyFactory $strategyFactory
-    ) {
+    public function __construct(protected readonly DetectionStrategyFactory $strategyFactory)
+    {
     }
 
-    /**
-     * Get the internal identifier name for this code environment.
-     *
-     * @return string
-     */
     abstract public function name(): string;
 
-    /**
-     * Get the human-readable display name for this code environment.
-     *
-     * @return string
-     */
     abstract public function displayName(): string;
+
+    public function agentName(): ?string
+    {
+        return $this->name();
+    }
+
+    public function ideName(): ?string
+    {
+        return $this->name();
+    }
 
     /**
      * Get the detection configuration for system-wide installation detection.
      *
      * @param Platform $platform
-     * @return array
+     * @return array{paths?: string[], command?: string, files?: string[]}
      */
     abstract public function systemDetectionConfig(Platform $platform): array;
 
     /**
      * Get the detection configuration for project-specific detection.
      *
-     * @return array
+     * @return array{paths?: string[], files?: string[]}
      */
     abstract public function projectDetectionConfig(): array;
 
-    /**
-     * Determine if this code environment is installed on the system.
-     *
-     * @param Platform $platform
-     * @return bool
-     */
     public function detectOnSystem(Platform $platform): bool
     {
         $config = $this->systemDetectionConfig($platform);
@@ -63,12 +56,6 @@ abstract class CodeEnvironment
         return $strategy->detect($config, $platform);
     }
 
-    /**
-     * Determine if this code environment is being used in a specific project.
-     *
-     * @param string $basePath
-     * @return bool
-     */
     public function detectInProject(string $basePath): bool
     {
         $config = array_merge($this->projectDetectionConfig(), ['basePath' => $basePath]);
@@ -77,81 +64,36 @@ abstract class CodeEnvironment
         return $strategy->detect($config);
     }
 
-    /**
-     * Override this method if the agent name is different from the environment name.
-     *
-     * @return ?string
-     */
-    public function agentName(): ?string
+    public function IsAgent(): bool
     {
-        return $this->name();
+        return $this->agentName() && $this instanceof Agent;
     }
 
-    /**
-     * Override this method if the IDE name is different from the environment name.
-     *
-     * @return ?string
-     */
-    public function ideName(): ?string
-    {
-        return $this->name();
-    }
-
-    /**
-     * Determine if this environment supports Agent/Guidelines functionality.
-     *
-     * @return bool
-     */
-    public function IsCodingAgent(): bool
-    {
-        return $this->agentName() !== null && $this instanceof CodingAgent;
-    }
-
-    /**
-     * Determine if this environment supports IDE/MCP functionality.
-     *
-     * @return bool
-     */
     public function isMcpClient(): bool
     {
-        return $this->ideName() !== null && $this instanceof McpClient;
+        return $this->ideName() && $this instanceof McpClient;
     }
 
-    /**
-     * Get the MCP installation strategy for this environment.
-     *
-     * @return McpInstallationStrategy
-     */
     public function mcpInstallationStrategy(): McpInstallationStrategy
     {
-        return McpInstallationStrategy::None;
+        return McpInstallationStrategy::File;
     }
 
-    /**
-     * Get the shell command for MCP installation (shell strategy).
-     *
-     * @return ?string
-     */
     public function shellMcpCommand(): ?string
     {
         return null;
     }
 
-    /**
-     * Get the path to an MCP configuration file (file strategy).
-     *
-     * @return ?string
-     */
     public function mcpConfigPath(): ?string
     {
         return null;
     }
 
-    /**
-     * Get the JSON key for MCP servers in the config file (file strategy).
-     *
-     * @return string
-     */
+    public function frontmatter(): bool
+    {
+        return false;
+    }
+
     public function mcpConfigKey(): string
     {
         return 'mcpServers';
@@ -173,7 +115,7 @@ abstract class CodeEnvironment
         return match($this->mcpInstallationStrategy()) {
             McpInstallationStrategy::Shell => $this->installShellMcp($key, $command, $args, $env),
             McpInstallationStrategy::File => $this->installFileMcp($key, $command, $args, $env),
-            McpInstallationStrategy::None => false,
+            McpInstallationStrategy::None => false
         };
     }
 

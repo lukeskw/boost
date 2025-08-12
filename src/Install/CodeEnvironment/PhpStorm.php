@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Install\CodeEnvironment;
 
-use Laravel\Boost\Contracts\CodingAgent;
+use Laravel\Boost\Contracts\Agent;
 use Laravel\Boost\Contracts\McpClient;
-use Laravel\Boost\Install\Enums\McpInstallationStrategy;
 use Laravel\Boost\Install\Enums\Platform;
 
-class PhpStorm extends CodeEnvironment implements CodingAgent, McpClient
+class PhpStorm extends CodeEnvironment implements Agent, McpClient
 {
     public function name(): string
     {
@@ -56,11 +55,6 @@ class PhpStorm extends CodeEnvironment implements CodingAgent, McpClient
         return 'junie';
     }
 
-    public function mcpInstallationStrategy(): McpInstallationStrategy
-    {
-        return McpInstallationStrategy::File;
-    }
-
     public function mcpConfigPath(): string
     {
         return '.junie/mcp/mcp.json';
@@ -69,10 +63,5 @@ class PhpStorm extends CodeEnvironment implements CodingAgent, McpClient
     public function guidelinesPath(): string
     {
         return '.junie/guidelines.md';
-    }
-
-    public function frontmatter(): bool
-    {
-        return false;
     }
 }
