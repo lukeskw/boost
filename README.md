@@ -8,99 +8,100 @@
 </p>
 
 ## Introduction
-Laravel Boost gives you a jump-start with AI assisted coding by making it simple to add everything you need to help AI make good choices.
 
-Core features:
-- MCP server with 15+ tools
-- Composable AI guidelines for ecosystem packages
-- Documentation API with built-in MCP tool, over 15, 000 pieces of knowledge, and semantic search with embeddings
+Laravel Boost accelerates AI-assisted development by providing the essential context and structure that AI needs to generate high-quality, Laravel-specific code.
 
-Other features:
-- Browser logs streamed to `log/storage/browser.log`
+At its foundation is an MCP server equipped with over 15 specialized tools designed to streamline AI-assisted coding workflows. The package includes composable AI guidelines specifically crafted for Laravel ecosystem packages, ensuring consistent and framework-appropriate code generation.
+
+Boost also features a powerful Documentation API that combines a built-in MCP tool with an extensive knowledge base containing over 15,000 pieces of Laravel-specific information, all enhanced by semantic search capabilities using embeddings for precise, context-aware results.
 
 > [!IMPORTANT]
-> Boost is in _Beta_ and will be updated frequently. 
+> Laravel Boost is currently in beta and receives frequent updates as we refine features and expand capabilities.
 
 ## Installation
 
-Add the package
+Laravel Boost can be installed via Composer:
+
 ```bash
 composer require laravel/boost --dev
 ```
 
-Install the MCP server & guidelines
+Next, install the MCP server and coding guidelines:
+
 ```bash
 php artisan boost:install
 ```
 
-You're ready to go!
+Once Laravel Boost has been installed, you're ready to start coding with Cursor, Claude Code, or your AI agent of choice.
 
 ## Available MCP Tools
 
 | Name                       | Notes                                                                                                          |
 | -------------------------- |----------------------------------------------------------------------------------------------------------------|
-| Application Info           | Shares PHP & Laravel versions, database engine, list of ecosystem packages with versions, and Eloquent models. |
-| Browser Logs               | Read logs & errors from the browser                                                                            |
-| Database Connections       | List database connections, and the default                                                                     |
-| Database Query             |                                                                                                                |
-| Database Schema            |                                                                                                                |
-| Get Absolute Url           | Converts relative path to absolute so AI doesn't give you invalid URLs                                         |
-| Get Config                 | Get specific value from config using dot notation                                                              |
-| Last Error                 | From the log files                                                                                             |
-| List Artisan Commands      |                                                                                                                |
-| List Available Config Keys |                                                                                                                |
-| List Available Env Vars    | Keys only                                                                                                      |
-| List Routes                | Regular & folio routes are combined. Ability to filter routes too                                              |
-| Read Log Entries           | Last X entries                                                                                                 |
-| Report Feedback            | Share Boost & Laravel AI feedback with the team, just say "give Boost feedback: x, y, and z"                    |
-| Search Docs                | Use hosted API service to retrieve docs based on installed packages                                            |
-| Tinker                     | Run arbitrary code within the context of the project                                                           |
+| Application Info           | Read PHP & Laravel versions, database engine, list of ecosystem packages with versions, and Eloquent models    |
+| Browser Logs               | Read logs and errors from the browser                                                                          |
+| Database Connections       | Inspect available database connections, including the default connection                                       |
+| Database Query             | Execute a query against the database                                                                           |
+| Database Schema            | Read the database schema                                                                                       |
+| Get Absolute URL           | Convert relative path URIs to absolute so agents generate valid URLs                                           |
+| Get Config                 | Get a value from the configuration files using "dot" notation                                                  |
+| Last Error                 | Read the last error from the application's log files                                                           |
+| List Artisan Commands      | Inspect the available Artisan commands                                                                         |
+| List Available Config Keys | Inspect the available configuration keys                                                                       |
+| List Available Env Vars    | Inspect the available environment variable keys                                                                |
+| List Routes                | Inspect the application's routes                                                                               |
+| Read Log Entries           | Read the last N log entries                                                                                    |
+| Report Feedback            | Share Boost & Laravel AI feedback with the team, just say "give Boost feedback: x, y, and z"                   |
+| Search Docs                | Query the Laravel hosted documentation API service to retrieve documentation based on installed packages       |
+| Tinker                     | Execute arbitrary code within the context of the application                                                   |
 
 ## Available AI Guidelines
 
 | Package | Versions Supported |
 |---------|-------------------|
 | Core & Boost | core |
-| Laravel Framework | core, v10, v11, v12 |
-| Livewire | core, v2, v3 |
+| Laravel Framework | core, 10.x, 11.x, 12.x |
+| Livewire | core, 2.x, 3.x |
 | Flux UI | core, free, pro |
 | Herd | core |
-| Inertia Laravel | core, v1, v2 |
-| Inertia React | core, v1, v2 |
-| Inertia Vue | core, v1, v2 |
-| Pest | core, v4 |
+| Inertia Laravel | core, 1.x, 2.x |
+| Inertia React | core, 1.x, 2.x |
+| Inertia Vue | core, 1.x, 2.x |
+| Pest | core, 4.x |
 | PHPUnit | core |
 | Pint | core |
-| TailwindCSS | core, v3, v4 |
+| TailwindCSS | core, 3.x, 4.x |
 | Livewire Volt | core |
 | Laravel Folio | core |
-| Enforce tests | conditional |
+| Enforce Tests | conditional |
 
 
-## Available documentation
+## Available Documentation
 
 | Package | Versions Supported |
 |---------|-------------------|
-| Laravel Framework | v10, v11, v12 |
-| Flux UI | v2 Free, v2 Pro |
-| Inertia | v1, v2 |
-| Livewire | v1, v2, v3 |
-| Pest | v3, v4 |
+| Laravel Framework | 10.x, 11.x, 12.x |
+| Flux UI | Free, 2.x, Pro |
+| Inertia | 1.x, 2.x |
+| Livewire | 1.x, 2.x, 3.x |
+| Pest | 3.x, 4.x |
 
 
-## Adding your own AI guidelines
+## Adding Custom AI Guidelines
 
-Add `.blade.php` files to `.ai/guidelines/*` in your project, and they'll be included with Boost guidelines when you run `boost:install`.
+To augment Laravel Boost with your own custom AI guidelines, add `.blade.php` files to your application's `.ai/guidelines/*` directory. These files will automatically be included with Laravel Boost's guidelines when you run `boost:install`.
 
-## Adding Boost MCP manually
-Create the necessary config for your code editor using these details.
+## Manually Registering the Boost MCP Server
+
+Sometimes you may need to manually register the Laravel Boost MCP server with your editor of choice. You should register the MCP server using the following details:
 
 <table>
 <tr><td><strong>Command</strong></td><td><code>php</code></td></tr>
 <tr><td><strong>Args</strong></td><td><code>./artisan boost:mcp</code></td></tr>
 </table>
 
-JSON Example
+JSON Example:
+
 ```json
 {
     "mcpServers": {
