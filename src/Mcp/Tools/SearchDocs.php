@@ -22,7 +22,7 @@ class SearchDocs extends Tool
 
     public function description(): string
     {
-        return 'Search for up-to-date version-specific documentation related to this project and its packages. This tool will search Laravel hosted documentation based on the packages installed and is perfect for all Laravel related packages. Laravel, inertia, pest, livewire, nova, nightwatch, and more.'.PHP_EOL.'You must use this tool to search for Laravel-ecosystem docs before using other approaches.';
+        return 'Search for up-to-date version-specific documentation related to this project and its packages. This tool will search Laravel hosted documentation based on the packages installed and is perfect for all Laravel related packages. Laravel, inertia, pest, livewire, filament, nova, nightwatch, and more.'.PHP_EOL.'You must use this tool to search for Laravel-ecosystem docs before using other approaches.';
     }
 
     public function schema(ToolInputSchema $schema): ToolInputSchema
