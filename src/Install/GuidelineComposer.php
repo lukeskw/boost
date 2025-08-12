@@ -52,7 +52,7 @@ class GuidelineComposer
     {
         return trim($guidelines
             ->filter(fn ($content) => ! empty(trim($content)))
-            ->map(fn ($content, $key) => "\n=== {$key} rules ===\n\n{$content}")
+            ->map(fn ($content, $key) => "\n=== {$key} rules ===\n\n".trim($content))
             ->join("\n\n"));
     }
 
