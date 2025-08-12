@@ -7,7 +7,7 @@ namespace Laravel\Boost\Mcp\Tools\DatabaseSchema;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
-class PostgresSQLSchemaDriver extends DatabaseSchemaDriver
+class PostgreSQLSchemaDriver extends DatabaseSchemaDriver
 {
     public function getViews(): array
     {

@@ -14,7 +14,7 @@ class SchemaDriverFactory
 
         return match ($driverName) {
             'mysql', 'mariadb' => new MySQLSchemaDriver($connection),
-            'pgsql' => new PostgresSQLSchemaDriver($connection),
+            'pgsql' => new PostgreSQLSchemaDriver($connection),
             'sqlite' => new SQLiteSchemaDriver($connection),
             default => new NullSchemaDriver($connection),
         };
