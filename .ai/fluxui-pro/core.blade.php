@@ -1,3 +1,5 @@
+## Flux UI Pro
+
 - This project is using the Pro version of Flux UI. It has full access to the free components and variants, as well as full access to the Pro components and variants.
 - Flux UI is a component library for Livewire. Flux is a robust, hand-crafted, UI component library for your Livewire applications. It's built using Tailwind CSS and provides a set of components that are easy to use and customize.
 - You should use Flux UI components when available.
@@ -8,7 +10,7 @@
     <flux:button variant="primary"/>
 </code-snippet>
 
-## Available Components
+### Available Components
 This is correct as of Boost installation, but there may be additional components within the codebase.
 
 <available-flux-components>
