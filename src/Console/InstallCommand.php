@@ -294,22 +294,19 @@ class InstallCommand extends Command
     {
         $allEnvironments = $this->codeEnvironmentsDetector->getCodeEnvironments();
 
-        // Filter by type capability
         $availableEnvironments = $allEnvironments->filter(function (CodeEnvironment $environment) use ($type) {
-            return ($type === 'ide' && $environment->supportsIde()) ||
-                   ($type === 'agent' && $environment->supportsAgent());
+            return ($type === 'ide' && $environment->isMcpClient()) ||
+                   ($type === 'agent' && $environment->IsCodingAgent());
         });
 
         if ($availableEnvironments->isEmpty()) {
             return collect();
         }
 
-        // Build options for multiselect
         $options = $availableEnvironments->mapWithKeys(function (CodeEnvironment $environment) {
             return [get_class($environment) => $environment->displayName()];
         })->sort();
 
-        // Auto-detect installed environments
         $detectedClasses = [];
         $installedEnvNames = array_unique(array_merge(
             $this->projectInstalledCodeEnvironments,

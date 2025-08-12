@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Install\CodeEnvironment;
 
-use Laravel\Boost\Contracts\Agent;
-use Laravel\Boost\Contracts\Ide;
+use Laravel\Boost\Contracts\CodingAgent;
+use Laravel\Boost\Contracts\McpClient;
 use Laravel\Boost\Install\Enums\McpInstallationStrategy;
 use Laravel\Boost\Install\Enums\Platform;
 
-class PhpStorm extends CodeEnvironment implements Agent, Ide
+class PhpStorm extends CodeEnvironment implements CodingAgent, McpClient
 {
     public function name(): string
     {

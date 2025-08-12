@@ -7,8 +7,8 @@ namespace Laravel\Boost\Install\CodeEnvironment;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
-use Laravel\Boost\Contracts\Agent;
-use Laravel\Boost\Contracts\Ide;
+use Laravel\Boost\Contracts\CodingAgent;
+use Laravel\Boost\Contracts\McpClient;
 use Laravel\Boost\Install\Detection\DetectionStrategyFactory;
 use Laravel\Boost\Install\Enums\McpInstallationStrategy;
 use Laravel\Boost\Install\Enums\Platform;
@@ -102,9 +102,9 @@ abstract class CodeEnvironment
      *
      * @return bool
      */
-    public function supportsAgent(): bool
+    public function IsCodingAgent(): bool
     {
-        return $this->agentName() !== null && $this instanceof Agent;
+        return $this->agentName() !== null && $this instanceof CodingAgent;
     }
 
     /**
@@ -112,9 +112,9 @@ abstract class CodeEnvironment
      *
      * @return bool
      */
-    public function supportsIde(): bool
+    public function isMcpClient(): bool
     {
-        return $this->ideName() !== null && $this instanceof Ide;
+        return $this->ideName() !== null && $this instanceof McpClient;
     }
 
     /**
@@ -236,10 +236,8 @@ abstract class CodeEnvironment
             return false;
         }
 
-        // Ensure directory exists
         File::ensureDirectoryExists(dirname($path));
 
-        // Load existing configuration
         $config = File::exists($path)
             ? json_decode(File::get($path), true) ?: []
             : [];

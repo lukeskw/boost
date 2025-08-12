@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Install\CodeEnvironment;
 
-use Laravel\Boost\Contracts\Ide;
+use Laravel\Boost\Contracts\McpClient;
 use Laravel\Boost\Install\Enums\McpInstallationStrategy;
 use Laravel\Boost\Install\Enums\Platform;
 
-class VSCode extends CodeEnvironment implements Ide
+class VSCode extends CodeEnvironment implements McpClient
 {
     public function name(): string
     {
