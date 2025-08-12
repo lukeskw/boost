@@ -1,37 +1,33 @@
 ## Livewire 3
 
 ### Key Changes From Livewire 2
+- These things changed in Livewire 2, but may not have been updated in this application. Verify this application's setup to ensure you conform with application conventions.
+    - Use `wire:model.live` for real-time updates, `wire:model` is now deferred by default.
+    - Components now use the `App\Livewire` namespace (not `App\Http\Livewire`).
+    - Use `$this->dispatch()` to dispatch events (not `emit` or `dispatchBrowserEvent`).
+    - Use the `components.layouts.app` view as the typical layout path (not `layouts.app`).
 
-- **Namespace**: Components now use `App\Livewire` (not `App\Http\Livewire`).
-- **Events**: Use `$this->dispatch()` (not `emit` or `dispatchBrowserEvent`).
-- **Layout Path**: `components.layouts.app` (not `layouts.app`).
-- **Deferred by Default**: Use `wire:model.live` for real-time updates.
-- **Alpine Included**: Don't manually include Alpine.js.
+### New Directives
+- `wire:show`, `wire:transition`, `wire:cloak, `wire:offline`, `wire:target` are available for use. Use the documentation to find usage examples.
 
-### Livewire Best Practices
+### Alpine
+- Alpine is now included with Livewire, don't manually include Alpine.js.
+- Plugins included with Alpine: persist, intersect, collapse, and focus.
 
-- Always use a **single root element** in Blade components.
-- Always add `wire:key` in loops to prevent DOM merging errors.
-
+### Lifecycle Hooks
+- You can listen for `livewire:init` to hook into Livewire initialization, and `fail.status === 419` for the page expiring:
 @verbatim
-```blade
-@foreach ($items as $item)
-    <div wire:key="item-{{ $item->id }}">
-        {{ $item->name }}
-    </div>
-@endforeach
-```
+<code-snippet name="livewire:load example" lang="js">
+document.addEventListener('livewire:init', function () {
+    Livewire.hook('request', ({ fail }) => {
+        if (fail && fail.status === 419) {
+            alert('Your session expired');
+        }
+    });
+
+    Livewire.hook('message.failed', (message, component) => {
+        console.error(message);
+    });
+});
+</code-snippet>
 @endverbatim
-
-- Use attributes to configure Livewire event listeners:
-
-```php
-#[On('todo-created')]
-public function refreshList()
-{
-// ...
-}
-```
-
-- Use `wire:loading` and `wire:dirty` to configure loading states when applicable.
-- Use something like `wire:confirm="Are you sure?"` to confirm destructive actions.

@@ -22,15 +22,20 @@ class SearchDocs extends Tool
 
     public function description(): string
     {
-        return 'Search for up-to-date version-specific documentation related to this project and its packages. This tool will search Laravel hosted documentation based on the packages installed and is perfect for all Laravel related packages. Laravel, inertia, pest, livewire, filament, nova, nightwatch, and more.'.PHP_EOL.'You must use this tool to search for Laravel-ecosystem docs before using other approaches.';
+        return 'Search for up-to-date version-specific documentation related to this project and its packages. This tool will search Laravel hosted documentation based on the packages installed and is perfect for all Laravel related packages. Laravel, inertia, pest, livewire, filament, nova, nightwatch, and more.'.PHP_EOL.'You must use this tool to search for Laravel-ecosystem docs before using other approaches. The results provided are for this project\'s package version and does not cover all versions of the package.';
     }
 
     public function schema(ToolInputSchema $schema): ToolInputSchema
     {
         return $schema
-            ->string('queries')
-            ->description('### separated list of queries to perform. Useful to pass multiple if you aren\'t sure if it is "toggle" or "switch", or "infinite scroll" or "infinite load", for example.')->required()
-
+            ->raw('queries', [
+                'description' => 'List of queries to perform, pass multiple if you aren\'t sure if it is "toggle" or "switch", for example',
+                'type' => 'array',
+                'items' => [
+                    'type' => 'string',
+                    'description' => 'Search query',
+                ],
+            ])->required()
             ->raw('packages', [
                 'description' => 'Package names to limit searching to from application-info. Useful if you know the package(s) you need. i.e. laravel/framework, inertiajs/inertia-laravel, @inertiajs/react',
                 'type' => 'array',
@@ -54,7 +59,7 @@ class SearchDocs extends Tool
         $packagesFilter = array_key_exists('packages', $arguments) ? $arguments['packages'] : null;
 
         $queries = array_filter(
-            array_map('trim', explode('###', $arguments['queries'])),
+            array_map('trim', $arguments['queries']),
             fn ($query) => $query !== '' && $query !== '*'
         );
 
@@ -90,6 +95,7 @@ class SearchDocs extends Tool
             'token_limit' => $tokenLimit,
             'format' => 'markdown',
         ];
+
         try {
             $response = $this->client()->asJson()->post($apiUrl, $payload);
 

@@ -1,7 +1,8 @@
 ## Livewire Volt
 
 - This project uses Livewire Volt for interactivity within its pages. New pages requiring interactivity must also use Livewire Volt. There is documentation available for it.
-- Volt is an elegantly crafted **class-based** and **functional** API for Livewire that supports single-file components, allowing a component's PHP logic and Blade templates to co-exist in the same file
+- Make new Volt components using `php artisan make:volt [name] [--test] [--pest]`
+- Volt is a **class-based** and **functional** API for Livewire that supports single-file components, allowing a component's PHP logic and Blade templates to co-exist in the same file
 - Livewire Volt allows PHP logic and Blade templates in one file. Components use the `@volt` directive.
 - You must check existing Volt components to determine if they're functional or class based. If you can't detect that, ask the user which they prefer before writing a Volt component.
 
@@ -94,7 +95,8 @@ test('product form creates product', function () {
 
 @verbatim
 <code-snippet name="CRUD With Volt" lang="php">
-@volt
+<?php
+
 use App\Models\Product;
 use function Livewire\Volt\{state, computed};
 
@@ -106,15 +108,15 @@ $products = computed(fn() => Product::when($this->search,
 
 $edit = fn(Product $product) => $this->editing = $product->id;
 $delete = fn(Product $product) => $product->delete();
-?>
-@endvolt
 
-<!-- UI here -->
+?>
+
+<!-- HTML / UI Here -->
 </code-snippet>
 @endverbatim
 
 @verbatim
-<code-snippet name="Real-time Search With Volt" lang="php">
+<code-snippet name="Real-Time Search With Volt" lang="php">
     <flux:input
         wire:model.live.debounce.300ms="search"
         placeholder="Search..."
