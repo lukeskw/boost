@@ -22,7 +22,7 @@ class InjectBoost
             $injectedContent = $this->injectScript($response->getContent());
             $response->setContent($injectedContent);
 
-            if ($originalView instanceof View) {
+            if ($originalView instanceof View && property_exists($response, 'original')) {
                 $response->original = $originalView;
             }
         }

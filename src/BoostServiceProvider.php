@@ -126,9 +126,6 @@ class BoostServiceProvider extends ServiceProvider
     /**
      * Build a string message for the log based on various input types. Single-dimensional, and multi:
      * "data": {"message":"Unhandled Promise Rejection","reason":{"name":"TypeError","message":"NetworkError when attempting to fetch resource.","stack":""}}]
-     *
-     * @param array $data
-     * @return string
      */
     private function buildLogMessageFromData(array $data): string
     {
@@ -141,6 +138,7 @@ class BoostServiceProvider extends ServiceProvider
                 is_bool($value) => $value ? 'true' : 'false',
                 is_null($value) => 'null',
                 is_object($value) => json_encode($value),
+                default => $value,
             };
         }
 
