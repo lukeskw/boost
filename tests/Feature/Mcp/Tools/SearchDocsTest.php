@@ -2,8 +2,7 @@
 
 declare(strict_types=1);
 
-use Illuminate\Http\Client\PendingRequest;
-use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Http;
 use Laravel\Boost\Mcp\Tools\SearchDocs;
 use Laravel\Mcp\Server\Tools\ToolResult;
 use Laravel\Roster\Enums\Packages;
@@ -20,34 +19,29 @@ test('it searches documentation successfully', function () {
     $roster = Mockery::mock(Roster::class);
     $roster->shouldReceive('packages')->andReturn($packages);
 
-    $mockResponse = Mockery::mock(Response::class);
-    $mockResponse->shouldReceive('successful')->andReturn(true);
-    $mockResponse->shouldReceive('json')->andReturn([
-        'results' => [
-            ['content' => 'Laravel documentation content'],
-            ['content' => 'Pest documentation content'],
-        ],
+    Http::fake([
+        'https://boost.laravel.com/api/docs' => Http::response('Documentation search results', 200),
     ]);
 
-    $mockClient = Mockery::mock(PendingRequest::class);
-    $mockClient->shouldReceive('asJson')->andReturnSelf();
-    $mockClient->shouldReceive('post')->andReturn($mockResponse);
-
-    $tool = Mockery::mock(SearchDocs::class, [$roster])->makePartial();
-    $tool->shouldReceive('client')->andReturn($mockClient);
-
-    $result = $tool->handle(['queries' => 'authentication, testing']);
+    $tool = new SearchDocs($roster);
+    $result = $tool->handle(['queries' => 'authentication###testing']);
 
     expect($result)->toBeInstanceOf(ToolResult::class);
 
     $data = $result->toArray();
-    expect($data['isError'])->toBeFalse();
+    expect($data['isError'])->toBeFalse()
+        ->and($data['content'][0]['text'])->toBe('Documentation search results');
 
-    $content = json_decode($data['content'][0]['text'], true);
-    expect($content['knowledge_count'])->toBe(2);
-    expect($content['knowledge'])->toContain('Laravel documentation content');
-    expect($content['knowledge'])->toContain('Pest documentation content');
-    expect($content['knowledge'])->toContain('---');
+    Http::assertSent(function ($request) {
+        return $request->url() === 'https://boost.laravel.com/api/docs' &&
+               $request->data()['queries'] === ['authentication', 'testing'] &&
+               $request->data()['packages'] === [
+                   ['name' => 'laravel/framework', 'version' => '11.x'],
+                   ['name' => 'pestphp/pest', 'version' => '2.x'],
+               ] &&
+               $request->data()['token_limit'] === 10000 &&
+               $request->data()['format'] === 'markdown';
+    });
 });
 
 test('it handles API error response', function () {
@@ -58,25 +52,18 @@ test('it handles API error response', function () {
     $roster = Mockery::mock(Roster::class);
     $roster->shouldReceive('packages')->andReturn($packages);
 
-    $mockResponse = Mockery::mock(Response::class);
-    $mockResponse->shouldReceive('successful')->andReturn(false);
-    $mockResponse->shouldReceive('status')->andReturn(500);
-    $mockResponse->shouldReceive('body')->andReturn('API Error');
+    Http::fake([
+        'https://boost.laravel.com/api/docs' => Http::response('API Error', 500),
+    ]);
 
-    $mockClient = Mockery::mock(PendingRequest::class);
-    $mockClient->shouldReceive('asJson')->andReturnSelf();
-    $mockClient->shouldReceive('post')->andReturn($mockResponse);
-
-    $tool = Mockery::mock(SearchDocs::class, [$roster])->makePartial();
-    $tool->shouldReceive('client')->andReturn($mockClient);
-
+    $tool = new SearchDocs($roster);
     $result = $tool->handle(['queries' => 'authentication']);
 
     expect($result)->toBeInstanceOf(ToolResult::class);
 
     $data = $result->toArray();
-    expect($data['isError'])->toBeTrue();
-    expect($data['content'][0]['text'])->toBe('Failed to search documentation: API Error');
+    expect($data['isError'])->toBeTrue()
+        ->and($data['content'][0]['text'])->toBe('Failed to search documentation: API Error');
 });
 
 test('it filters empty queries', function () {
@@ -85,28 +72,24 @@ test('it filters empty queries', function () {
     $roster = Mockery::mock(Roster::class);
     $roster->shouldReceive('packages')->andReturn($packages);
 
-    $mockResponse = Mockery::mock(Response::class);
-    $mockResponse->shouldReceive('successful')->andReturn(true);
-    $mockResponse->shouldReceive('json')->andReturn(['results' => []]);
+    Http::fake([
+        'https://boost.laravel.com/api/docs' => Http::response('Empty results', 200),
+    ]);
 
-    $mockClient = Mockery::mock(PendingRequest::class);
-    $mockClient->shouldReceive('asJson')->andReturnSelf();
-    $mockClient->shouldReceive('post')->withArgs(function ($url, $payload) {
-        return $url === 'https://boost.laravel.com/api/docs' &&
-               $payload['queries'] === ['test'] &&
-               empty($payload['packages']) &&
-               $payload['token_limit'] === 10000;
-    })->andReturn($mockResponse);
-
-    $tool = Mockery::mock(SearchDocs::class, [$roster])->makePartial();
-    $tool->shouldReceive('client')->andReturn($mockClient);
-
+    $tool = new SearchDocs($roster);
     $result = $tool->handle(['queries' => 'test###  ###*### ']);
 
     expect($result)->toBeInstanceOf(ToolResult::class);
 
     $data = $result->toArray();
     expect($data['isError'])->toBeFalse();
+
+    Http::assertSent(function ($request) {
+        return $request->url() === 'https://boost.laravel.com/api/docs' &&
+               $request->data()['queries'] === ['test'] &&
+               empty($request->data()['packages']) &&
+               $request->data()['token_limit'] === 10000;
+    });
 });
 
 test('it formats package data correctly', function () {
@@ -118,28 +101,21 @@ test('it formats package data correctly', function () {
     $roster = Mockery::mock(Roster::class);
     $roster->shouldReceive('packages')->andReturn($packages);
 
-    $mockResponse = Mockery::mock(Response::class);
-    $mockResponse->shouldReceive('successful')->andReturn(true);
-    $mockResponse->shouldReceive('json')->andReturn(['results' => []]);
+    Http::fake([
+        'https://boost.laravel.com/api/docs' => Http::response('Package data results', 200),
+    ]);
 
-    $mockClient = Mockery::mock(PendingRequest::class);
-    $mockClient->shouldReceive('asJson')->andReturnSelf();
-    $mockClient->shouldReceive('post')->with(
-        'https://boost.laravel.com/api/docs',
-        Mockery::on(function ($payload) {
-            return $payload['packages'] === [
-                ['name' => 'laravel/framework', 'version' => '11.x'],
-                ['name' => 'livewire/livewire', 'version' => '3.x'],
-            ] && $payload['token_limit'] === 10000;
-        })
-    )->andReturn($mockResponse);
-
-    $tool = Mockery::mock(SearchDocs::class, [$roster])->makePartial();
-    $tool->shouldReceive('client')->andReturn($mockClient);
-
+    $tool = new SearchDocs($roster);
     $result = $tool->handle(['queries' => 'test']);
 
     expect($result)->toBeInstanceOf(ToolResult::class);
+
+    Http::assertSent(function ($request) {
+        return $request->data()['packages'] === [
+            ['name' => 'laravel/framework', 'version' => '11.x'],
+            ['name' => 'livewire/livewire', 'version' => '3.x'],
+        ] && $request->data()['token_limit'] === 10000;
+    });
 });
 
 test('it handles empty results', function () {
@@ -148,27 +124,18 @@ test('it handles empty results', function () {
     $roster = Mockery::mock(Roster::class);
     $roster->shouldReceive('packages')->andReturn($packages);
 
-    $mockResponse = Mockery::mock(Response::class);
-    $mockResponse->shouldReceive('successful')->andReturn(true);
-    $mockResponse->shouldReceive('json')->andReturn(['results' => []]);
+    Http::fake([
+        'https://boost.laravel.com/api/docs' => Http::response('Empty response', 200),
+    ]);
 
-    $mockClient = Mockery::mock(PendingRequest::class);
-    $mockClient->shouldReceive('asJson')->andReturnSelf();
-    $mockClient->shouldReceive('post')->andReturn($mockResponse);
-
-    $tool = Mockery::mock(SearchDocs::class, [$roster])->makePartial();
-    $tool->shouldReceive('client')->andReturn($mockClient);
-
+    $tool = new SearchDocs($roster);
     $result = $tool->handle(['queries' => 'nonexistent']);
 
     expect($result)->toBeInstanceOf(ToolResult::class);
 
     $data = $result->toArray();
-    expect($data['isError'])->toBeFalse();
-
-    $content = json_decode($data['content'][0]['text'], true);
-    expect($content['knowledge_count'])->toBe(0);
-    expect($content['knowledge'])->toBe('');
+    expect($data['isError'])->toBeFalse()
+        ->and($data['content'][0]['text'])->toBe('Empty response');
 });
 
 test('it uses custom token_limit when provided', function () {
@@ -177,25 +144,18 @@ test('it uses custom token_limit when provided', function () {
     $roster = Mockery::mock(Roster::class);
     $roster->shouldReceive('packages')->andReturn($packages);
 
-    $mockResponse = Mockery::mock(Response::class);
-    $mockResponse->shouldReceive('successful')->andReturn(true);
-    $mockResponse->shouldReceive('json')->andReturn(['results' => []]);
+    Http::fake([
+        'https://boost.laravel.com/api/docs' => Http::response('Custom token limit results', 200),
+    ]);
 
-    $mockClient = Mockery::mock(PendingRequest::class);
-    $mockClient->shouldReceive('asJson')->andReturnSelf();
-    $mockClient->shouldReceive('post')->with(
-        'https://boost.laravel.com/api/docs',
-        Mockery::on(function ($payload) {
-            return $payload['token_limit'] === 5000;
-        })
-    )->andReturn($mockResponse);
-
-    $tool = Mockery::mock(SearchDocs::class, [$roster])->makePartial();
-    $tool->shouldReceive('client')->andReturn($mockClient);
-
+    $tool = new SearchDocs($roster);
     $result = $tool->handle(['queries' => 'test', 'token_limit' => 5000]);
 
     expect($result)->toBeInstanceOf(ToolResult::class);
+
+    Http::assertSent(function ($request) {
+        return $request->data()['token_limit'] === 5000;
+    });
 });
 
 test('it caps token_limit at maximum of 1000000', function () {
@@ -204,23 +164,16 @@ test('it caps token_limit at maximum of 1000000', function () {
     $roster = Mockery::mock(Roster::class);
     $roster->shouldReceive('packages')->andReturn($packages);
 
-    $mockResponse = Mockery::mock(Response::class);
-    $mockResponse->shouldReceive('successful')->andReturn(true);
-    $mockResponse->shouldReceive('json')->andReturn(['results' => []]);
+    Http::fake([
+        'https://boost.laravel.com/api/docs' => Http::response('Capped token limit results', 200),
+    ]);
 
-    $mockClient = Mockery::mock(PendingRequest::class);
-    $mockClient->shouldReceive('asJson')->andReturnSelf();
-    $mockClient->shouldReceive('post')->with(
-        'https://boost.laravel.com/api/docs',
-        Mockery::on(function ($payload) {
-            return $payload['token_limit'] === 1000000; // Should be capped at 1M
-        })
-    )->andReturn($mockResponse);
-
-    $tool = Mockery::mock(SearchDocs::class, [$roster])->makePartial();
-    $tool->shouldReceive('client')->andReturn($mockClient);
-
-    $result = $tool->handle(['queries' => 'test', 'token_limit' => 2000000]); // Request 2M but get capped at 1M
+    $tool = new SearchDocs($roster);
+    $result = $tool->handle(['queries' => 'test', 'token_limit' => 2000000]);
 
     expect($result)->toBeInstanceOf(ToolResult::class);
+
+    Http::assertSent(function ($request) {
+        return $request->data()['token_limit'] === 1000000;
+    });
 });

@@ -16,8 +16,8 @@ trait MakesHttpRequests
             'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:140.0) Gecko/20100101 Firefox/140.0 Laravel Boost',
         ]);
 
-        // Disable SSL verification for local development URLs
-        if (app()->environment('local') || str_contains(config('boost.hosted.api_url', ''), '.test')) {
+        // Disable SSL verification for local development URLs and testing
+        if (app()->environment(['local', 'testing']) || str_contains(config('boost.hosted.api_url', ''), '.test')) {
             $client = $client->withoutVerifying();
         }
 
