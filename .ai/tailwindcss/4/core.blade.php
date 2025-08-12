@@ -1,5 +1,4 @@
 - Always use Tailwind CSS v4, do not use the deprecated utilities.
-- Use the `search-docs` tool to find exactly what's supported in this project's Tailwind setup.
 - In Tailwind v4 you import Tailwind using a regular CSS `@import` statement, not using the `@tailwind` directives used in v3:
 @verbatim
 <code-snippet name="Tailwind v4 import tailwind diff" lang="diff"

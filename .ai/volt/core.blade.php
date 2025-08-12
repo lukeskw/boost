@@ -107,11 +107,10 @@ $edit = fn(Product $product) => $this->editing = $product->id;
 $delete = fn(Product $product) => $product->delete();
 ?>
 
-    <!-- UI here -->
+<!-- HTML here -->
 @endvolt
 </code-snippet>
 @endverbatim
-
 @verbatim
 <code-snippet name="Real-time search with Volt" lang="php">
     <flux:input
@@ -120,8 +119,6 @@ $delete = fn(Product $product) => $product->delete();
     />
 </code-snippet>
 @endverbatim
-
-
 @verbatim
 <code-snippet name="Loading states with Volt" lang="php">
     <flux:button wire:click="save" wire:loading.attr="disabled">
