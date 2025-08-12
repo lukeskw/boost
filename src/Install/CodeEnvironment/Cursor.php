@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Install\CodeEnvironment;
 
+use Laravel\Boost\Contracts\Agent;
+use Laravel\Boost\Contracts\Ide;
+use Laravel\Boost\Install\Enums\McpInstallationStrategy;
 use Laravel\Boost\Install\Enums\Platform;
 
-class Cursor extends CodeEnvironment
+class Cursor extends CodeEnvironment implements Agent, Ide
 {
     public function name(): string
     {
@@ -47,4 +50,23 @@ class Cursor extends CodeEnvironment
         ];
     }
 
+    public function mcpInstallationStrategy(): McpInstallationStrategy
+    {
+        return McpInstallationStrategy::File;
+    }
+
+    public function mcpConfigPath(): string
+    {
+        return '.cursor/mcp.json';
+    }
+
+    public function guidelinesPath(): string
+    {
+        return '.cursor/rules/laravel-boost.mdc';
+    }
+
+    public function frontmatter(): bool
+    {
+        return true;
+    }
 }

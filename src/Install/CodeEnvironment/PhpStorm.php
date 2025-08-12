@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Install\CodeEnvironment;
 
+use Laravel\Boost\Contracts\Agent;
+use Laravel\Boost\Contracts\Ide;
+use Laravel\Boost\Install\Enums\McpInstallationStrategy;
 use Laravel\Boost\Install\Enums\Platform;
 
-class PhpStorm extends CodeEnvironment
+class PhpStorm extends CodeEnvironment implements Agent, Ide
 {
     public function name(): string
     {
@@ -48,4 +51,28 @@ class PhpStorm extends CodeEnvironment
         ];
     }
 
+    public function agentName(): string
+    {
+        return 'junie';
+    }
+
+    public function mcpInstallationStrategy(): McpInstallationStrategy
+    {
+        return McpInstallationStrategy::File;
+    }
+
+    public function mcpConfigPath(): string
+    {
+        return '.junie/mcp/mcp.json';
+    }
+
+    public function guidelinesPath(): string
+    {
+        return '.junie/guidelines.md';
+    }
+
+    public function frontmatter(): bool
+    {
+        return false;
+    }
 }

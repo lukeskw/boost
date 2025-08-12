@@ -9,9 +9,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Laravel\Boost\Contracts\Agent;
-use Laravel\Boost\Contracts\Ide;
 use Laravel\Boost\Install\Cli\DisplayHelper;
+use Laravel\Boost\Install\CodeEnvironment\CodeEnvironment;
 use Laravel\Boost\Install\CodeEnvironmentsDetector;
 use Laravel\Boost\Install\GuidelineComposer;
 use Laravel\Boost\Install\GuidelineConfig;
@@ -19,7 +18,6 @@ use Laravel\Boost\Install\GuidelineWriter;
 use Laravel\Boost\Install\Herd;
 use Laravel\Prompts\Concerns\Colors;
 use Laravel\Prompts\Terminal;
-use ReflectionClass;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Finder\Finder;
 
@@ -39,10 +37,10 @@ class InstallCommand extends Command
 
     private Terminal $terminal;
 
-    /** @var Collection<int, Agent> */
+    /** @var Collection<int, CodeEnvironment> */
     private Collection $selectedTargetAgents;
 
-    /** @var Collection<int, Ide> */
+    /** @var Collection<int, CodeEnvironment> */
     private Collection $selectedTargetIdes;
 
     /** @var Collection<int, string> */
@@ -56,8 +54,6 @@ class InstallCommand extends Command
     private array $projectInstalledCodeEnvironments = [];
 
     private bool $enforceTests = true;
-
-    private array $projectInstalledAgents = [];
 
     private string $greenTick;
 
@@ -114,7 +110,6 @@ class InstallCommand extends Command
     {
         $this->systemInstalledCodeEnvironments = $this->codeEnvironmentsDetector->discoverSystemInstalledCodeEnvironments();
         $this->projectInstalledCodeEnvironments = $this->codeEnvironmentsDetector->discoverProjectInstalledCodeEnvironments(base_path());
-        $this->projectInstalledAgents = $this->discoverProjectAgents();
     }
 
     private function collectInstallationPreferences(): void
@@ -127,7 +122,7 @@ class InstallCommand extends Command
 
     private function enact(): void
     {
-        if ($this->shouldInstallAiGuidelines() && ! empty($this->selectedTargetAgents)) {
+        if ($this->shouldInstallAiGuidelines() && $this->selectedTargetAgents->isNotEmpty()) {
             $this->enactGuidelines();
         }
 
@@ -163,8 +158,8 @@ class InstallCommand extends Command
     {
         $label = 'https://boost.laravel.com/installed';
 
-        $ideNames = $this->selectedTargetIdes->map(fn ($ide) => 'i:'.class_basename($ide))->toArray();
-        $agentNames = $this->selectedTargetAgents->map(fn ($agent) => 'a:'.class_basename($agent))->toArray();
+        $ideNames = $this->selectedTargetIdes->map(fn ($ide) => 'i:'.$ide->ideName())->toArray();
+        $agentNames = $this->selectedTargetAgents->map(fn ($agent) => 'a:'.$agent->agentName())->toArray();
         $boostFeatures = $this->selectedBoostFeatures->map(fn ($feature) => 'b:'.$feature)->toArray();
 
         // Guidelines installed (prefix: g)
@@ -261,137 +256,86 @@ class InstallCommand extends Command
     /**
      * @return array<int, string>
      */
-    private function discoverProjectAgents(): array
-    {
-        $agents = [];
-        $projectAgents = $this->codeEnvironmentsDetector->discoverProjectInstalledCodeEnvironments(base_path());
-
-        // Map IDE detections to their corresponding agents
-        $ideToAgentMap = [
-            'phpstorm' => 'junie',
-            'claudecode' => 'claudecode',
-            'cursor' => 'cursor',
-            'copilot' => 'copilot',
-        ];
-
-        foreach ($projectAgents as $app) {
-            if (isset($ideToAgentMap[$app])) {
-                $agents[] = $ideToAgentMap[$app];
-            }
-        }
-
-        foreach ($this->systemInstalledCodeEnvironments as $ide) {
-            if (isset($ideToAgentMap[$ide]) && ! in_array($ideToAgentMap[$ide], $agents)) {
-                $agents[] = $ideToAgentMap[$ide];
-            }
-        }
-
-        return array_unique($agents);
-    }
 
     /**
-     * @return Collection<int, Ide>
+     * @return Collection<int, CodeEnvironment>
      */
     private function selectTargetIdes(): Collection
     {
-        $ides = [];
         if (! $this->shouldInstallMcp() && ! $this->shouldInstallHerdMcp()) {
             return collect();
         }
 
-        $agentDir = implode(DIRECTORY_SEPARATOR, [__DIR__, '..', 'Install', 'Agents']);
-
-        $finder = Finder::create()
-            ->in($agentDir)
-            ->files()
-            ->name('*.php');
-
-        foreach ($finder as $ideFile) {
-            $className = 'Laravel\\Boost\\Install\\Agents\\'.$ideFile->getBasename('.php');
-
-            if (class_exists($className)) {
-                $reflection = new ReflectionClass($className);
-
-                if ($reflection->implementsInterface(Ide::class) && ! $reflection->isAbstract()) {
-                    $ides[$className] = Str::headline($ideFile->getBasename('.php'));
-                }
-            }
-        }
-
-        ksort($ides);
-
-        $detectedClasses = [];
-        foreach ($this->projectInstalledCodeEnvironments as $ideKey) {
-            foreach ($ides as $className => $displayName) {
-                if (strtolower($ideKey) === strtolower(class_basename($className))) {
-                    $detectedClasses[] = $className;
-                    break;
-                }
-            }
-        }
-
-        $selectedIdeClasses = collect(multiselect(
-            label: sprintf('Which code editors do you use in %s?', $this->projectName),
-            options: $ides,
-            default: $detectedClasses,
-            scroll: 5,
-            required: true,
-            hint: sprintf('Auto-detected %s for you', Arr::join(array_map(fn ($c) => class_basename($c), $detectedClasses), ', ', ' & '))
-        ))->sort();
-
-        return $selectedIdeClasses->map(fn ($ideClass) => new $ideClass);
+        return $this->selectCodeEnvironments(
+            'ide',
+            sprintf('Which code editors do you use in %s?', $this->projectName)
+        );
     }
 
     /**
-     * @return Collection<int, Agent>
+     * @return Collection<int, CodeEnvironment>
      */
     private function selectTargetAgents(): Collection
     {
-        $agents = [];
         if (! $this->shouldInstallAiGuidelines()) {
             return collect();
         }
 
-        $agentDir = implode(DIRECTORY_SEPARATOR, [__DIR__, '..', 'Install', 'Agents']);
+        return $this->selectCodeEnvironments(
+            'agent',
+            sprintf('Which agents need AI guidelines for %s?', $this->projectName)
+        );
+    }
 
-        $finder = Finder::create()
-            ->in($agentDir)
-            ->files()
-            ->name('*.php');
+    /**
+     * @return Collection<int, CodeEnvironment>
+     */
+    private function selectCodeEnvironments(string $type, string $label): Collection
+    {
+        $allEnvironments = $this->codeEnvironmentsDetector->getCodeEnvironments();
 
-        foreach ($finder as $agentFile) {
-            $className = 'Laravel\\Boost\\Install\\Agents\\'.$agentFile->getBasename('.php');
+        // Filter by type capability
+        $availableEnvironments = $allEnvironments->filter(function (CodeEnvironment $environment) use ($type) {
+            return ($type === 'ide' && $environment->supportsIde()) ||
+                   ($type === 'agent' && $environment->supportsAgent());
+        });
 
-            if (class_exists($className)) {
-                $reflection = new ReflectionClass($className);
-
-                if ($reflection->implementsInterface(Agent::class)) {
-                    $agents[$className] = Str::headline($agentFile->getBasename('.php'));
-                }
-            }
+        if ($availableEnvironments->isEmpty()) {
+            return collect();
         }
 
-        ksort($agents);
+        // Build options for multiselect
+        $options = $availableEnvironments->mapWithKeys(function (CodeEnvironment $environment) {
+            return [get_class($environment) => $environment->displayName()];
+        })->sort();
 
-        // Map detected agent keys to class names
+        // Auto-detect installed environments
         $detectedClasses = [];
-        foreach ($this->projectInstalledAgents as $agentKey) {
-            foreach ($agents as $className => $displayName) {
-                if (strtolower($agentKey) === strtolower(class_basename($className))) {
-                    $detectedClasses[] = $className;
-                    break;
-                }
+        $installedEnvNames = array_unique(array_merge(
+            $this->projectInstalledCodeEnvironments,
+            $this->systemInstalledCodeEnvironments
+        ));
+
+        foreach ($installedEnvNames as $envKey) {
+            $matchingEnv = $availableEnvironments->first(fn (CodeEnvironment $env) => strtolower($envKey) === strtolower($env->name())
+            );
+            if ($matchingEnv) {
+                $detectedClasses[] = get_class($matchingEnv);
             }
         }
 
-        $selectedAgentClasses = collect(multiselect(
-            label: sprintf('Which agents need AI guidelines for %s?', $this->projectName),
-            options: $agents,
-            default: $detectedClasses,
-            scroll: 4,
+        $selectedClasses = collect(multiselect(
+            label: $label,
+            options: $options->toArray(),
+            default: array_unique($detectedClasses),
+            scroll: $type === 'ide' ? 5 : 4,
+            required: $type === 'ide',
+            hint: empty($detectedClasses) ? null : sprintf('Auto-detected %s for you',
+                Arr::join(array_map(fn ($className) => $availableEnvironments->first(fn ($env) => get_class($env) === $className)->displayName(), $detectedClasses), ', ', ' & ')
+            )
         ))->sort();
 
-        return $selectedAgentClasses->map(fn ($agentClass) => new $agentClass);
+        return $selectedClasses->map(fn ($className) => $availableEnvironments->first(fn ($env) => get_class($env) === $className));
     }
 
     protected function enactGuidelines(): void
@@ -424,9 +368,9 @@ class InstallCommand extends Command
         $failed = [];
         $composedAiGuidelines = $composer->compose();
 
-        $longestAgentName = max(1, ...$this->selectedTargetAgents->map(fn ($agent) => Str::length(class_basename($agent)))->toArray());
+        $longestAgentName = max(1, ...$this->selectedTargetAgents->map(fn ($agent) => Str::length($agent->agentName()))->toArray());
         foreach ($this->selectedTargetAgents as $agent) {
-            $agentName = class_basename($agent);
+            $agentName = $agent->agentName();
             $displayAgentName = str_pad($agentName, $longestAgentName);
             $this->output->write("  {$displayAgentName}... ");
 
@@ -483,10 +427,10 @@ class InstallCommand extends Command
         usleep(750000);
 
         $failed = [];
-        $longestIdeName = max(1, ...$this->selectedTargetIdes->map(fn ($ide) => Str::length(class_basename($ide)))->toArray());
+        $longestIdeName = max(1, ...$this->selectedTargetIdes->map(fn ($ide) => Str::length($ide->ideName()))->toArray());
 
         foreach ($this->selectedTargetIdes as $ide) {
-            $ideName = class_basename($ide);
+            $ideName = $ide->ideName();
             $ideDisplay = str_pad($ideName, $longestIdeName);
             $this->output->write("  {$ideDisplay}... ");
             $results = [];

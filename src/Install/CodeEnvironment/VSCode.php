@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Install\CodeEnvironment;
 
+use Laravel\Boost\Contracts\Ide;
+use Laravel\Boost\Install\Enums\McpInstallationStrategy;
 use Laravel\Boost\Install\Enums\Platform;
 
-class VSCode extends CodeEnvironment
+class VSCode extends CodeEnvironment implements Ide
 {
     public function name(): string
     {
@@ -43,4 +45,23 @@ class VSCode extends CodeEnvironment
         ];
     }
 
+    public function agentName(): ?string
+    {
+        return null;
+    }
+
+    public function mcpInstallationStrategy(): McpInstallationStrategy
+    {
+        return McpInstallationStrategy::File;
+    }
+
+    public function mcpConfigPath(): string
+    {
+        return '.vscode/mcp.json';
+    }
+
+    public function mcpConfigKey(): string
+    {
+        return 'servers';
+    }
 }

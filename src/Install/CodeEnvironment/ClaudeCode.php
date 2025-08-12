@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Install\CodeEnvironment;
 
+use Laravel\Boost\Contracts\Agent;
+use Laravel\Boost\Contracts\Ide;
+use Laravel\Boost\Install\Enums\McpInstallationStrategy;
 use Laravel\Boost\Install\Enums\Platform;
 
-class ClaudeCode extends CodeEnvironment
+class ClaudeCode extends CodeEnvironment implements Agent, Ide
 {
     public function name(): string
     {
@@ -36,5 +39,25 @@ class ClaudeCode extends CodeEnvironment
             'paths' => ['.claude'],
             'files' => ['CLAUDE.md'],
         ];
+    }
+
+    public function mcpInstallationStrategy(): McpInstallationStrategy
+    {
+        return McpInstallationStrategy::Shell;
+    }
+
+    public function shellMcpCommand(): string
+    {
+        return 'claude mcp add -s local -t stdio {key} "{command}" {args} {env}';
+    }
+
+    public function guidelinesPath(): string
+    {
+        return 'CLAUDE.md';
+    }
+
+    public function frontmatter(): bool
+    {
+        return false;
     }
 }

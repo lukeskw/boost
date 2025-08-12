@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Install\CodeEnvironment;
 
+use Laravel\Boost\Contracts\Ide;
+use Laravel\Boost\Install\Enums\McpInstallationStrategy;
 use Laravel\Boost\Install\Enums\Platform;
 
-class Zed extends CodeEnvironment
+class Zed extends CodeEnvironment implements Ide
 {
     public function name(): string
     {
@@ -47,4 +49,18 @@ class Zed extends CodeEnvironment
         ];
     }
 
+    public function agentName(): ?string
+    {
+        return null;
+    }
+
+    public function mcpInstallationStrategy(): McpInstallationStrategy
+    {
+        return McpInstallationStrategy::File;
+    }
+
+    public function mcpConfigPath(): string
+    {
+        return '.zed/mcp.json';
+    }
 }

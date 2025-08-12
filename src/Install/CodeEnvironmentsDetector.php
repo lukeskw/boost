@@ -73,4 +73,14 @@ class CodeEnvironmentsDetector
             fn (string $className) => $this->container->make($className)
         );
     }
+
+    /**
+     * Get all registered programs (public access).
+     *
+     * @return Collection<string, CodeEnvironment>
+     */
+    public function getCodeEnvironments(): Collection
+    {
+        return $this->getAllPrograms();
+    }
 }
