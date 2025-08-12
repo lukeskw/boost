@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Mcp\Tools;
 
+use Illuminate\Support\Arr;
 use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 use Laravel\Mcp\Server\Tools\ToolInputSchema;
 use Laravel\Mcp\Server\Tools\ToolResult;
 
-#[IsReadOnly()]
+#[IsReadOnly]
 class GetAbsoluteUrl extends Tool
 {
     public function description(): string
@@ -35,8 +36,8 @@ class GetAbsoluteUrl extends Tool
      */
     public function handle(array $arguments): ToolResult
     {
-        $path = $arguments['path'] ?? null;
-        $routeName = $arguments['route'] ?? null;
+        $path = Arr::get($arguments, 'path');
+        $routeName = Arr::get($arguments, 'route');
 
         if ($path) {
             return ToolResult::text(url($path));
