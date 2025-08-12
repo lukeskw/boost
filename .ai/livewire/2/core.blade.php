@@ -1,6 +1,8 @@
+## Livewire 2
+
 - `wire:model` is live by default.
-- **Namespace**: Components typically exist in `App\Http\Livewire`.
-- **Events**: Use `emit()`, `emitTo()`, `emitSelf()` and `dispatchBrowserEvent()` for events.
+- Components typically exist in the `App\Http\Livewire` namespace.
+- Use `emit()`, `emitTo()`, `emitSelf()`, and `dispatchBrowserEvent()` for events.
 - Alpine is included separately to Livewire.
 - You can listen for `livewire:load` to hook into Livewire initialization, and `Livewire.onPageExpired` for when the page expires:
 @verbatim
