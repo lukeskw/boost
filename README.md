@@ -57,6 +57,8 @@ Once Laravel Boost has been installed, you're ready to start coding with Cursor,
 
 ## Available AI Guidelines
 
+Laravel Boost includes AI guidelines for the following packages and frameworks. The `core` guidelines provide generic, generalized advice to the AI for the given package that is applicable across all versions.
+
 | Package | Versions Supported |
 |---------|-------------------|
 | Core & Boost | core |
