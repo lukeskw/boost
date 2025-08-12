@@ -10,6 +10,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Boost\Contracts\Agent;
+use Laravel\Boost\Contracts\McpClient;
 use Laravel\Boost\Install\Cli\DisplayHelper;
 use Laravel\Boost\Install\CodeEnvironment\CodeEnvironment;
 use Laravel\Boost\Install\CodeEnvironmentsDetector;
@@ -38,10 +39,10 @@ class InstallCommand extends Command
 
     private Terminal $terminal;
 
-    /** @var Collection<int, CodeEnvironment> */
+    /** @var Collection<int, Agent> */
     private Collection $selectedTargetAgents;
 
-    /** @var Collection<int, CodeEnvironment> */
+    /** @var Collection<int, McpClient> */
     private Collection $selectedTargetMcpClient;
 
     /** @var Collection<int, string> */
@@ -157,11 +158,11 @@ class InstallCommand extends Command
     {
         $label = 'https://boost.laravel.com/installed';
 
-        $ideNames = $this->selectedTargetMcpClient->map(fn ($ide) => 'i:'.$ide->ideName())->toArray();
-        $agentNames = $this->selectedTargetAgents->map(fn ($agent) => 'a:'.$agent->agentName())->toArray();
+        $ideNames = $this->selectedTargetMcpClient->map(fn (McpClient $mcpClient) => 'i:'.$mcpClient->mcpClientName())
+            ->toArray();
+        $agentNames = $this->selectedTargetAgents->map(fn (Agent $agent) => 'a:'.$agent->agentName())->toArray();
         $boostFeatures = $this->selectedBoostFeatures->map(fn ($feature) => 'b:'.$feature)->toArray();
 
-        // Guidelines installed (prefix: g)
         $guidelines = [];
         if ($this->shouldInstallAiGuidelines()) {
             $guidelines[] = 'g:ai';
@@ -436,12 +437,12 @@ class InstallCommand extends Command
         $longestIdeName = max(
             1,
             ...$this->selectedTargetMcpClient->map(
-                fn ($mcpClient) => Str::length($mcpClient->ideName())
+                fn (McpClient $mcpClient) => Str::length($mcpClient->mcpClientName())
             )->toArray()
         );
 
         foreach ($this->selectedTargetMcpClient as $mcpClient) {
-            $ideName = $mcpClient->ideName();
+            $ideName = $mcpClient->mcpClientName();
             $ideDisplay = str_pad($ideName, $longestIdeName);
             $this->output->write("  {$ideDisplay}... ");
             $results = [];

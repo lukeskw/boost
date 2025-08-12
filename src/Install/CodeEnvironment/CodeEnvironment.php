@@ -28,7 +28,7 @@ abstract class CodeEnvironment
         return $this->name();
     }
 
-    public function ideName(): ?string
+    public function mcpClientName(): ?string
     {
         return $this->name();
     }
@@ -71,7 +71,7 @@ abstract class CodeEnvironment
 
     public function isMcpClient(): bool
     {
-        return $this->ideName() && $this instanceof McpClient;
+        return $this->mcpClientName() && $this instanceof McpClient;
     }
 
     public function mcpInstallationStrategy(): McpInstallationStrategy

@@ -16,7 +16,7 @@ class VSCode extends CodeEnvironment implements McpClient
 
     public function displayName(): string
     {
-        return 'Visual Studio Code';
+        return 'Vs Code';
     }
 
     public function systemDetectionConfig(Platform $platform): array
@@ -42,11 +42,6 @@ class VSCode extends CodeEnvironment implements McpClient
         return [
             'paths' => ['.vscode'],
         ];
-    }
-
-    public function agentName(): ?string
-    {
-        return null;
     }
 
     public function mcpConfigPath(): string

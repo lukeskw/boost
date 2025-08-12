@@ -10,6 +10,13 @@ namespace Laravel\Boost\Contracts;
 interface Agent
 {
     /**
+     * Get the display name of the Agent.
+     *
+     * @return string|null
+     */
+    public function agentName(): ?string;
+
+    /**
      * Get the file path where AI guidelines should be written.
      *
      * @return string The relative or absolute path to the guideline file

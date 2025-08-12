@@ -39,7 +39,7 @@ class Copilot extends CodeEnvironment implements Agent
         return false;
     }
 
-    public function ideName(): ?string
+    public function mcpClientName(): ?string
     {
         return null;
     }
