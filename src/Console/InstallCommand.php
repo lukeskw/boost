@@ -194,7 +194,7 @@ class InstallCommand extends Command
 
     private function hyperlink(string $label, string $url): string
     {
-        return "\033]8;;$url\007$label\033]8;;\033\\";
+        return "\033]8;;{$url}\007{$label}\033]8;;\033\\";
     }
 
     /**
@@ -428,7 +428,7 @@ class InstallCommand extends Command
         foreach ($this->selectedTargetAgents as $agent) {
             $agentName = class_basename($agent);
             $displayAgentName = str_pad($agentName, $longestAgentName);
-            $this->output->write("  $displayAgentName... ");
+            $this->output->write("  {$displayAgentName}... ");
 
             try {
                 (new GuidelineWriter($agent))
@@ -449,7 +449,7 @@ class InstallCommand extends Command
                 count($failed) === 1 ? '' : 's'
             ));
             foreach ($failed as $agentName => $error) {
-                $this->line("  - $agentName: $error");
+                $this->line("  - {$agentName}: {$error}");
             }
         }
     }
@@ -488,7 +488,7 @@ class InstallCommand extends Command
         foreach ($this->selectedTargetIdes as $ide) {
             $ideName = class_basename($ide);
             $ideDisplay = str_pad($ideName, $longestIdeName);
-            $this->output->write("  $ideDisplay... ");
+            $this->output->write("  {$ideDisplay}... ");
             $results = [];
 
             // Install Laravel Boost MCP if enabled
@@ -539,7 +539,7 @@ class InstallCommand extends Command
             $this->error(sprintf('%s Some MCP servers failed to install:', $this->redCross));
             foreach ($failed as $ideName => $errors) {
                 foreach ($errors as $server => $error) {
-                    $this->line("  - $ideName ($server): $error");
+                    $this->line("  - {$ideName} ({$server}): {$error}");
                 }
             }
         }

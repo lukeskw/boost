@@ -41,7 +41,7 @@ class ListAvailableEnvVars extends Tool
         }
 
         if (! file_exists($filePath)) {
-            return ToolResult::error("File not found at '$filePath'");
+            return ToolResult::error("File not found at '{$filePath}'");
         }
 
         $envLines = file_get_contents($filePath);

@@ -73,7 +73,7 @@ class LastError extends Tool
         $logFile = $this->resolveLogFilePath();
 
         if (! file_exists($logFile)) {
-            return ToolResult::error("Log file not found at $logFile");
+            return ToolResult::error("Log file not found at {$logFile}");
         }
 
         $entry = $this->readLastErrorEntry($logFile);
