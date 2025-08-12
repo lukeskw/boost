@@ -14,7 +14,7 @@ class Boost extends Server
 
     public string $serverVersion = '0.0.1';
 
-    public string $instructions = 'Laravel AI Assistant to give you a boost';
+    public string $instructions = 'Laravel ecosystem MCP server offering database schema access, Artisan commands, error logs, Tinker execution, semantic documentation search and more. Boost helps with code generation.';
 
     public int $defaultPaginationLength = 50;
 
