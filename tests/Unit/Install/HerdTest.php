@@ -175,3 +175,15 @@ test('isInstalled returns false when herd config directory is missing on Windows
 
     expect($herd->isInstalled())->toBeFalse();
 })->onlyOnWindows();
+
+test('isWindowsPlatform returns true on Windows', function () {
+    $herd = new Herd();
+
+    expect($herd->isWindowsPlatform())->toBeTrue();
+})->onlyOnWindows();
+
+test('isWindowsPlatform returns false on non-Windows platforms', function () {
+    $herd = new Herd();
+
+    expect($herd->isWindowsPlatform())->toBeFalse();
+})->skipOnWindows();

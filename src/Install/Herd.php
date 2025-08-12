@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Install;
 
+use Laravel\Boost\Install\Enums\Platform;
+
 class Herd
 {
     public function isInstalled(): bool
     {
-        $isWindows = PHP_OS_FAMILY === 'Windows';
-
-        if (! $isWindows) {
+        if ($this->isWindowsPlatform()) {
             return file_exists('/Applications/Herd.app/Contents/MacOS/Herd');
         }
 
@@ -24,7 +24,7 @@ class Herd
 
     public function getHomePath(): string
     {
-        if (PHP_OS_FAMILY === 'Windows') {
+        if ($this->isWindowsPlatform()) {
             if (! isset($_SERVER['HOME'])) {
                 $_SERVER['HOME'] = $_SERVER['USERPROFILE'];
             }
@@ -37,12 +37,15 @@ class Herd
 
     public function mcpPath(): string
     {
-        $isWindows = PHP_OS_FAMILY === 'Windows';
-
-        if ($isWindows) {
+        if ($this->isWindowsPlatform()) {
             return $this->getHomePath().'/.config/herd/bin/herd-mcp.phar';
         }
 
         return $this->getHomePath().'/Library/Application Support/Herd/bin/herd-mcp.phar';
+    }
+
+    public function isWindowsPlatform(): bool
+    {
+        return Platform::current() === Platform::Windows;
     }
 }
