@@ -41,7 +41,7 @@ class CodeEnvironmentsDetector
     {
         $platform = Platform::current();
 
-        return $this->getAllPrograms()
+        return $this->getCodeEnvironments()
             ->filter(fn (CodeEnvironment $program) => $program->detectOnSystem($platform))
             ->map(fn (CodeEnvironment $program) => $program->name())
             ->values()
@@ -55,7 +55,7 @@ class CodeEnvironmentsDetector
      */
     public function discoverProjectInstalledCodeEnvironments(string $basePath): array
     {
-        return $this->getAllPrograms()
+        return $this->getCodeEnvironments()
             ->filter(fn ($program) => $program->detectInProject($basePath))
             ->map(fn ($program) => $program->name())
             ->values()
@@ -63,24 +63,12 @@ class CodeEnvironmentsDetector
     }
 
     /**
-     * Get all registered programs.
-     *
-     * @return Collection<string, CodeEnvironment>
-     */
-    private function getAllPrograms(): Collection
-    {
-        return collect($this->programs)->map(
-            fn (string $className) => $this->container->make($className)
-        );
-    }
-
-    /**
-     * Get all registered programs (public access).
+     * Get all registered code environments.
      *
      * @return Collection<string, CodeEnvironment>
      */
     public function getCodeEnvironments(): Collection
     {
-        return $this->getAllPrograms();
+        return collect($this->programs)->map(fn (string $className) => $this->container->make($className));
     }
 }
