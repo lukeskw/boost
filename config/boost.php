@@ -6,12 +6,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Boost Browser Logs Watcher Switch
+    | Boost Browser Logs Watcher
     |--------------------------------------------------------------------------
     |
-    | The following option may be used to enable or disable browser logs watcher
-    | functionality which simply provides a single and convenient way to
-    | enable or disable browser logs functionality in Boost.
+    | The following option may be used to enable or disable the browser logs
+    | watcher feature within Laravel Boost. The log watcher will read any
+    | errors within the browser's console to give Boost better context.
     */
 
     'browser_logs_watcher' => env('BOOST_BROWSER_LOGS_WATCHER', true),
