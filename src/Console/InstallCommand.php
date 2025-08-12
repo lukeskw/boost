@@ -225,20 +225,22 @@ class InstallCommand extends Command
     {
         $defaultInstallOptions = ['mcp_server', 'ai_guidelines'];
         $installOptions = [
-            'mcp_server' => 'Boost MCP Server',
-            'ai_guidelines' => 'Package AI Guidelines (i.e. Framework, Inertia, Pest)',
+            'mcp_server' => 'Boost MCP Server (with 15+ tools)',
+            'ai_guidelines' => 'Boost AI Guidelines (for Laravel, Inertia, and more)',
         ];
 
         if ($this->herd->isMcpAvailable()) {
             $installOptions['herd_mcp'] = 'Herd MCP Server';
+
+            return collect(multiselect(
+                label: 'What shall we install?',
+                options: $installOptions,
+                default: $defaultInstallOptions,
+                required: true,
+            ));
         }
 
-        return collect(multiselect(
-            label: 'What shall we install?',
-            options: $installOptions,
-            default: $defaultInstallOptions,
-            required: true,
-        ));
+        return collect(['mcp_server', 'ai_guidelines']);
     }
 
     /**
@@ -291,12 +293,11 @@ class InstallCommand extends Command
     /**
      * Get configuration settings for contract-specific selection behavior.
      *
-     * @param string $contractClass
      * @return array{scroll: int, required: bool, displayMethod: string}
      */
     private function getSelectionConfig(string $contractClass): array
     {
-        return match($contractClass) {
+        return match ($contractClass) {
             Agent::class => ['scroll' => 4, 'required' => false, 'displayMethod' => 'agentName'],
             McpClient::class => ['scroll' => 5, 'required' => true, 'displayMethod' => 'displayName'],
             default => throw new InvalidArgumentException("Unsupported contract class: {$contractClass}"),
