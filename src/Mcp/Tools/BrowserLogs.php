@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Mcp\Tools;
 
-use Illuminate\Support\Facades\Log;
 use Laravel\Boost\Concerns\ReadsLogs;
 use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 use Laravel\Mcp\Server\Tools\ToolInputSchema;
 use Laravel\Mcp\Server\Tools\ToolResult;
 
-#[IsReadOnly()]
+#[IsReadOnly]
 class BrowserLogs extends Tool
 {
     use ReadsLogs;
@@ -41,7 +40,7 @@ class BrowserLogs extends Tool
             return ToolResult::error('The "entries" argument must be greater than 0.');
         }
 
-        // Locate the correct log file using shared helper.
+        // Locate the correct log file using the shared helper.
         $logFile = storage_path('logs/browser.log');
 
         if (! file_exists($logFile)) {
