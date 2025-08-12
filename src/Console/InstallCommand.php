@@ -470,6 +470,7 @@ class InstallCommand extends Command
 
             if ($this->shouldInstallMcp()) {
                 try {
+                    /** @phpstan-ignore property.notFound */
                     $artisan = $mcpClient->absolute ? base_path('artisan') : './artisan';
                     $result = $mcpClient->installMcp('laravel-boost', 'php', [$artisan, 'boost:mcp']);
 
