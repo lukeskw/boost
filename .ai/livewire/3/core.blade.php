@@ -1,16 +1,17 @@
+## Livewire 3
 
-#### Key Changes from Livewire 2
+### Key Changes From Livewire 2
 
-- **Namespace**: Components now use `App\Livewire` (not `App\Http\Livewire`)
-- **Events**: Use `$this->dispatch()` (not `emit` or `dispatchBrowserEvent`)
-- **Layout path**: `components.layouts.app` (not `layouts.app`)
-- **Deferred by default**: Use `wire:model.live` for real-time updates
-- **Alpine included**: Don't manually include Alpine.js
+- **Namespace**: Components now use `App\Livewire` (not `App\Http\Livewire`).
+- **Events**: Use `$this->dispatch()` (not `emit` or `dispatchBrowserEvent`).
+- **Layout Path**: `components.layouts.app` (not `layouts.app`).
+- **Deferred by Default**: Use `wire:model.live` for real-time updates.
+- **Alpine Included**: Don't manually include Alpine.js.
 
-#### Livewire Best Practices
+### Livewire Best Practices
 
-- **Single root element** in Blade components
-- **Add wire:key** in loops:
+- Always use a **single root element** in Blade components.
+- Always add `wire:key` in loops to prevent DOM merging errors.
 
 @verbatim
 ```blade
@@ -22,7 +23,7 @@
 ```
 @endverbatim
 
-- **Use attributes** for event listeners:
+- Use attributes to configure Livewire event listeners:
 
 ```php
 #[On('todo-created')]
@@ -32,5 +33,5 @@ public function refreshList()
 }
 ```
 
-- **Loading states**: Use `wire:loading` and `wire:dirty`
-- **Confirmations**: Use `wire:confirm="Are you sure?"`
+- Use `wire:loading` and `wire:dirty` to configure loading states when applicable.
+- Use something like `wire:confirm="Are you sure?"` to confirm destructive actions.
