@@ -9,9 +9,11 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Laravel\Boost\Contracts\Agent;
-use Laravel\Boost\Contracts\Ide;
+use Laravel\Boost\Contracts\McpClient;
 use Laravel\Boost\Install\Cli\DisplayHelper;
+use Laravel\Boost\Install\CodeEnvironment\CodeEnvironment;
 use Laravel\Boost\Install\CodeEnvironmentsDetector;
 use Laravel\Boost\Install\GuidelineComposer;
 use Laravel\Boost\Install\GuidelineConfig;
@@ -19,7 +21,6 @@ use Laravel\Boost\Install\GuidelineWriter;
 use Laravel\Boost\Install\Herd;
 use Laravel\Prompts\Concerns\Colors;
 use Laravel\Prompts\Terminal;
-use ReflectionClass;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Finder\Finder;
 
@@ -42,8 +43,8 @@ class InstallCommand extends Command
     /** @var Collection<int, Agent> */
     private Collection $selectedTargetAgents;
 
-    /** @var Collection<int, Ide> */
-    private Collection $selectedTargetIdes;
+    /** @var Collection<int, McpClient> */
+    private Collection $selectedTargetMcpClient;
 
     /** @var Collection<int, string> */
     private Collection $selectedBoostFeatures;
@@ -57,8 +58,6 @@ class InstallCommand extends Command
 
     private bool $enforceTests = true;
 
-    private array $projectInstalledAgents = [];
-
     private string $greenTick;
 
     private string $redCross;
@@ -70,7 +69,7 @@ class InstallCommand extends Command
         $this->displayBoostHeader();
         $this->discoverEnvironment();
         $this->collectInstallationPreferences();
-        $this->enact();
+        $this->performInstallation();
         $this->outro();
     }
 
@@ -85,7 +84,7 @@ class InstallCommand extends Command
         $this->redCross = $this->red('✗');
 
         $this->selectedTargetAgents = collect();
-        $this->selectedTargetIdes = collect();
+        $this->selectedTargetMcpClient = collect();
 
         $this->projectName = basename(base_path());
     }
@@ -114,27 +113,24 @@ class InstallCommand extends Command
     {
         $this->systemInstalledCodeEnvironments = $this->codeEnvironmentsDetector->discoverSystemInstalledCodeEnvironments();
         $this->projectInstalledCodeEnvironments = $this->codeEnvironmentsDetector->discoverProjectInstalledCodeEnvironments(base_path());
-        $this->projectInstalledAgents = $this->discoverProjectAgents();
     }
 
     private function collectInstallationPreferences(): void
     {
         $this->selectedBoostFeatures = $this->selectBoostFeatures();
         $this->enforceTests = $this->determineTestEnforcement(ask: false);
-        $this->selectedTargetIdes = $this->selectTargetIdes();
+        $this->selectedTargetMcpClient = $this->selectTargetMcpClients();
         $this->selectedTargetAgents = $this->selectTargetAgents();
     }
 
-    private function enact(): void
+    private function performInstallation(): void
     {
-        if ($this->shouldInstallAiGuidelines() && ! empty($this->selectedTargetAgents)) {
-            $this->enactGuidelines();
-        }
+        $this->installGuidelines();
 
         usleep(750000);
 
-        if (($this->shouldInstallMcp() || $this->shouldInstallHerdMcp()) && $this->selectedTargetIdes->isNotEmpty()) {
-            $this->enactMcpServers();
+        if (($this->shouldInstallMcp() || $this->shouldInstallHerdMcp()) && $this->selectedTargetMcpClient->isNotEmpty()) {
+            $this->installMcpServerConfig();
         }
     }
 
@@ -148,9 +144,9 @@ class InstallCommand extends Command
             ->name('*.php');
 
         foreach ($finder as $toolFile) {
-            $fqdn = 'Laravel\\Boost\\Mcp\\Tools\\'.$toolFile->getBasename('.php');
-            if (class_exists($fqdn)) {
-                $tools[$fqdn] = Str::headline($toolFile->getBasename('.php'));
+            $fullyClassifiedClassName = 'Laravel\\Boost\\Mcp\\Tools\\'.$toolFile->getBasename('.php');
+            if (class_exists($fullyClassifiedClassName)) {
+                $tools[$fullyClassifiedClassName] = Str::headline($toolFile->getBasename('.php'));
             }
         }
 
@@ -163,11 +159,11 @@ class InstallCommand extends Command
     {
         $label = 'https://boost.laravel.com/installed';
 
-        $ideNames = $this->selectedTargetIdes->map(fn ($ide) => 'i:'.class_basename($ide))->toArray();
-        $agentNames = $this->selectedTargetAgents->map(fn ($agent) => 'a:'.class_basename($agent))->toArray();
+        $ideNames = $this->selectedTargetMcpClient->map(fn (McpClient $mcpClient) => 'i:'.$mcpClient->mcpClientName())
+            ->toArray();
+        $agentNames = $this->selectedTargetAgents->map(fn (Agent $agent) => 'a:'.$agent->agentName())->toArray();
         $boostFeatures = $this->selectedBoostFeatures->map(fn ($feature) => 'b:'.$feature)->toArray();
 
-        // Guidelines installed (prefix: g)
         $guidelines = [];
         if ($this->shouldInstallAiGuidelines()) {
             $guidelines[] = 'g:ai';
@@ -177,10 +173,7 @@ class InstallCommand extends Command
             $guidelines[] = 'g:style';
         }
 
-        // Combine all data
         $allData = array_merge($ideNames, $agentNames, $boostFeatures, $guidelines);
-
-        // Create a compact CSV string and base64 encode
         $installData = base64_encode(implode(',', $allData));
 
         $link = $this->hyperlink($label, 'https://boost.laravel.com/installed/?d='.$installData);
@@ -229,20 +222,22 @@ class InstallCommand extends Command
     {
         $defaultInstallOptions = ['mcp_server', 'ai_guidelines'];
         $installOptions = [
-            'mcp_server' => 'Boost MCP Server',
-            'ai_guidelines' => 'Package AI Guidelines (i.e. Framework, Inertia, Pest)',
+            'mcp_server' => 'Boost MCP Server (with 15+ tools)',
+            'ai_guidelines' => 'Boost AI Guidelines (for Laravel, Inertia, and more)',
         ];
 
         if ($this->herd->isMcpAvailable()) {
             $installOptions['herd_mcp'] = 'Herd MCP Server';
+
+            return collect(multiselect(
+                label: 'What shall we install?',
+                options: $installOptions,
+                default: $defaultInstallOptions,
+                required: true,
+            ));
         }
 
-        return collect(multiselect(
-            label: 'What shall we install?',
-            options: $installOptions,
-            default: $defaultInstallOptions,
-            required: true,
-        ));
+        return collect(['mcp_server', 'ai_guidelines']);
     }
 
     /**
@@ -261,147 +256,123 @@ class InstallCommand extends Command
     /**
      * @return array<int, string>
      */
-    private function discoverProjectAgents(): array
-    {
-        $agents = [];
-        $projectAgents = $this->codeEnvironmentsDetector->discoverProjectInstalledCodeEnvironments(base_path());
-
-        // Map IDE detections to their corresponding agents
-        $ideToAgentMap = [
-            'phpstorm' => 'junie',
-            'claudecode' => 'claudecode',
-            'cursor' => 'cursor',
-            'copilot' => 'copilot',
-        ];
-
-        foreach ($projectAgents as $app) {
-            if (isset($ideToAgentMap[$app])) {
-                $agents[] = $ideToAgentMap[$app];
-            }
-        }
-
-        foreach ($this->systemInstalledCodeEnvironments as $ide) {
-            if (isset($ideToAgentMap[$ide]) && ! in_array($ideToAgentMap[$ide], $agents)) {
-                $agents[] = $ideToAgentMap[$ide];
-            }
-        }
-
-        return array_unique($agents);
-    }
 
     /**
-     * @return Collection<int, Ide>
+     * @return Collection<int, CodeEnvironment>
      */
-    private function selectTargetIdes(): Collection
+    private function selectTargetMcpClients(): Collection
     {
-        $ides = [];
         if (! $this->shouldInstallMcp() && ! $this->shouldInstallHerdMcp()) {
             return collect();
         }
 
-        $agentDir = implode(DIRECTORY_SEPARATOR, [__DIR__, '..', 'Install', 'Agents']);
-
-        $finder = Finder::create()
-            ->in($agentDir)
-            ->files()
-            ->name('*.php');
-
-        foreach ($finder as $ideFile) {
-            $className = 'Laravel\\Boost\\Install\\Agents\\'.$ideFile->getBasename('.php');
-
-            if (class_exists($className)) {
-                $reflection = new ReflectionClass($className);
-
-                if ($reflection->implementsInterface(Ide::class) && ! $reflection->isAbstract()) {
-                    $ides[$className] = Str::headline($ideFile->getBasename('.php'));
-                }
-            }
-        }
-
-        ksort($ides);
-
-        $detectedClasses = [];
-        foreach ($this->projectInstalledCodeEnvironments as $ideKey) {
-            foreach ($ides as $className => $displayName) {
-                if (strtolower($ideKey) === strtolower(class_basename($className))) {
-                    $detectedClasses[] = $className;
-                    break;
-                }
-            }
-        }
-
-        $selectedIdeClasses = collect(multiselect(
-            label: sprintf('Which code editors do you use in %s?', $this->projectName),
-            options: $ides,
-            default: $detectedClasses,
-            scroll: 5,
-            required: true,
-            hint: sprintf('Auto-detected %s for you', Arr::join(array_map(fn ($c) => class_basename($c), $detectedClasses), ', ', ' & '))
-        ))->sort();
-
-        return $selectedIdeClasses->map(fn ($ideClass) => new $ideClass);
+        return $this->selectCodeEnvironments(
+            McpClient::class,
+            sprintf('Which code editors do you use in %s?', $this->projectName)
+        );
     }
 
     /**
-     * @return Collection<int, Agent>
+     * @return Collection<int, CodeEnvironment>
      */
     private function selectTargetAgents(): Collection
     {
-        $agents = [];
         if (! $this->shouldInstallAiGuidelines()) {
             return collect();
         }
 
-        $agentDir = implode(DIRECTORY_SEPARATOR, [__DIR__, '..', 'Install', 'Agents']);
-
-        $finder = Finder::create()
-            ->in($agentDir)
-            ->files()
-            ->name('*.php');
-
-        foreach ($finder as $agentFile) {
-            $className = 'Laravel\\Boost\\Install\\Agents\\'.$agentFile->getBasename('.php');
-
-            if (class_exists($className)) {
-                $reflection = new ReflectionClass($className);
-
-                if ($reflection->implementsInterface(Agent::class)) {
-                    $agents[$className] = Str::headline($agentFile->getBasename('.php'));
-                }
-            }
-        }
-
-        ksort($agents);
-
-        // Map detected agent keys to class names
-        $detectedClasses = [];
-        foreach ($this->projectInstalledAgents as $agentKey) {
-            foreach ($agents as $className => $displayName) {
-                if (strtolower($agentKey) === strtolower(class_basename($className))) {
-                    $detectedClasses[] = $className;
-                    break;
-                }
-            }
-        }
-
-        $selectedAgentClasses = collect(multiselect(
-            label: sprintf('Which agents need AI guidelines for %s?', $this->projectName),
-            options: $agents,
-            default: $detectedClasses,
-            scroll: 4,
-        ))->sort();
-
-        return $selectedAgentClasses->map(fn ($agentClass) => new $agentClass);
+        return $this->selectCodeEnvironments(
+            Agent::class,
+            sprintf('Which agents need AI guidelines for %s?', $this->projectName)
+        );
     }
 
-    protected function enactGuidelines(): void
+    /**
+     * Get configuration settings for contract-specific selection behavior.
+     *
+     * @return array{scroll: int, required: bool, displayMethod: string}
+     */
+    private function getSelectionConfig(string $contractClass): array
+    {
+        return match ($contractClass) {
+            Agent::class => ['scroll' => 4, 'required' => false, 'displayMethod' => 'agentName'],
+            McpClient::class => ['scroll' => 5, 'required' => true, 'displayMethod' => 'displayName'],
+            default => throw new InvalidArgumentException("Unsupported contract class: {$contractClass}"),
+        };
+    }
+
+    /**
+     * @return Collection<int, CodeEnvironment>
+     */
+    private function selectCodeEnvironments(string $contractClass, string $label): Collection
+    {
+        $allEnvironments = $this->codeEnvironmentsDetector->getCodeEnvironments();
+        $config = $this->getSelectionConfig($contractClass);
+
+        $availableEnvironments = $allEnvironments->filter(function (CodeEnvironment $environment) use ($contractClass) {
+            return $environment instanceof $contractClass;
+        });
+
+        if ($availableEnvironments->isEmpty()) {
+            return collect();
+        }
+
+        $options = $availableEnvironments
+            ->filter(function (CodeEnvironment $environment) {
+                // We only show Zed if it's actually installed
+                if ($environment->name() === 'zed' && ! in_array('zed', $this->systemInstalledCodeEnvironments)) {
+                    return false;
+                }
+
+                return true;
+            })
+            ->mapWithKeys(function (CodeEnvironment $environment) use ($config) {
+                $displayMethod = $config['displayMethod'];
+                $displayText = $environment->{$displayMethod}();
+
+                return [get_class($environment) => $displayText];
+            })->sort();
+
+        $detectedClasses = [];
+        $installedEnvNames = array_unique(array_merge(
+            $this->projectInstalledCodeEnvironments,
+            $this->systemInstalledCodeEnvironments
+        ));
+
+        foreach ($installedEnvNames as $envKey) {
+            $matchingEnv = $availableEnvironments->first(fn (CodeEnvironment $env) => strtolower($envKey) === strtolower($env->name()));
+            if ($matchingEnv && ($options->contains($matchingEnv->displayName() || $options->contains($matchingEnv->agentName())))) {
+                $detectedClasses[] = get_class($matchingEnv);
+            }
+        }
+
+        $selectedClasses = collect(multiselect(
+            label: $label,
+            options: $options->toArray(),
+            default: array_unique($detectedClasses),
+            scroll: $config['scroll'],
+            required: $config['required'],
+            hint: empty($detectedClasses) ? '' : sprintf('Auto-detected %s for you',
+                Arr::join(array_map(function ($className) use ($availableEnvironments, $config) {
+                    $env = $availableEnvironments->first(fn ($env) => get_class($env) === $className);
+                    $displayMethod = $config['displayMethod'];
+
+                    return $env->{$displayMethod}();
+                }, $detectedClasses), ', ', ' & ')
+            )
+        ))->sort();
+
+        return $selectedClasses->map(fn ($className) => $availableEnvironments->first(fn ($env) => get_class($env) === $className));
+    }
+
+    private function installGuidelines(): void
     {
         if (! $this->shouldInstallAiGuidelines()) {
             return;
         }
 
         if ($this->selectedTargetAgents->isEmpty()) {
-            $this->info('No agents selected for guideline installation.');
+            $this->info(' No agents selected for guideline installation.');
 
             return;
         }
@@ -424,12 +395,13 @@ class InstallCommand extends Command
         $failed = [];
         $composedAiGuidelines = $composer->compose();
 
-        $longestAgentName = max(1, ...$this->selectedTargetAgents->map(fn ($agent) => Str::length(class_basename($agent)))->toArray());
+        $longestAgentName = max(1, ...$this->selectedTargetAgents->map(fn ($agent) => Str::length($agent->agentName()))->toArray());
+        /** @var CodeEnvironment $agent */
         foreach ($this->selectedTargetAgents as $agent) {
-            $agentName = class_basename($agent);
+            $agentName = $agent->agentName();
             $displayAgentName = str_pad($agentName, $longestAgentName);
             $this->output->write("  {$displayAgentName}... ");
-
+            /** @var Agent $agent */
             try {
                 (new GuidelineWriter($agent))
                     ->write($composedAiGuidelines);
@@ -474,8 +446,17 @@ class InstallCommand extends Command
         return $this->selectedBoostFeatures->contains('herd_mcp');
     }
 
-    private function enactMcpServers(): void
+    private function installMcpServerConfig(): void
     {
+        if (! $this->shouldInstallMcp() && ! $this->shouldInstallHerdMcp()) {
+            return;
+        }
+
+        if ($this->selectedTargetMcpClient->isEmpty()) {
+            $this->info('No agents selected for guideline installation.');
+
+            return;
+        }
         $this->newLine();
         $this->info(' Installing MCP servers to your selected IDEs');
         $this->newLine();
@@ -483,18 +464,22 @@ class InstallCommand extends Command
         usleep(750000);
 
         $failed = [];
-        $longestIdeName = max(1, ...$this->selectedTargetIdes->map(fn ($ide) => Str::length(class_basename($ide)))->toArray());
+        $longestIdeName = max(
+            1,
+            ...$this->selectedTargetMcpClient->map(
+                fn (McpClient $mcpClient) => Str::length($mcpClient->mcpClientName())
+            )->toArray()
+        );
 
-        foreach ($this->selectedTargetIdes as $ide) {
-            $ideName = class_basename($ide);
+        foreach ($this->selectedTargetMcpClient as $mcpClient) {
+            $ideName = $mcpClient->mcpClientName();
             $ideDisplay = str_pad($ideName, $longestIdeName);
             $this->output->write("  {$ideDisplay}... ");
             $results = [];
 
-            // Install Laravel Boost MCP if enabled
             if ($this->shouldInstallMcp()) {
                 try {
-                    $result = $ide->installMcp('laravel-boost', 'php', ['./artisan', 'boost:mcp']);
+                    $result = $mcpClient->installMcp('laravel-boost', 'php', ['./artisan', 'boost:mcp']);
 
                     if ($result) {
                         $results[] = $this->greenTick.' Boost';
@@ -511,7 +496,7 @@ class InstallCommand extends Command
             // Install Herd MCP if enabled
             if ($this->shouldInstallHerdMcp()) {
                 try {
-                    $result = $ide->installMcp(
+                    $result = $mcpClient->installMcp(
                         key: 'herd',
                         command: 'php',
                         args: [$this->herd->mcpPath()],

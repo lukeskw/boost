@@ -84,17 +84,17 @@ class GuidelineComposer
     protected function find(): Collection
     {
         $guidelines = collect();
-        $guidelines->put('core', $this->guideline('core'));
-        $guidelines->put('boost/core', $this->guideline('boost/core'));
+        $guidelines->put('foundation', $this->guideline('foundation'));
+        $guidelines->put('boost', $this->guideline('boost/core'));
 
-        $guidelines->put('php/core', $this->guideline('php/core'));
+        $guidelines->put('php', $this->guideline('php/base'));
 
         // TODO: AI-48: Use composer target version, not PHP version. Production could be 8.1, but local is 8.4
         // $phpMajorMinor = PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;
         // $guidelines->put('php/v'.$phpMajorMinor, $this->guidelinesDir('php/'.$phpMajorMinor));
 
         if (str_contains(config('app.url'), '.test') && $this->herd->isInstalled()) {
-            $guidelines->put('herd/core', $this->guideline('herd/core'));
+            $guidelines->put('herd', $this->guideline('herd/core'));
         }
 
         if ($this->config->laravelStyle) {
