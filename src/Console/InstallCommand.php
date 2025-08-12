@@ -173,10 +173,7 @@ class InstallCommand extends Command
             $guidelines[] = 'g:style';
         }
 
-        // Combine all data
         $allData = array_merge($ideNames, $agentNames, $boostFeatures, $guidelines);
-
-        // Create a compact CSV string and base64 encode
         $installData = base64_encode(implode(',', $allData));
 
         $link = $this->hyperlink($label, 'https://boost.laravel.com/installed/?d='.$installData);
@@ -320,12 +317,21 @@ class InstallCommand extends Command
             return collect();
         }
 
-        $options = $availableEnvironments->mapWithKeys(function (CodeEnvironment $environment) use ($config) {
-            $displayMethod = $config['displayMethod'];
-            $displayText = $environment->{$displayMethod}();
+        $options = $availableEnvironments
+            ->filter(function (CodeEnvironment $environment) {
+                // We only show Zed if it's actually installed
+                if ($environment->name() === 'zed' && ! in_array('zed', $this->systemInstalledCodeEnvironments)) {
+                    return false;
+                }
 
-            return [get_class($environment) => $displayText];
-        })->sort();
+                return true;
+            })
+            ->mapWithKeys(function (CodeEnvironment $environment) use ($config) {
+                $displayMethod = $config['displayMethod'];
+                $displayText = $environment->{$displayMethod}();
+
+                return [get_class($environment) => $displayText];
+            })->sort();
 
         $detectedClasses = [];
         $installedEnvNames = array_unique(array_merge(
