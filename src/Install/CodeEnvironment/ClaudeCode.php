@@ -43,7 +43,7 @@ class ClaudeCode extends CodeEnvironment implements McpClient, Agent
 
     public function mcpInstallationStrategy(): McpInstallationStrategy
     {
-        return McpInstallationStrategy::Shell;
+        return McpInstallationStrategy::SHELL;
     }
 
     public function shellMcpCommand(): string

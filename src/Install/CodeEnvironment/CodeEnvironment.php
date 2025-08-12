@@ -76,7 +76,7 @@ abstract class CodeEnvironment
 
     public function mcpInstallationStrategy(): McpInstallationStrategy
     {
-        return McpInstallationStrategy::File;
+        return McpInstallationStrategy::FILE;
     }
 
     public function shellMcpCommand(): ?string
@@ -113,9 +113,9 @@ abstract class CodeEnvironment
     public function installMcp(string $key, string $command, array $args = [], array $env = []): bool
     {
         return match($this->mcpInstallationStrategy()) {
-            McpInstallationStrategy::Shell => $this->installShellMcp($key, $command, $args, $env),
-            McpInstallationStrategy::File => $this->installFileMcp($key, $command, $args, $env),
-            McpInstallationStrategy::None => false
+            McpInstallationStrategy::SHELL => $this->installShellMcp($key, $command, $args, $env),
+            McpInstallationStrategy::FILE => $this->installFileMcp($key, $command, $args, $env),
+            McpInstallationStrategy::NONE => false
         };
     }
 

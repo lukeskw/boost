@@ -161,7 +161,7 @@ test('isMcpClient returns false when does not implement McpClient interface', fu
 test('mcpInstallationStrategy returns File by default', function () {
     $environment = new TestCodeEnvironment($this->strategyFactory);
 
-    expect($environment->mcpInstallationStrategy())->toBe(McpInstallationStrategy::File);
+    expect($environment->mcpInstallationStrategy())->toBe(McpInstallationStrategy::FILE);
 });
 
 test('shellMcpCommand returns null by default', function () {
@@ -193,7 +193,7 @@ test('installMcp uses Shell strategy when configured', function () {
     $environment->shouldAllowMockingProtectedMethods();
 
     $environment->shouldReceive('mcpInstallationStrategy')
-        ->andReturn(McpInstallationStrategy::Shell);
+        ->andReturn(McpInstallationStrategy::SHELL);
 
     $environment->shouldReceive('installShellMcp')
         ->once()
@@ -210,7 +210,7 @@ test('installMcp uses File strategy when configured', function () {
     $environment->shouldAllowMockingProtectedMethods();
 
     $environment->shouldReceive('mcpInstallationStrategy')
-        ->andReturn(McpInstallationStrategy::File);
+        ->andReturn(McpInstallationStrategy::FILE);
 
     $environment->shouldReceive('installFileMcp')
         ->once()
@@ -226,7 +226,7 @@ test('installMcp returns false for None strategy', function () {
     $environment = Mockery::mock(TestCodeEnvironment::class)->makePartial();
 
     $environment->shouldReceive('mcpInstallationStrategy')
-        ->andReturn(McpInstallationStrategy::None);
+        ->andReturn(McpInstallationStrategy::NONE);
 
     $result = $environment->installMcp('test-key', 'test-command');
 
@@ -249,7 +249,7 @@ test('installShellMcp executes command with placeholders replaced', function () 
         ->andReturn('install {key} {command} {args} {env}');
 
     $environment->shouldReceive('mcpInstallationStrategy')
-        ->andReturn(McpInstallationStrategy::Shell);
+        ->andReturn(McpInstallationStrategy::SHELL);
 
     $mockResult = Mockery::mock();
     $mockResult->shouldReceive('successful')->andReturn(true);
@@ -277,7 +277,7 @@ test('installShellMcp returns true when process fails but has already exists err
         ->andReturn('install {key}');
 
     $environment->shouldReceive('mcpInstallationStrategy')
-        ->andReturn(McpInstallationStrategy::Shell);
+        ->andReturn(McpInstallationStrategy::SHELL);
 
     $mockResult = Mockery::mock();
     $mockResult->shouldReceive('successful')->andReturn(false);
@@ -305,7 +305,7 @@ test('installFileMcp creates new config file when none exists', function () {
     $environment->shouldAllowMockingProtectedMethods();
 
     $environment->shouldReceive('mcpInstallationStrategy')
-        ->andReturn(McpInstallationStrategy::File);
+        ->andReturn(McpInstallationStrategy::FILE);
 
     File::shouldReceive('ensureDirectoryExists')
         ->once()
@@ -331,7 +331,7 @@ test('installFileMcp updates existing config file', function () {
     $environment->shouldAllowMockingProtectedMethods();
 
     $environment->shouldReceive('mcpInstallationStrategy')
-        ->andReturn(McpInstallationStrategy::File);
+        ->andReturn(McpInstallationStrategy::FILE);
 
     $existingConfig = json_encode(['mcpServers' => ['existing' => ['command' => 'existing-cmd']]]);
 
