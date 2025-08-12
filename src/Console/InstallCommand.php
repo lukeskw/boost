@@ -367,12 +367,12 @@ class InstallCommand extends Command
         $composedAiGuidelines = $composer->compose();
 
         $longestAgentName = max(1, ...$this->selectedTargetAgents->map(fn ($agent) => Str::length($agent->agentName()))->toArray());
-        /** @var CodingAgent $agent */
+        /** @var CodeEnvironment $agent */
         foreach ($this->selectedTargetAgents as $agent) {
             $agentName = $agent->agentName();
             $displayAgentName = str_pad($agentName, $longestAgentName);
             $this->output->write("  {$displayAgentName}... ");
-
+            /** @var CodingAgent $agent */
             try {
                 (new GuidelineWriter($agent))
                     ->write($composedAiGuidelines);
