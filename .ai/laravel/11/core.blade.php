@@ -2,7 +2,6 @@
 
 - Use the `search-docs` tool to get version specific documentation.
 @if (file_exists(base_path('app/Http/Kernel.php')))
-{{-- Migrated from Laravel 10 to Laravel 11, but did't migrate to the new Laravel 11 Structure --}}
 - This project upgraded from Laravel 10 without migrating to the new streamlined Laravel 11 file structure.
 - This is **perfectly fine** and recommended by Laravel. Follow the existing structure from Laravel 10. We do not to need migrate to the Laravel 11 structure unless the user explicitly requests that.
 
@@ -14,7 +13,6 @@
     - Console commands and schedule registration is in `app/Console/Kernel.php`
     - Rate limits likely exist in `RouteServiceProvider` or `app/Http/Kernel.php`
 @else
-{{-- New Laravel 11 project, or upgraded from Laravel 10 and migrated structure --}}
 - Laravel 11 brought a new streamlined file structure which this project now uses.
 
 ### Laravel 11 Structure
