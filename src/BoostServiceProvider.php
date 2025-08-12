@@ -6,6 +6,7 @@ namespace Laravel\Boost;
 
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Http\Request;
+use Illuminate\Log\Logger;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
@@ -69,7 +70,7 @@ class BoostServiceProvider extends ServiceProvider
         $this->hookIntoResponses($router);
     }
 
-    protected function registerPublishing(): void
+    private function registerPublishing(): void
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
@@ -78,7 +79,7 @@ class BoostServiceProvider extends ServiceProvider
         }
     }
 
-    protected function registerCommands(): void
+    private function registerCommands(): void
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
@@ -93,14 +94,14 @@ class BoostServiceProvider extends ServiceProvider
     {
         Route::post('/_boost/browser-logs', function (Request $request) {
             $logs = $request->input('logs', []);
-            /** @var \Illuminate\Log\Logger $logger */
+            /** @var Logger $logger */
             $logger = Log::channel('browser');
 
             /**
              *  @var array{
              *      type: 'error'|'warn'|'info'|'log'|'table'|'window_error'|'uncaught_error'|'unhandled_rejection',
              *      timestamp: string,
-             *      data: array<mixed>,
+             *      data: array,
              *      url:string,
              *      userAgent:string
              *  } $log */
@@ -123,13 +124,13 @@ class BoostServiceProvider extends ServiceProvider
     }
 
     /**
-     * Build a string message for the log based on various input types. Single dimensional, and multi:
-     * "data":[
-     * {"message":"Unhandled Promise Rejection","reason":{"name":"TypeError","message":"NetworkError when attempting to fetch resource.","stack":""}}]
+     * Build a string message for the log based on various input types. Single-dimensional, and multi:
+     * "data": {"message":"Unhandled Promise Rejection","reason":{"name":"TypeError","message":"NetworkError when attempting to fetch resource.","stack":""}}]
      *
-     * @param array<mixed> $data
+     * @param array $data
+     * @return string
      */
-    protected function buildLogMessageFromData(array $data): string
+    private function buildLogMessageFromData(array $data): string
     {
         $messages = [];
 
@@ -146,7 +147,7 @@ class BoostServiceProvider extends ServiceProvider
         return implode(' ', $messages);
     }
 
-    protected function registerBrowserLogger(): void
+    private function registerBrowserLogger(): void
     {
         config([
             'logging.channels.browser' => [
@@ -158,7 +159,7 @@ class BoostServiceProvider extends ServiceProvider
         ]);
     }
 
-    protected function registerBladeDirectives(BladeCompiler $bladeCompiler): void
+    private function registerBladeDirectives(BladeCompiler $bladeCompiler): void
     {
         $bladeCompiler->directive('boostJs', fn () => '<?php echo \\Laravel\\Boost\\Services\\BrowserLogger::getScript(); ?>');
     }
@@ -167,11 +168,8 @@ class BoostServiceProvider extends ServiceProvider
     {
         return match ($type) {
             'warn' => 'warning',
-            'log' => 'debug',
-            'table' => 'debug',
-            'window_error' => 'error',
-            'uncaught_error' => 'error',
-            'unhandled_rejection' => 'error',
+            'log', 'table' => 'debug',
+            'window_error', 'uncaught_error', 'unhandled_rejection' => 'error',
             default => $type
         };
     }
