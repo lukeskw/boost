@@ -9,6 +9,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Laravel\Boost\Contracts\Agent;
 use Laravel\Boost\Contracts\McpClient;
 use Laravel\Boost\Install\Cli\DisplayHelper;
@@ -118,7 +119,7 @@ class InstallCommand extends Command
     {
         $this->selectedBoostFeatures = $this->selectBoostFeatures();
         $this->enforceTests = $this->determineTestEnforcement(ask: false);
-        $this->selectedTargetMcpClient = $this->selectTargetIdes();
+        $this->selectedTargetMcpClient = $this->selectTargetMcpClients();
         $this->selectedTargetAgents = $this->selectTargetAgents();
     }
 
@@ -143,9 +144,9 @@ class InstallCommand extends Command
             ->name('*.php');
 
         foreach ($finder as $toolFile) {
-            $fqdn = 'Laravel\\Boost\\Mcp\\Tools\\'.$toolFile->getBasename('.php');
-            if (class_exists($fqdn)) {
-                $tools[$fqdn] = Str::headline($toolFile->getBasename('.php'));
+            $fullyClassifiedClassName = 'Laravel\\Boost\\Mcp\\Tools\\'.$toolFile->getBasename('.php');
+            if (class_exists($fullyClassifiedClassName)) {
+                $tools[$fullyClassifiedClassName] = Str::headline($toolFile->getBasename('.php'));
             }
         }
 
@@ -260,14 +261,14 @@ class InstallCommand extends Command
     /**
      * @return Collection<int, CodeEnvironment>
      */
-    private function selectTargetIdes(): Collection
+    private function selectTargetMcpClients(): Collection
     {
         if (! $this->shouldInstallMcp() && ! $this->shouldInstallHerdMcp()) {
             return collect();
         }
 
         return $this->selectCodeEnvironments(
-            'ide',
+            McpClient::class,
             sprintf('Which code editors do you use in %s?', $this->projectName)
         );
     }
@@ -282,29 +283,47 @@ class InstallCommand extends Command
         }
 
         return $this->selectCodeEnvironments(
-            'agent',
+            Agent::class,
             sprintf('Which agents need AI guidelines for %s?', $this->projectName)
         );
     }
 
     /**
+     * Get configuration settings for contract-specific selection behavior.
+     *
+     * @param string $contractClass
+     * @return array{scroll: int, required: bool, displayMethod: string}
+     */
+    private function getSelectionConfig(string $contractClass): array
+    {
+        return match($contractClass) {
+            Agent::class => ['scroll' => 4, 'required' => false, 'displayMethod' => 'agentName'],
+            McpClient::class => ['scroll' => 5, 'required' => true, 'displayMethod' => 'displayName'],
+            default => throw new InvalidArgumentException("Unsupported contract class: {$contractClass}"),
+        };
+    }
+
+    /**
      * @return Collection<int, CodeEnvironment>
      */
-    private function selectCodeEnvironments(string $type, string $label): Collection
+    private function selectCodeEnvironments(string $contractClass, string $label): Collection
     {
         $allEnvironments = $this->codeEnvironmentsDetector->getCodeEnvironments();
+        $config = $this->getSelectionConfig($contractClass);
 
-        $availableEnvironments = $allEnvironments->filter(function (CodeEnvironment $environment) use ($type) {
-            return ($type === 'ide' && $environment->isMcpClient()) ||
-                   ($type === 'agent' && $environment->IsAgent());
+        $availableEnvironments = $allEnvironments->filter(function (CodeEnvironment $environment) use ($contractClass) {
+            return $environment instanceof $contractClass;
         });
 
         if ($availableEnvironments->isEmpty()) {
             return collect();
         }
 
-        $options = $availableEnvironments->mapWithKeys(function (CodeEnvironment $environment) {
-            return [get_class($environment) => $environment->displayName()];
+        $options = $availableEnvironments->mapWithKeys(function (CodeEnvironment $environment) use ($config) {
+            $displayMethod = $config['displayMethod'];
+            $displayText = $environment->{$displayMethod}();
+
+            return [get_class($environment) => $displayText];
         })->sort();
 
         $detectedClasses = [];
@@ -314,8 +333,7 @@ class InstallCommand extends Command
         ));
 
         foreach ($installedEnvNames as $envKey) {
-            $matchingEnv = $availableEnvironments->first(fn (CodeEnvironment $env) => strtolower($envKey) === strtolower($env->name())
-            );
+            $matchingEnv = $availableEnvironments->first(fn (CodeEnvironment $env) => strtolower($envKey) === strtolower($env->name()));
             if ($matchingEnv) {
                 $detectedClasses[] = get_class($matchingEnv);
             }
@@ -325,10 +343,15 @@ class InstallCommand extends Command
             label: $label,
             options: $options->toArray(),
             default: array_unique($detectedClasses),
-            scroll: $type === 'ide' ? 5 : 4,
-            required: $type === 'ide',
+            scroll: $config['scroll'],
+            required: $config['required'],
             hint: empty($detectedClasses) ? null : sprintf('Auto-detected %s for you',
-                Arr::join(array_map(fn ($className) => $availableEnvironments->first(fn ($env) => get_class($env) === $className)->displayName(), $detectedClasses), ', ', ' & ')
+                Arr::join(array_map(function ($className) use ($availableEnvironments, $config) {
+                    $env = $availableEnvironments->first(fn ($env) => get_class($env) === $className);
+                    $displayMethod = $config['displayMethod'];
+
+                    return $env->{$displayMethod}();
+                }, $detectedClasses), ', ', ' & ')
             )
         ))->sort();
 

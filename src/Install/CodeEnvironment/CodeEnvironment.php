@@ -25,12 +25,12 @@ abstract class CodeEnvironment
 
     public function agentName(): ?string
     {
-        return $this->name();
+        return $this->displayName();
     }
 
     public function mcpClientName(): ?string
     {
-        return $this->name();
+        return $this->displayName();
     }
 
     /**

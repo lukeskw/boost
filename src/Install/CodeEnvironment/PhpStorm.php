@@ -52,7 +52,7 @@ class PhpStorm extends CodeEnvironment implements Agent, McpClient
 
     public function agentName(): string
     {
-        return 'junie';
+        return 'Junie';
     }
 
     public function mcpConfigPath(): string

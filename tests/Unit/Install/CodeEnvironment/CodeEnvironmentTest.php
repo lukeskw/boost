@@ -122,16 +122,16 @@ test('detectInProject merges config with basePath and delegates to strategy', fu
     expect($result)->toBe(false);
 });
 
-test('agentName returns name by default', function () {
+test('agentName returns displayName by default', function () {
     $environment = new TestCodeEnvironment($this->strategyFactory);
 
-    expect($environment->agentName())->toBe('test');
+    expect($environment->agentName())->toBe('Test Environment');
 });
 
-test('mcpClientName returns name by default', function () {
+test('mcpClientName returns displayName by default', function () {
     $environment = new TestCodeEnvironment($this->strategyFactory);
 
-    expect($environment->mcpClientName())->toBe('test');
+    expect($environment->mcpClientName())->toBe('Test Environment');
 });
 
 test('IsAgent returns true when implements Agent interface and has agentName', function () {
