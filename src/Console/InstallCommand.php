@@ -42,7 +42,7 @@ class InstallCommand extends Command
     private Collection $selectedTargetAgents;
 
     /** @var Collection<int, CodeEnvironment> */
-    private Collection $selectedTargetIdes;
+    private Collection $selectedTargetMcpClient;
 
     /** @var Collection<int, string> */
     private Collection $selectedBoostFeatures;
@@ -67,7 +67,7 @@ class InstallCommand extends Command
         $this->displayBoostHeader();
         $this->discoverEnvironment();
         $this->collectInstallationPreferences();
-        $this->enact();
+        $this->performInstallation();
         $this->outro();
     }
 
@@ -82,7 +82,7 @@ class InstallCommand extends Command
         $this->redCross = $this->red('✗');
 
         $this->selectedTargetAgents = collect();
-        $this->selectedTargetIdes = collect();
+        $this->selectedTargetMcpClient = collect();
 
         $this->projectName = basename(base_path());
     }
@@ -117,20 +117,18 @@ class InstallCommand extends Command
     {
         $this->selectedBoostFeatures = $this->selectBoostFeatures();
         $this->enforceTests = $this->determineTestEnforcement(ask: false);
-        $this->selectedTargetIdes = $this->selectTargetIdes();
+        $this->selectedTargetMcpClient = $this->selectTargetIdes();
         $this->selectedTargetAgents = $this->selectTargetAgents();
     }
 
-    private function enact(): void
+    private function performInstallation(): void
     {
-        if ($this->shouldInstallAiGuidelines() && $this->selectedTargetAgents->isNotEmpty()) {
-            $this->enactGuidelines();
-        }
+        $this->installGuidelines();
 
         usleep(750000);
 
-        if (($this->shouldInstallMcp() || $this->shouldInstallHerdMcp()) && $this->selectedTargetIdes->isNotEmpty()) {
-            $this->enactMcpServers();
+        if (($this->shouldInstallMcp() || $this->shouldInstallHerdMcp()) && $this->selectedTargetMcpClient->isNotEmpty()) {
+            $this->installMcpServerConfig();
         }
     }
 
@@ -159,7 +157,7 @@ class InstallCommand extends Command
     {
         $label = 'https://boost.laravel.com/installed';
 
-        $ideNames = $this->selectedTargetIdes->map(fn ($ide) => 'i:'.$ide->ideName())->toArray();
+        $ideNames = $this->selectedTargetMcpClient->map(fn ($ide) => 'i:'.$ide->ideName())->toArray();
         $agentNames = $this->selectedTargetAgents->map(fn ($agent) => 'a:'.$agent->agentName())->toArray();
         $boostFeatures = $this->selectedBoostFeatures->map(fn ($feature) => 'b:'.$feature)->toArray();
 
@@ -336,7 +334,7 @@ class InstallCommand extends Command
         return $selectedClasses->map(fn ($className) => $availableEnvironments->first(fn ($env) => get_class($env) === $className));
     }
 
-    protected function enactGuidelines(): void
+    private function installGuidelines(): void
     {
         if (! $this->shouldInstallAiGuidelines()) {
             return;
@@ -417,8 +415,17 @@ class InstallCommand extends Command
         return $this->selectedBoostFeatures->contains('herd_mcp');
     }
 
-    private function enactMcpServers(): void
+    private function installMcpServerConfig(): void
     {
+        if (! $this->shouldInstallMcp() && ! $this->shouldInstallHerdMcp()) {
+            return;
+        }
+
+        if ($this->selectedTargetMcpClient->isEmpty()) {
+            $this->info('No agents selected for guideline installation.');
+
+            return;
+        }
         $this->newLine();
         $this->info(' Installing MCP servers to your selected IDEs');
         $this->newLine();
@@ -426,18 +433,22 @@ class InstallCommand extends Command
         usleep(750000);
 
         $failed = [];
-        $longestIdeName = max(1, ...$this->selectedTargetIdes->map(fn ($ide) => Str::length($ide->ideName()))->toArray());
+        $longestIdeName = max(
+            1,
+            ...$this->selectedTargetMcpClient->map(
+                fn ($mcpClient) => Str::length($mcpClient->ideName())
+            )->toArray()
+        );
 
-        foreach ($this->selectedTargetIdes as $ide) {
-            $ideName = $ide->ideName();
+        foreach ($this->selectedTargetMcpClient as $mcpClient) {
+            $ideName = $mcpClient->ideName();
             $ideDisplay = str_pad($ideName, $longestIdeName);
             $this->output->write("  {$ideDisplay}... ");
             $results = [];
 
-            // Install Laravel Boost MCP if enabled
             if ($this->shouldInstallMcp()) {
                 try {
-                    $result = $ide->installMcp('laravel-boost', 'php', ['./artisan', 'boost:mcp']);
+                    $result = $mcpClient->installMcp('laravel-boost', 'php', ['./artisan', 'boost:mcp']);
 
                     if ($result) {
                         $results[] = $this->greenTick.' Boost';
@@ -454,7 +465,7 @@ class InstallCommand extends Command
             // Install Herd MCP if enabled
             if ($this->shouldInstallHerdMcp()) {
                 try {
-                    $result = $ide->installMcp(
+                    $result = $mcpClient->installMcp(
                         key: 'herd',
                         command: 'php',
                         args: [$this->herd->mcpPath()],
