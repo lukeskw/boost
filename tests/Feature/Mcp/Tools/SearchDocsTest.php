@@ -24,7 +24,7 @@ test('it searches documentation successfully', function () {
     ]);
 
     $tool = new SearchDocs($roster);
-    $result = $tool->handle(['queries' => 'authentication###testing']);
+    $result = $tool->handle(['queries' => ['authentication', 'testing']]);
 
     expect($result)->toBeInstanceOf(ToolResult::class);
 
@@ -57,7 +57,7 @@ test('it handles API error response', function () {
     ]);
 
     $tool = new SearchDocs($roster);
-    $result = $tool->handle(['queries' => 'authentication']);
+    $result = $tool->handle(['queries' => ['authentication']]);
 
     expect($result)->toBeInstanceOf(ToolResult::class);
 
@@ -77,7 +77,7 @@ test('it filters empty queries', function () {
     ]);
 
     $tool = new SearchDocs($roster);
-    $result = $tool->handle(['queries' => 'test###  ###*### ']);
+    $result = $tool->handle(['queries' => ['test', '  ', '*', ' ']]);
 
     expect($result)->toBeInstanceOf(ToolResult::class);
 
@@ -106,7 +106,7 @@ test('it formats package data correctly', function () {
     ]);
 
     $tool = new SearchDocs($roster);
-    $result = $tool->handle(['queries' => 'test']);
+    $result = $tool->handle(['queries' => ['test']]);
 
     expect($result)->toBeInstanceOf(ToolResult::class);
 
@@ -129,7 +129,7 @@ test('it handles empty results', function () {
     ]);
 
     $tool = new SearchDocs($roster);
-    $result = $tool->handle(['queries' => 'nonexistent']);
+    $result = $tool->handle(['queries' => ['nonexistent']]);
 
     expect($result)->toBeInstanceOf(ToolResult::class);
 
@@ -149,7 +149,7 @@ test('it uses custom token_limit when provided', function () {
     ]);
 
     $tool = new SearchDocs($roster);
-    $result = $tool->handle(['queries' => 'test', 'token_limit' => 5000]);
+    $result = $tool->handle(['queries' => ['test'], 'token_limit' => 5000]);
 
     expect($result)->toBeInstanceOf(ToolResult::class);
 
@@ -169,7 +169,7 @@ test('it caps token_limit at maximum of 1000000', function () {
     ]);
 
     $tool = new SearchDocs($roster);
-    $result = $tool->handle(['queries' => 'test', 'token_limit' => 2000000]);
+    $result = $tool->handle(['queries' => ['test'], 'token_limit' => 2000000]);
 
     expect($result)->toBeInstanceOf(ToolResult::class);
 
