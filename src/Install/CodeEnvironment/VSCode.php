@@ -16,7 +16,7 @@ class VSCode extends CodeEnvironment implements McpClient
 
     public function displayName(): string
     {
-        return 'Vs Code';
+        return 'VS Code';
     }
 
     public function systemDetectionConfig(Platform $platform): array
