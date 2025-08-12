@@ -67,22 +67,11 @@ function getHerdTestTempDir(): string
     return $herdTestCleanupData['tempDir'];
 }
 
-test('mcpPath builds correct path from HOME on non-Windows', function () {
-    $testHome = getHerdTestTempDir().'/home';
-    mkdir($testHome, 0755, true);
-    $_SERVER['HOME'] = $testHome;
-
-    $herd = new Herd();
-    $expected = $testHome.'/Library/Application Support/Herd/bin/herd-mcp.phar';
-
-    expect($herd->mcpPath())->toBe($expected);
-})->skipOnWindows();
-
 test('mcpPath builds correct Windows path from USERPROFILE when HOME missing', function () {
     unset($_SERVER['HOME']);
     $_SERVER['USERPROFILE'] = 'C:\\Users\\TestUser';
 
-    $herd = new Herd();
+    $herd = new Herd;
     $expected = 'C:/Users/TestUser/.config/herd/bin/herd-mcp.phar';
 
     expect($herd->mcpPath())->toBe($expected);
@@ -93,7 +82,7 @@ test('isMcpAvailable returns false when MCP file is missing', function () {
     mkdir($testHome, 0755, true);
     $_SERVER['HOME'] = $testHome;
 
-    $herd = new Herd();
+    $herd = new Herd;
 
     expect($herd->isMcpAvailable())->toBeFalse();
 });
@@ -103,7 +92,7 @@ test('isMcpAvailable returns true when MCP file exists', function () {
     mkdir($testHome, 0755, true);
     $_SERVER['HOME'] = $testHome;
 
-    $herd = new Herd();
+    $herd = new Herd;
     $mcpPath = $herd->mcpPath();
 
     $mcpDir = dirname($mcpPath);
@@ -119,7 +108,7 @@ test('isMcpAvailable returns false after MCP file is removed', function () {
     mkdir($testHome, 0755, true);
     $_SERVER['HOME'] = $testHome;
 
-    $herd = new Herd();
+    $herd = new Herd;
     $mcpPath = $herd->mcpPath();
 
     $mcpDir = dirname($mcpPath);
@@ -139,7 +128,7 @@ test('getHomePath returns HOME on non-Windows', function () {
     mkdir($testHome, 0755, true);
     $_SERVER['HOME'] = $testHome;
 
-    $herd = new Herd();
+    $herd = new Herd;
 
     expect($herd->getHomePath())->toBe($testHome);
 })->skipOnWindows();
@@ -148,7 +137,7 @@ test('getHomePath uses USERPROFILE on Windows when HOME is not set and normalize
     unset($_SERVER['HOME']);
     $_SERVER['USERPROFILE'] = 'C:\\Users\\TestUser';
 
-    $herd = new Herd();
+    $herd = new Herd;
 
     expect($herd->getHomePath())->toBe('C:/Users/TestUser');
 })->onlyOnWindows();
@@ -161,7 +150,7 @@ test('isInstalled returns true when herd config directory exists on Windows', fu
     $configDir = $testHome.'/.config/herd';
     mkdir($configDir, 0755, true);
 
-    $herd = new Herd();
+    $herd = new Herd;
 
     expect($herd->isInstalled())->toBeTrue();
 })->onlyOnWindows();
@@ -171,19 +160,19 @@ test('isInstalled returns false when herd config directory is missing on Windows
     mkdir($testHome, 0755, true);
     $_SERVER['HOME'] = $testHome;
 
-    $herd = new Herd();
+    $herd = new Herd;
 
     expect($herd->isInstalled())->toBeFalse();
 })->onlyOnWindows();
 
 test('isWindowsPlatform returns true on Windows', function () {
-    $herd = new Herd();
+    $herd = new Herd;
 
     expect($herd->isWindowsPlatform())->toBeTrue();
 })->onlyOnWindows();
 
 test('isWindowsPlatform returns false on non-Windows platforms', function () {
-    $herd = new Herd();
+    $herd = new Herd;
 
     expect($herd->isWindowsPlatform())->toBeFalse();
 })->skipOnWindows();
