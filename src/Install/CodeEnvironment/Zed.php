@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Install\CodeEnvironment;
 
+use Laravel\Boost\Contracts\McpClient;
 use Laravel\Boost\Install\Enums\Platform;
 
-class Zed extends CodeEnvironment
+class Zed extends CodeEnvironment implements McpClient
 {
     public function name(): string
     {
@@ -47,4 +48,13 @@ class Zed extends CodeEnvironment
         ];
     }
 
+    public function agentName(): ?string
+    {
+        return null;
+    }
+
+    public function mcpConfigPath(): string
+    {
+        return '.zed/mcp.json';
+    }
 }
