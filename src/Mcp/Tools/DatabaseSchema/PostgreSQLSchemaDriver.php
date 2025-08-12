@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Mcp\Tools\DatabaseSchema;
 
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 class PostgreSQLSchemaDriver extends DatabaseSchemaDriver
@@ -12,11 +13,11 @@ class PostgreSQLSchemaDriver extends DatabaseSchemaDriver
     {
         try {
             return DB::connection($this->connection)->select("
-                SELECT schemaname, viewname, definition 
-                FROM pg_views 
+                SELECT schemaname, viewname, definition
+                FROM pg_views
                 WHERE schemaname NOT IN ('pg_catalog', 'information_schema')
             ");
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return [];
         }
     }
@@ -31,7 +32,7 @@ class PostgreSQLSchemaDriver extends DatabaseSchemaDriver
                 WHERE n.nspname NOT IN ('pg_catalog', 'information_schema')
                 AND prokind = 'p'
             ");
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return [];
         }
     }
@@ -46,7 +47,7 @@ class PostgreSQLSchemaDriver extends DatabaseSchemaDriver
                 WHERE n.nspname NOT IN ('pg_catalog', 'information_schema')
                 AND prokind = 'f'
             ");
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return [];
         }
     }
@@ -66,7 +67,7 @@ class PostgreSQLSchemaDriver extends DatabaseSchemaDriver
             }
 
             return DB::connection($this->connection)->select($sql);
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return [];
         }
     }
@@ -76,11 +77,11 @@ class PostgreSQLSchemaDriver extends DatabaseSchemaDriver
         try {
             return DB::connection($this->connection)->select("
                 SELECT conname, pg_get_constraintdef(oid) as definition
-                FROM pg_constraint 
-                WHERE contype = 'c' 
+                FROM pg_constraint
+                WHERE contype = 'c'
                 AND conrelid = ?::regclass
             ", [$table]);
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return [];
         }
     }
@@ -93,7 +94,7 @@ class PostgreSQLSchemaDriver extends DatabaseSchemaDriver
                 FROM information_schema.sequences
                 WHERE sequence_schema = current_schema()
             ');
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return [];
         }
     }

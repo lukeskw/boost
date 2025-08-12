@@ -9,8 +9,9 @@ use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 use Laravel\Mcp\Server\Tools\ToolInputSchema;
 use Laravel\Mcp\Server\Tools\ToolResult;
+use Throwable;
 
-#[IsReadOnly()]
+#[IsReadOnly]
 class DatabaseQuery extends Tool
 {
     /**
@@ -56,9 +57,9 @@ class DatabaseQuery extends Tool
             'EXPLAIN',
             'DESCRIBE',
             'DESC',
-            'WITH',        // Common-table expressions, must be followed by SELECT
+            'WITH',        // SELECT must follow Common-table expressions
             'VALUES',      // Returns literal values
-            'TABLE',       // PostgreSQL shorthand for SELECT *
+            'TABLE',       // PostgresSQL shorthand for SELECT *
         ];
 
         $isReadOnly = in_array($firstWord, $allowList, true);
@@ -80,7 +81,7 @@ class DatabaseQuery extends Tool
             return ToolResult::json(
                 DB::connection($connectionName)->select($query)
             );
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             return ToolResult::error('Query failed: '.$e->getMessage());
         }
     }
