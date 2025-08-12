@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Mcp\Tools;
 
+use Exception;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -14,7 +16,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 use Laravel\Mcp\Server\Tools\ToolInputSchema;
 use Laravel\Mcp\Server\Tools\ToolResult;
 
-#[IsReadOnly()]
+#[IsReadOnly]
 class DatabaseSchema extends Tool
 {
     public function description(): string
@@ -53,13 +55,11 @@ class DatabaseSchema extends Tool
 
     protected function getDatabaseStructure(?string $connection, string $filter = ''): array
     {
-        $structure = [
+        return [
             'engine' => DB::connection($connection)->getDriverName(),
             'tables' => $this->getAllTablesStructure($connection, $filter),
             'global' => $this->getGlobalStructure($connection),
         ];
-
-        return $structure;
     }
 
     protected function getAllTablesStructure(?string $connection, string $filter = ''): array
@@ -102,7 +102,7 @@ class DatabaseSchema extends Tool
                 'triggers' => $triggers,
                 'check_constraints' => $checkConstraints,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to get table structure for: '.$tableName, [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -136,15 +136,15 @@ class DatabaseSchema extends Tool
 
             foreach ($indexes as $index) {
                 $indexDetails[$index['name']] = [
-                    'columns' => $index['columns'],
-                    'type' => $index['type'] ?? null,
-                    'is_unique' => $index['unique'] ?? false,
-                    'is_primary' => $index['primary'] ?? false,
+                    'columns' => Arr::get($index, 'columns'),
+                    'type' => Arr::get($index, 'type'),
+                    'is_unique' => Arr::get($index, 'unique', false),
+                    'is_primary' => Arr::get($index, 'primary', false),
                 ];
             }
 
             return $indexDetails;
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return [];
         }
     }
@@ -153,7 +153,7 @@ class DatabaseSchema extends Tool
     {
         try {
             return Schema::connection($connection)->getForeignKeys($tableName);
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return [];
         }
     }

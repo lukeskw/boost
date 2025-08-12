@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Mcp\Tools;
 
+use Illuminate\Support\Arr;
 use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 use Laravel\Mcp\Server\Tools\ToolInputSchema;
 use Laravel\Mcp\Server\Tools\ToolResult;
 
-#[IsReadOnly()]
+#[IsReadOnly]
 class ListAvailableEnvVars extends Tool
 {
     public function description(): string
@@ -31,9 +32,11 @@ class ListAvailableEnvVars extends Tool
      */
     public function handle(array $arguments): ToolResult
     {
-        $filename = $arguments['filename'] ?? null;
-        $filePath = ! empty($filename) ? base_path($filename) : base_path('.env');
-        if (str_contains($filePath, '.env') === false) {
+        $filename = Arr::get($arguments, 'filename', '.env');
+
+        $filePath = base_path($filename);
+
+        if (! str_contains($filePath, '.env')) {
             return ToolResult::error('This tool can only read .env files');
         }
 
@@ -43,13 +46,13 @@ class ListAvailableEnvVars extends Tool
 
         $envLines = file_get_contents($filePath);
 
-        if ($envLines === false) {
+        if (! $envLines) {
             return ToolResult::error('Failed to read .env file.');
         }
 
         $count = preg_match_all('/^(?!\s*#)\s*([^=\s]+)=/m', $envLines, $matches);
 
-        if ($count === false) {
+        if (! $count) {
             return ToolResult::error('Failed to parse .env file');
         }
 

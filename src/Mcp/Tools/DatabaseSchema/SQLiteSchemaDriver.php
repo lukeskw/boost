@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Mcp\Tools\DatabaseSchema;
 
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 class SQLiteSchemaDriver extends DatabaseSchemaDriver
@@ -12,11 +13,11 @@ class SQLiteSchemaDriver extends DatabaseSchemaDriver
     {
         try {
             return DB::connection($this->connection)->select("
-                SELECT name, sql 
-                FROM sqlite_master 
+                SELECT name, sql
+                FROM sqlite_master
                 WHERE type = 'view'
             ");
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return [];
         }
     }
@@ -42,7 +43,7 @@ class SQLiteSchemaDriver extends DatabaseSchemaDriver
             }
 
             return DB::connection($this->connection)->select($sql);
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return [];
         }
     }

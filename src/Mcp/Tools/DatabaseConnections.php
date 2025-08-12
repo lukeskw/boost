@@ -9,7 +9,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 use Laravel\Mcp\Server\Tools\ToolInputSchema;
 use Laravel\Mcp\Server\Tools\ToolResult;
 
-#[IsReadOnly()]
+#[IsReadOnly]
 class DatabaseConnections extends Tool
 {
     public function description(): string
@@ -19,7 +19,6 @@ class DatabaseConnections extends Tool
 
     public function schema(ToolInputSchema $schema): ToolInputSchema
     {
-        // No inputs required for this tool.
         return $schema;
     }
 

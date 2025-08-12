@@ -20,7 +20,6 @@ class ListAvailableConfigKeys extends Tool
 
     public function schema(ToolInputSchema $schema): ToolInputSchema
     {
-        // No inputs required for this tool.
         return $schema;
     }
 
@@ -47,16 +46,16 @@ class ListAvailableConfigKeys extends Tool
         $results = [];
 
         foreach ($array as $key => $value) {
-            $newPrefix = $prefix === '' ? $key : $prefix.$key;
+            $currentKey = $prefix.$key;
 
             if (is_array($value)) {
-                $results = array_merge($results, $this->flattenToDotNotation($value, $newPrefix.'.'));
+                $results = array_merge($results, $this->flattenToDotNotation($value, $currentKey.'.'));
             } else {
                 // Skip numeric keys at the top level (they're likely array values, not config keys)
                 if ($prefix === '' && is_numeric($key)) {
                     continue;
                 }
-                $results[] = $newPrefix;
+                $results[] = $currentKey;
             }
         }
 

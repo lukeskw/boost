@@ -44,7 +44,7 @@ class ReadLogEntries extends Tool
         $logFile = $this->resolveLogFilePath();
 
         if (! file_exists($logFile)) {
-            return ToolResult::error("Log file not found at $logFile");
+            return ToolResult::error("Log file not found at {$logFile}");
         }
 
         $entries = $this->readLastLogEntries($logFile, $maxEntries);

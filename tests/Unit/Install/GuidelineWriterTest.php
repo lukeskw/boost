@@ -258,7 +258,7 @@ test('it retries file locking on contention', function () {
 
     // Create a process that holds the lock
     $lockingProcess = proc_open("php -r \"
-        \$handle = fopen('$tempFile', 'c+');
+        \$handle = fopen('{$tempFile}', 'c+');
         flock(\$handle, LOCK_EX);
         sleep(1);
         fclose(\$handle);

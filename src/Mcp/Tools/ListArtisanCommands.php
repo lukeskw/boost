@@ -11,7 +11,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 use Laravel\Mcp\Server\Tools\ToolInputSchema;
 use Laravel\Mcp\Server\Tools\ToolResult;
 
-#[IsReadOnly()]
+#[IsReadOnly]
 class ListArtisanCommands extends Tool
 {
     public function description(): string
@@ -21,7 +21,6 @@ class ListArtisanCommands extends Tool
 
     public function schema(ToolInputSchema $schema): ToolInputSchema
     {
-        // No inputs required.
         return $schema;
     }
 
@@ -42,7 +41,7 @@ class ListArtisanCommands extends Tool
         }
 
         // Sort alphabetically by name for determinism.
-        usort($commandList, fn ($a, $b) => strcmp($a['name'], $b['name']));
+        usort($commandList, fn ($firstCommand, $secondCommand) => strcmp($firstCommand['name'], $secondCommand['name']));
 
         return ToolResult::json($commandList);
     }

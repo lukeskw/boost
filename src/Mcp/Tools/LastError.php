@@ -13,7 +13,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 use Laravel\Mcp\Server\Tools\ToolInputSchema;
 use Laravel\Mcp\Server\Tools\ToolResult;
 
-#[IsReadOnly()]
+#[IsReadOnly]
 class LastError extends Tool
 {
     use ReadsLogs;
@@ -69,7 +69,7 @@ class LastError extends Tool
             return ToolResult::text($entry);
         }
 
-        // Locate the correct log file using shared helper.
+        // Locate the correct log file using the shared helper.
         $logFile = $this->resolveLogFilePath();
 
         if (! file_exists($logFile)) {

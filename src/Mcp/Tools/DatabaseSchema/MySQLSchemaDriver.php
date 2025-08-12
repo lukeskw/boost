@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Mcp\Tools\DatabaseSchema;
 
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 class MySQLSchemaDriver extends DatabaseSchemaDriver
@@ -16,7 +17,7 @@ class MySQLSchemaDriver extends DatabaseSchemaDriver
                 FROM information_schema.VIEWS
                 WHERE TABLE_SCHEMA = DATABASE()
             ');
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return [];
         }
     }
@@ -25,7 +26,7 @@ class MySQLSchemaDriver extends DatabaseSchemaDriver
     {
         try {
             return DB::connection($this->connection)->select('SHOW PROCEDURE STATUS WHERE Db = DATABASE()');
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return [];
         }
     }
@@ -34,7 +35,7 @@ class MySQLSchemaDriver extends DatabaseSchemaDriver
     {
         try {
             return DB::connection($this->connection)->select('SHOW FUNCTION STATUS WHERE Db = DATABASE()');
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return [];
         }
     }
@@ -47,7 +48,7 @@ class MySQLSchemaDriver extends DatabaseSchemaDriver
             }
 
             return DB::connection($this->connection)->select('SHOW TRIGGERS');
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return [];
         }
     }
@@ -61,7 +62,7 @@ class MySQLSchemaDriver extends DatabaseSchemaDriver
                 WHERE CONSTRAINT_SCHEMA = DATABASE()
                 AND TABLE_NAME = ?
             ', [$table]);
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return [];
         }
     }
