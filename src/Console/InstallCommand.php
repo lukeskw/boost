@@ -341,7 +341,7 @@ class InstallCommand extends Command
 
         foreach ($installedEnvNames as $envKey) {
             $matchingEnv = $availableEnvironments->first(fn (CodeEnvironment $env) => strtolower($envKey) === strtolower($env->name()));
-            if ($matchingEnv) {
+            if ($matchingEnv && ($options->contains($matchingEnv->displayName() || $options->contains($matchingEnv->agentName())))) {
                 $detectedClasses[] = get_class($matchingEnv);
             }
         }
@@ -352,7 +352,7 @@ class InstallCommand extends Command
             default: array_unique($detectedClasses),
             scroll: $config['scroll'],
             required: $config['required'],
-            hint: empty($detectedClasses) ? null : sprintf('Auto-detected %s for you',
+            hint: empty($detectedClasses) ? '' : sprintf('Auto-detected %s for you',
                 Arr::join(array_map(function ($className) use ($availableEnvironments, $config) {
                     $env = $availableEnvironments->first(fn ($env) => get_class($env) === $className);
                     $displayMethod = $config['displayMethod'];
@@ -372,7 +372,7 @@ class InstallCommand extends Command
         }
 
         if ($this->selectedTargetAgents->isEmpty()) {
-            $this->info('No agents selected for guideline installation.');
+            $this->info(' No agents selected for guideline installation.');
 
             return;
         }
