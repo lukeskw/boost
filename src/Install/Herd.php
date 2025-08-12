@@ -41,7 +41,7 @@ class Herd
             return $this->getHomePath().'/.config/herd/bin/herd-mcp.phar';
         }
 
-        return $this->getHomePath().'/Library/Application Support/Herd/bin/herd-mcp.phar';
+        return '/Applications/Herd.app/Contents/Resources/herd-mcp.phar';
     }
 
     public function isWindowsPlatform(): bool
