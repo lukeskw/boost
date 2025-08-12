@@ -11,7 +11,7 @@
 
 Laravel Boost accelerates AI-assisted development by providing the essential context and structure that AI needs to generate high-quality, Laravel-specific code.
 
-At its foundation is an MCP server equipped with over 15 specialized tools designed to streamline AI-assisted coding workflows. The package includes composable AI guidelines specifically crafted for Laravel ecosystem packages, ensuring consistent and framework-appropriate code generation.
+At its foundation, Laravel Boost is an MCP server equipped with over 15 specialized tools designed to streamline AI-assisted coding workflows. The package includes composable AI guidelines specifically crafted for Laravel ecosystem packages, ensuring consistent and framework-appropriate code generation.
 
 Boost also features a powerful Documentation API that combines a built-in MCP tool with an extensive knowledge base containing over 15,000 pieces of Laravel-specific information, all enhanced by semantic search capabilities using embeddings for precise, context-aware results.
 
