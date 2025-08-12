@@ -1,5 +1,6 @@
 - This project uses Livewire Volt for interactivity within its pages. New pages requiring interactivity must also use Livewire Volt. There is documentation available for it.
-- Volt is an elegantly crafted **functional** API for Livewire that supports single-file components, allowing a component's PHP logic and Blade templates to coexist in the same file
+- Make new Volt components using `php artisan make:volt [name] [--test] [--pest]`
+- Volt is a **functional** API for Livewire that supports single-file components, allowing a component's PHP logic and Blade templates to coexist in the same file
 - **Single-File Components**: Livewire Volt allows PHP logic and Blade templates in one file. Components use the `@volt` directive.
 - You must check existing Volt components to find out if they're functional or class based. If you can't detect that, ask the user which they prefer before writing a Volt component.
 
