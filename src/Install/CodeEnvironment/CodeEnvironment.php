@@ -165,6 +165,7 @@ abstract class CodeEnvironment
      * @param array<int, string> $args
      * @param array<string, string> $env
      * @return bool
+     *
      * @throws FileNotFoundException
      */
     public function installMcp(string $key, string $command, array $args = [], array $env = []): bool
@@ -225,6 +226,7 @@ abstract class CodeEnvironment
      * @param array<int, string> $args
      * @param array<string, string> $env
      * @return bool
+     *
      * @throws FileNotFoundException
      */
     protected function installFileMcp(string $key, string $command, array $args = [], array $env = []): bool
@@ -243,7 +245,7 @@ abstract class CodeEnvironment
             : [];
 
         $mcpKey = $this->mcpConfigKey();
-        data_set($config, "$mcpKey.$key", collect([
+        data_set($config, "{$mcpKey}.{$key}", collect([
             'command' => $command,
             'args' => $args,
             'env' => $env,
