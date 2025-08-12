@@ -1,12 +1,16 @@
+## Inertia + React
+
 - Use `router.visit()` or `<Link>` for navigation instead of traditional links.
-<code-snippet lang="react" name="Inertia client navigation">
+
+<code-snippet lang="react" name="Inertia Client Navigation">
     import { Link } from '@inertiajs/react'
 
     <Link href="/">Home</Link>
 </code-snippet>
 
-- For form handling, use `router.post` and related methods, do not use regular forms.
-<code-snippet lang="react" name="Form example">
+- For form handling, use `router.post` and related methods. Do not use regular forms.
+
+<code-snippet lang="react" name="Inertia React Form Example">
 import { useState } from 'react'
 import { router } from '@inertiajs/react'
 
@@ -20,6 +24,7 @@ export default function Edit() {
     function handleChange(e) {
         const key = e.target.id;
         const value = e.target.value
+
         setValues(values => ({
             ...values,
             [key]: value,
@@ -28,6 +33,7 @@ export default function Edit() {
 
     function handleSubmit(e) {
         e.preventDefault()
+
         router.post('/users', values)
     }
 
