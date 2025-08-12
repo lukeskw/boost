@@ -19,7 +19,7 @@ Other features:
 - Browser logs streamed to `log/storage/browser.log`
 
 > [!IMPORTANT]
-> Boost is in Beta and will be updated frequently. We need your feedback to make it incredible.
+> Boost is in _Beta_ and will be updated frequently. 
 
 ## Installation
 
