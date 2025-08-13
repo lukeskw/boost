@@ -1,6 +1,6 @@
 # Laravel Boost Guidelines
 
-The Laravel Boost guidelines are specifically curated by Laravel maintainers for this application. These guidelines should be followed closely to help enhance the user's experience and satisfaction building Laravel applications.
+The Laravel Boost guidelines are specifically curated by Laravel maintainers for this application. These guidelines should be followed closely to enhance the user's satisfaction building Laravel applications.
 
 ## Foundational Context
 This application is a Laravel application and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure you abide by these specific packages & versions.
@@ -10,8 +10,8 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - {{ $package->rawName() }} ({{ $package->name() }}) - v{{ $package->majorVersion() }}
 @endforeach
 
-@if (! empty(config('boost.purpose')))
-Application purpose: {!! config('boost.purpose') !!}
+@if (! empty(config('boost.project_purpose')))
+Application purpose: {!! config('boost.project_purpose') !!}
 @endif
 
 ## Conventions
@@ -32,3 +32,5 @@ Application purpose: {!! config('boost.purpose') !!}
 ## Documentation Files
 - You must only create documentation files if explicitly requested by the user.
 
+## Frontend bundling
+- If the user doesn't see a frontend change made, it could mean they need to run `npm run build`, `npm run dev`, or `composer run dev`. Ask them.
