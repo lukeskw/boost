@@ -10,8 +10,8 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - {{ $package->rawName() }} ({{ $package->name() }}) - v{{ $package->majorVersion() }}
 @endforeach
 
-@if (! empty(config('boost.project_purpose')))
-Application purpose: {!! config('boost.project_purpose') !!}
+@if (! empty(config('boost.purpose')))
+Application purpose: {!! config('boost.purpose') !!}
 @endif
 
 ## Conventions
@@ -26,11 +26,11 @@ Application purpose: {!! config('boost.project_purpose') !!}
 - Stick to existing directory structure - don't create new base folders without approval.
 - Do not change the application's dependencies without approval.
 
+## Frontend Bundling
+- If the user doesn't see a frontend change reflected in the UI, it could mean they need to run `npm run build`, `npm run dev`, or `composer run dev`. Ask them.
+
 ## Replies
 - Be concise in your explanations - focus on what's important rather than explaining obvious details.
 
 ## Documentation Files
 - You must only create documentation files if explicitly requested by the user.
-
-## Frontend bundling
-- If the user doesn't see a frontend change made, it could mean they need to run `npm run build`, `npm run dev`, or `composer run dev`. Ask them.
