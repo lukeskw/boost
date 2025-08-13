@@ -32,7 +32,6 @@ Forms\Components\Select::make('user_id')
 </code-snippet>
 @endverbatim
 
-
 ## Testing
 - It's important to test Filament functionality for user satisfaction.
 - Ensure that you are authenticated to access the application within the test.
