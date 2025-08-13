@@ -83,7 +83,7 @@ Laravel Boost includes AI guidelines for the following packages and frameworks. 
 | Package | Versions Supported |
 |---------|-------------------|
 | Laravel Framework | 10.x, 11.x, 12.x |
-| Flux UI | Free, 2.x, Pro |
+| Flux UI | 2.x Free, 2.x Pro |
 | Inertia | 1.x, 2.x |
 | Livewire | 1.x, 2.x, 3.x |
 | Pest | 3.x, 4.x |
