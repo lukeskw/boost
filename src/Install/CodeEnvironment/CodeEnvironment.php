@@ -15,11 +15,9 @@ use Laravel\Boost\Install\Enums\Platform;
 
 abstract class CodeEnvironment
 {
-    public bool $absolute = false;
+    public bool $useAbsolutePathForMcp = false;
 
-    public function __construct(protected readonly DetectionStrategyFactory $strategyFactory)
-    {
-    }
+    public function __construct(protected readonly DetectionStrategyFactory $strategyFactory) {}
 
     abstract public function name(): string;
 

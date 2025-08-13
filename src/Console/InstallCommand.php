@@ -462,6 +462,7 @@ class InstallCommand extends Command
             )->toArray()
         );
 
+        /** @var CodeEnvironment $mcpClient */
         foreach ($this->selectedTargetMcpClient as $mcpClient) {
             $ideName = $mcpClient->mcpClientName();
             $ideDisplay = str_pad($ideName, $longestIdeName);
@@ -470,8 +471,7 @@ class InstallCommand extends Command
 
             if ($this->shouldInstallMcp()) {
                 try {
-                    /** @phpstan-ignore property.notFound */
-                    $artisan = $mcpClient->absolute ? base_path('artisan') : './artisan';
+                    $artisan = $mcpClient->useAbsolutePathForMcp ? base_path('artisan') : './artisan';
                     $result = $mcpClient->installMcp('laravel-boost', 'php', [$artisan, 'boost:mcp']);
 
                     if ($result) {
