@@ -32,7 +32,7 @@ class InjectBoost
 
     private function shouldInject(Response $response): bool
     {
-        if (str_contains($response->headers->get('content-type'), 'html') === false) {
+        if (str_contains($response->headers->get('content-type', ''), 'html') === false) {
             return false;
         }
 

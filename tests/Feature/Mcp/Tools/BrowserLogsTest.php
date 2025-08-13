@@ -97,8 +97,7 @@ test('it returns error when log file is empty', function () {
 
 test('@boostJs blade directive renders browser logger script', function () {
     // Ensure route exists
-    Route::post('/_boost/browser-logs', function () {
-    })->name('boost.browser-logs');
+    Route::post('/_boost/browser-logs', function () {})->name('boost.browser-logs');
 
     $blade = Blade::compileString('@boostJs');
 
@@ -208,7 +207,7 @@ test('InjectBoost middleware injects script into HTML response', function () {
 HTML;
 
     $request = Request::create('/');
-    $response = new \Illuminate\Http\Response($html);
+    $response = new \Illuminate\Http\Response($html, 200, ['Content-Type' => 'text/html']);
 
     $result = $middleware->handle($request, function ($req) use ($response) {
         return $response;
@@ -277,7 +276,7 @@ test('InjectBoost middleware injects before body tag when no head tag', function
 HTML;
 
     $request = Request::create('/');
-    $response = new \Illuminate\Http\Response($html);
+    $response = new \Illuminate\Http\Response($html, 200, ['Content-Type' => 'text/html']);
 
     $result = $middleware->handle($request, function ($req) use ($response) {
         return $response;
