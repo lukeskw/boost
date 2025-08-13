@@ -1,6 +1,14 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/boost/compare/v1.0.8...main)
+## [Unreleased](https://github.com/laravel/boost/compare/v1.0.9...main)
+
+## [v1.0.9](https://github.com/laravel/boost/compare/v1.0.8...v1.0.9) - 2025-08-13
+
+### What's Changed
+
+* fixes #80 - install Boost MCP into Claude via file instead of shell by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/82
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.0.8...v1.0.9
 
 ## [v1.0.8](https://github.com/laravel/boost/compare/v1.0.3...v1.0.8) - 2025-08-13
 
