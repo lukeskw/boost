@@ -1,6 +1,14 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/boost/compare/v1.0.3...main)
+## [Unreleased](https://github.com/laravel/boost/compare/v1.0.8...main)
+
+## [v1.0.8](https://github.com/laravel/boost/compare/v1.0.3...v1.0.8) - 2025-08-13
+
+### What's Changed
+
+* fixes #80 by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/81
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.0.7...v1.0.8
 
 ## [v1.0.3](https://github.com/laravel/boost/compare/v1.0.2...v1.0.3) - 2025-08-13
 
