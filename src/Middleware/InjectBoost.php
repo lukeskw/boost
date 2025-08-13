@@ -17,7 +17,7 @@ class InjectBoost
         /** @var \Symfony\Component\HttpFoundation\Response $response */
         $response = $next($request);
 
-        if ($this->shouldInject($response->getContent())) {
+        if ($this->shouldInject($response)) {
             $originalView = $response->original ?? null;
             $injectedContent = $this->injectScript($response->getContent());
             $response->setContent($injectedContent);
@@ -30,8 +30,13 @@ class InjectBoost
         return $response;
     }
 
-    private function shouldInject(string $content): bool
+    private function shouldInject(Response $response): bool
     {
+        if (str_contains($response->headers->get('content-type'), 'html') === false) {
+            return false;
+        }
+
+        $content = $response->getContent();
         // Check if it's HTML
         if (! str_contains($content, '<html') && ! str_contains($content, '<head')) {
             return false;
