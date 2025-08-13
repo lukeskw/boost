@@ -2,6 +2,9 @@
 - Filament is by this application, check how and where to follow existing application conventions.
 - Filament is a Server-Driven UI (SDUI) framework for Laravel. It allows developers to define user interfaces in PHP using structured configuration objects. It is built on top of Livewire, Alpine.js, and Tailwind CSS.
 - You can use the `search-docs` tool to get information from the official Filament documentation when needed. This is very useful for Artisan command arguments, specific code examples, testing functionality, relationship management, and ensuring you're following idiomatic practices.
+- Do not use the package name in the query, this project's packages are automatically share
+- Use multiple, broad, simple, topic based queries
+- Utilize static `make()` methods for consistent component initialization.
 
 ### Artisan
 - You must use the Filament specific Artisan commands to create new files or components for Filament. You can find these with the `list-artisan-commands` tool, or with `php artisan` and the `--help` option.
@@ -29,7 +32,8 @@ Forms\Components\Select::make('user_id')
 </code-snippet>
 @endverbatim
 
-### Testing
+
+## Testing
 - It's important to test Filament functionality for user satisfaction.
 - Ensure that you are authenticated to access the application within the test.
 - Filament uses Livewire, so start assertions with `livewire()` or `Livewire::test()`.
