@@ -108,7 +108,6 @@ class BrowserLogger
     // Global error handlers for uncaught errors
     const originalOnError = window.onerror;
     window.onerror = function boostErrorHandler(errorMsg, url, lineNumber, colNumber, error) {
-        console.log('window on error work please');
         try {
             logQueue.push({
                 type: 'uncaught_error',
