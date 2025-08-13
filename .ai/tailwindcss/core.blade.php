@@ -3,6 +3,7 @@
 - Use Tailwind CSS classes to style HTML, check and use existing tailwind conventions within the project before writing your own.
 - Offer to extract repeated patterns into components that match the project's conventions (i.e. Blade, JSX, Vue, etc..)
 - Think through class placement, order, priority, and defaults - remove redundant classes, add classes to parent or child carefully to limit repetition, group elements logically
+- You can use the `search-docs` tool to get exact examples from the official documentation when needed.
 
 ### Spacing
 - When listing items, use gap utilities for spacing, don't use margins.
