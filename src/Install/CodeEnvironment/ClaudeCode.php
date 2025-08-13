@@ -48,7 +48,7 @@ class ClaudeCode extends CodeEnvironment implements McpClient, Agent
 
     public function shellMcpCommand(): string
     {
-        return 'claude mcp add -s local -t stdio {key} "{command}" {args} {env}';
+        return 'claude mcp add -s project -t stdio {key} "{command}" {args} {env}';
     }
 
     public function guidelinesPath(): string
