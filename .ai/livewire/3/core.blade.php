@@ -8,7 +8,7 @@
     - Use the `components.layouts.app` view as the typical layout path (not `layouts.app`).
 
 ### New Directives
-- `wire:show`, `wire:transition`, `wire:cloak, `wire:offline`, `wire:target` are available for use. Use the documentation to find usage examples.
+- `wire:show`, `wire:transition`, `wire:cloak`, `wire:offline`, `wire:target` are available for use. Use the documentation to find usage examples.
 
 ### Alpine
 - Alpine is now included with Livewire, don't manually include Alpine.js.
