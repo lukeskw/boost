@@ -1,6 +1,6 @@
 {
     "name": "laravel/boost",
-    "description": "Laravel AI jump-start to give you a boost",
+    "description": "Laravel Boost accelerates AI-assisted development to generate high-quality, Laravel-specific code.",
     "keywords": [
         "dev",
         "laravel",
