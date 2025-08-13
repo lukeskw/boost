@@ -7,7 +7,7 @@ use Laravel\Boost\Install\CodeEnvironmentsDetector;
 use Laravel\Boost\Install\Enums\Platform;
 
 beforeEach(function () {
-    $this->container = new \Illuminate\Container\Container();
+    $this->container = new \Illuminate\Container\Container;
     $this->detector = new CodeEnvironmentsDetector($this->container);
 });
 
@@ -35,12 +35,11 @@ test('discoverSystemInstalledCodeEnvironments returns detected programs', functi
     $otherProgram->shouldReceive('name')->andReturn('other');
 
     // Bind mocked programs to container
-    $container = new \Illuminate\Container\Container();
+    $container = new \Illuminate\Container\Container;
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\PhpStorm::class, fn () => $program1);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\VSCode::class, fn () => $program2);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\Cursor::class, fn () => $program3);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\ClaudeCode::class, fn () => $otherProgram);
-    $container->bind(\Laravel\Boost\Install\CodeEnvironment\Zed::class, fn () => $otherProgram);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\Copilot::class, fn () => $otherProgram);
 
     $detector = new CodeEnvironmentsDetector($container);
@@ -60,12 +59,11 @@ test('discoverSystemInstalledCodeEnvironments returns empty array when no progra
     $otherProgram->shouldReceive('name')->andReturn('other');
 
     // Bind mocked program to container
-    $container = new \Illuminate\Container\Container();
+    $container = new \Illuminate\Container\Container;
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\PhpStorm::class, fn () => $program1);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\VSCode::class, fn () => $otherProgram);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\Cursor::class, fn () => $otherProgram);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\ClaudeCode::class, fn () => $otherProgram);
-    $container->bind(\Laravel\Boost\Install\CodeEnvironment\Zed::class, fn () => $otherProgram);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\Copilot::class, fn () => $otherProgram);
 
     $detector = new CodeEnvironmentsDetector($container);
@@ -90,7 +88,7 @@ test('discoverProjectInstalledCodeEnvironments detects programs in project', fun
     $program3->shouldReceive('name')->andReturn('claudecode');
 
     // Bind mocked programs to container
-    $container = new \Illuminate\Container\Container();
+    $container = new \Illuminate\Container\Container;
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\VSCode::class, fn () => $program1);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\PhpStorm::class, fn () => $program2);
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\ClaudeCode::class, fn () => $program3);
@@ -109,7 +107,7 @@ test('discoverProjectInstalledCodeEnvironments returns empty array when no progr
     $program1->shouldReceive('name')->andReturn('vscode');
 
     // Bind mocked program to container
-    $container = new \Illuminate\Container\Container();
+    $container = new \Illuminate\Container\Container;
     $container->bind(\Laravel\Boost\Install\CodeEnvironment\VSCode::class, fn () => $program1);
 
     $detector = new CodeEnvironmentsDetector($container);

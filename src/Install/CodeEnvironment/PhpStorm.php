@@ -10,6 +10,8 @@ use Laravel\Boost\Install\Enums\Platform;
 
 class PhpStorm extends CodeEnvironment implements Agent, McpClient
 {
+    public bool $useAbsolutePathForMcp = true;
+
     public function name(): string
     {
         return 'phpstorm';

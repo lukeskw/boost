@@ -317,21 +317,12 @@ class InstallCommand extends Command
             return collect();
         }
 
-        $options = $availableEnvironments
-            ->filter(function (CodeEnvironment $environment) {
-                // We only show Zed if it's actually installed
-                if ($environment->name() === 'zed' && ! in_array('zed', $this->systemInstalledCodeEnvironments)) {
-                    return false;
-                }
+        $options = $availableEnvironments->mapWithKeys(function (CodeEnvironment $environment) use ($config) {
+            $displayMethod = $config['displayMethod'];
+            $displayText = $environment->{$displayMethod}();
 
-                return true;
-            })
-            ->mapWithKeys(function (CodeEnvironment $environment) use ($config) {
-                $displayMethod = $config['displayMethod'];
-                $displayText = $environment->{$displayMethod}();
-
-                return [get_class($environment) => $displayText];
-            })->sort();
+            return [get_class($environment) => $displayText];
+        })->sort();
 
         $detectedClasses = [];
         $installedEnvNames = array_unique(array_merge(
@@ -341,7 +332,7 @@ class InstallCommand extends Command
 
         foreach ($installedEnvNames as $envKey) {
             $matchingEnv = $availableEnvironments->first(fn (CodeEnvironment $env) => strtolower($envKey) === strtolower($env->name()));
-            if ($matchingEnv && ($options->contains($matchingEnv->displayName() || $options->contains($matchingEnv->agentName())))) {
+            if ($matchingEnv) {
                 $detectedClasses[] = get_class($matchingEnv);
             }
         }
@@ -471,6 +462,7 @@ class InstallCommand extends Command
             )->toArray()
         );
 
+        /** @var CodeEnvironment $mcpClient */
         foreach ($this->selectedTargetMcpClient as $mcpClient) {
             $ideName = $mcpClient->mcpClientName();
             $ideDisplay = str_pad($ideName, $longestIdeName);
@@ -479,7 +471,8 @@ class InstallCommand extends Command
 
             if ($this->shouldInstallMcp()) {
                 try {
-                    $result = $mcpClient->installMcp('laravel-boost', 'php', ['./artisan', 'boost:mcp']);
+                    $artisan = $mcpClient->useAbsolutePathForMcp ? base_path('artisan') : './artisan';
+                    $result = $mcpClient->installMcp('laravel-boost', 'php', [$artisan, 'boost:mcp']);
 
                     if ($result) {
                         $results[] = $this->greenTick.' Boost';

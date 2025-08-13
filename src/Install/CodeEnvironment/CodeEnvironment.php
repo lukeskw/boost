@@ -15,6 +15,8 @@ use Laravel\Boost\Install\Enums\Platform;
 
 abstract class CodeEnvironment
 {
+    public bool $useAbsolutePathForMcp = false;
+
     public function __construct(protected readonly DetectionStrategyFactory $strategyFactory)
     {
     }
@@ -36,7 +38,6 @@ abstract class CodeEnvironment
     /**
      * Get the detection configuration for system-wide installation detection.
      *
-     * @param Platform $platform
      * @return array{paths?: string[], command?: string, files?: string[]}
      */
     abstract public function systemDetectionConfig(Platform $platform): array;
@@ -102,17 +103,14 @@ abstract class CodeEnvironment
     /**
      * Install MCP server using the appropriate strategy.
      *
-     * @param string $key
-     * @param string $command
      * @param array<int, string> $args
      * @param array<string, string> $env
-     * @return bool
      *
      * @throws FileNotFoundException
      */
     public function installMcp(string $key, string $command, array $args = [], array $env = []): bool
     {
-        return match($this->mcpInstallationStrategy()) {
+        return match ($this->mcpInstallationStrategy()) {
             McpInstallationStrategy::SHELL => $this->installShellMcp($key, $command, $args, $env),
             McpInstallationStrategy::FILE => $this->installFileMcp($key, $command, $args, $env),
             McpInstallationStrategy::NONE => false
@@ -122,11 +120,8 @@ abstract class CodeEnvironment
     /**
      * Install MCP server using a shell command strategy.
      *
-     * @param string $key
-     * @param string $command
      * @param array<int, string> $args
      * @param array<string, string> $env
-     * @return bool
      */
     protected function installShellMcp(string $key, string $command, array $args = [], array $env = []): bool
     {
@@ -163,11 +158,8 @@ abstract class CodeEnvironment
     /**
      * Install MCP server using a file-based configuration strategy.
      *
-     * @param string $key
-     * @param string $command
      * @param array<int, string> $args
      * @param array<string, string> $env
-     * @return bool
      *
      * @throws FileNotFoundException
      */
