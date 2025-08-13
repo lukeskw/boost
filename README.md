@@ -87,6 +87,7 @@ Laravel Boost includes AI guidelines for the following packages and frameworks. 
 | Inertia | 1.x, 2.x |
 | Livewire | 1.x, 2.x, 3.x |
 | Pest | 3.x, 4.x |
+| Tailwind CSS | 3.x, 4.x |
 
 
 ## Adding Custom AI Guidelines
