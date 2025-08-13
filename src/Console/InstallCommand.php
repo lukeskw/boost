@@ -86,7 +86,7 @@ class InstallCommand extends Command
         $this->selectedTargetAgents = collect();
         $this->selectedTargetMcpClient = collect();
 
-        $this->projectName = basename(base_path());
+        $this->projectName = config('app.name');
     }
 
     private function displayBoostHeader(): void
