@@ -208,7 +208,9 @@ class InstallCommand extends Command
             $process->run();
 
             /** Count the number of tests - they'll always have :: between the filename and test name */
-            $hasMinimumTests = collect(explode("\n", trim($process->getOutput())))
+            $hasMinimumTests = Str::of($process->getOutput())
+                ->trim()
+                ->explode("\n")
                 ->filter(fn ($line) => str_contains($line, '::'))
                 ->count() >= self::MIN_TEST_COUNT;
         }
