@@ -118,9 +118,9 @@ class InstallCommand extends Command
     private function collectInstallationPreferences(): void
     {
         $this->selectedBoostFeatures = $this->selectBoostFeatures();
-        $this->enforceTests = $this->determineTestEnforcement(ask: false);
         $this->selectedTargetMcpClient = $this->selectTargetMcpClients();
         $this->selectedTargetAgents = $this->selectTargetAgents();
+        $this->enforceTests = $this->determineTestEnforcement();
     }
 
     private function performInstallation(): void
@@ -196,23 +196,13 @@ class InstallCommand extends Command
      * won't have the CI setup to make use of them anyway, so we're just wasting their
      * tokens/money by enforcing them.
      */
-    protected function determineTestEnforcement(bool $ask = true): bool
+    protected function determineTestEnforcement(): bool
     {
-        $hasMinimumTests = Finder::create()
-            ->in(base_path('tests'))
-            ->files()
-            ->name('*.php')
-            ->count() > 6;
-
-        if (! $hasMinimumTests && $ask) {
-            $hasMinimumTests = select(
-                label: 'Should AI always create tests?',
-                options: ['Yes', 'No'],
-                default: 'Yes'
-            ) === 'Yes';
-        }
-
-        return $hasMinimumTests;
+        return select(
+            label: 'Should AI always create tests?',
+            options: ['Yes', 'No'],
+            default: 'Yes'
+        ) === 'Yes';
     }
 
     /**
