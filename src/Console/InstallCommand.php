@@ -204,7 +204,7 @@ class InstallCommand extends Command
         $hasMinimumTests = false;
 
         if (file_exists(base_path('vendor/bin/phpunit'))) {
-            $process = new Process(['php', 'artisan', 'test', '--list-tests']);
+            $process = new Process([PHP_BINARY, 'artisan', 'test', '--list-tests'], base_path());
             $process->run();
 
             /** Count the number of tests - they'll always have :: between the filename and test name */
