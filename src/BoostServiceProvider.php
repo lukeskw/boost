@@ -55,7 +55,7 @@ class BoostServiceProvider extends ServiceProvider
 
     public function boot(Router $router): void
     {
-        if (! app()->environment('local', 'testing')) {
+        if (config('app.debug', false) !== true) {
             return;
         }
 
@@ -107,8 +107,8 @@ class BoostServiceProvider extends ServiceProvider
              *  } $log */
             foreach ($logs as $log) {
                 $logger->write(
-                    level: $this->mapJsTypeToPsr3Level($log['type']),
-                    message: $this->buildLogMessageFromData($log['data']),
+                    level: self::mapJsTypeToPsr3Level($log['type']),
+                    message: self::buildLogMessageFromData($log['data']),
                     context: [
                         'url' => $log['url'],
                         'user_agent' => $log['userAgent'] ?: null,
@@ -127,13 +127,13 @@ class BoostServiceProvider extends ServiceProvider
      * Build a string message for the log based on various input types. Single-dimensional, and multi:
      * "data": {"message":"Unhandled Promise Rejection","reason":{"name":"TypeError","message":"NetworkError when attempting to fetch resource.","stack":""}}]
      */
-    private function buildLogMessageFromData(array $data): string
+    private static function buildLogMessageFromData(array $data): string
     {
         $messages = [];
 
         foreach ($data as $value) {
             $messages[] = match (true) {
-                is_array($value) => $this->buildLogMessageFromData($value),
+                is_array($value) => self::buildLogMessageFromData($value),
                 is_string($value), is_numeric($value) => (string) $value,
                 is_bool($value) => $value ? 'true' : 'false',
                 is_null($value) => 'null',
@@ -162,7 +162,7 @@ class BoostServiceProvider extends ServiceProvider
         $bladeCompiler->directive('boostJs', fn () => '<?php echo \\Laravel\\Boost\\Services\\BrowserLogger::getScript(); ?>');
     }
 
-    private function mapJsTypeToPsr3Level(string $type): string
+    private static function mapJsTypeToPsr3Level(string $type): string
     {
         return match ($type) {
             'warn' => 'warning',

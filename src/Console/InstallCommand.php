@@ -86,7 +86,7 @@ class InstallCommand extends Command
         $this->selectedTargetAgents = collect();
         $this->selectedTargetMcpClient = collect();
 
-        $this->projectName = basename(base_path());
+        $this->projectName = config('app.name');
     }
 
     private function displayBoostHeader(): void
@@ -178,10 +178,10 @@ class InstallCommand extends Command
 
         $link = $this->hyperlink($label, 'https://boost.laravel.com/installed/?d='.$installData);
 
-        $text = 'Enjoy the boost 🚀 ';
+        $text = 'Enjoy the boost 🚀 Next steps: ';
         $paddingLength = (int) (floor(($this->terminal->cols() - mb_strlen($text.$label)) / 2)) - 2;
 
-        echo "\033[42m\033[2K".str_repeat(' ', $paddingLength); // Make the entire line have a green background
+        echo "\033[42m\033[2K".str_repeat(' ', max(0, $paddingLength)); // Make the entire line have a green background
         echo $this->black($this->bold($text.$link)).$this->reset(PHP_EOL).$this->reset(PHP_EOL);
     }
 
@@ -230,7 +230,7 @@ class InstallCommand extends Command
             $installOptions['herd_mcp'] = 'Herd MCP Server';
 
             return collect(multiselect(
-                label: 'What shall we install?',
+                label: 'What do you want to install?',
                 options: $installOptions,
                 default: $defaultInstallOptions,
                 required: true,

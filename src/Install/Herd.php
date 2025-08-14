@@ -10,7 +10,7 @@ class Herd
 {
     public function isInstalled(): bool
     {
-        if ($this->isWindowsPlatform()) {
+        if (! $this->isWindowsPlatform()) {
             return file_exists('/Applications/Herd.app/Contents/MacOS/Herd');
         }
 

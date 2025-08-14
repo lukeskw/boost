@@ -208,7 +208,7 @@ test('InjectBoost middleware injects script into HTML response', function () {
 HTML;
 
     $request = Request::create('/');
-    $response = new \Illuminate\Http\Response($html);
+    $response = new \Illuminate\Http\Response($html, 200, ['Content-Type' => 'text/html']);
 
     $result = $middleware->handle($request, function ($req) use ($response) {
         return $response;
@@ -277,7 +277,7 @@ test('InjectBoost middleware injects before body tag when no head tag', function
 HTML;
 
     $request = Request::create('/');
-    $response = new \Illuminate\Http\Response($html);
+    $response = new \Illuminate\Http\Response($html, 200, ['Content-Type' => 'text/html']);
 
     $result = $middleware->handle($request, function ($req) use ($response) {
         return $response;

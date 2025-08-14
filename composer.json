@@ -1,6 +1,6 @@
 {
     "name": "laravel/boost",
-    "description": "Laravel AI jump-start to give you a boost",
+    "description": "Laravel Boost accelerates AI-assisted development to generate high-quality, Laravel-specific code.",
     "keywords": [
         "dev",
         "laravel",
@@ -25,9 +25,9 @@
         "illuminate/contracts": "^10.0|^11.0|^12.0",
         "illuminate/routing": "^10.0|^11.0|^12.0",
         "illuminate/support": "^10.0|^11.0|^12.0",
-        "laravel/mcp": "dev-main",
+        "laravel/mcp": "^0.1.0",
         "laravel/prompts": "^0.1.9|^0.3",
-        "laravel/roster": "^0.2.2"
+        "laravel/roster": "^0.2"
     },
     "require-dev": {
         "laravel/pint": "^1.14|^1.23",

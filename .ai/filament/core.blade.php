@@ -1,5 +1,5 @@
 ## Filament
-- Filament is by this application, check how and where to follow existing application conventions.
+- Filament is used by this application, check how and where to follow existing application conventions.
 - Filament is a Server-Driven UI (SDUI) framework for Laravel. It allows developers to define user interfaces in PHP using structured configuration objects. It is built on top of Livewire, Alpine.js, and Tailwind CSS.
 - You can use the `search-docs` tool to get information from the official Filament documentation when needed. This is very useful for Artisan command arguments, specific code examples, testing functionality, relationship management, and ensuring you're following idiomatic practices.
 - Do not use the package name in the query, this project's packages are automatically share

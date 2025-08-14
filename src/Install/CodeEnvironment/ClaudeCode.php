@@ -9,7 +9,7 @@ use Laravel\Boost\Contracts\McpClient;
 use Laravel\Boost\Install\Enums\McpInstallationStrategy;
 use Laravel\Boost\Install\Enums\Platform;
 
-class ClaudeCode extends CodeEnvironment implements McpClient, Agent
+class ClaudeCode extends CodeEnvironment implements Agent, McpClient
 {
     public function name(): string
     {
@@ -43,12 +43,12 @@ class ClaudeCode extends CodeEnvironment implements McpClient, Agent
 
     public function mcpInstallationStrategy(): McpInstallationStrategy
     {
-        return McpInstallationStrategy::SHELL;
+        return McpInstallationStrategy::FILE;
     }
 
-    public function shellMcpCommand(): string
+    public function mcpConfigPath(): string
     {
-        return 'claude mcp add -s local -t stdio {key} "{command}" {args} {env}';
+        return '.mcp.json';
     }
 
     public function guidelinesPath(): string

@@ -2,9 +2,9 @@
 
 <p align="center">
 <a href="https://github.com/laravel/boost/actions"><img src="https://github.com/laravel/boost/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/boost"><img src="https://img.shields.io/packagist/dt/boost" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/boost"><img src="https://img.shields.io/packagist/v/boost" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/boost"><img src="https://img.shields.io/packagist/l/boost" alt="License"></a>
+<a href="https://packagist.org/packages/laravel/boost"><img src="https://img.shields.io/packagist/dt/laravel/boost?v=1" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/boost"><img src="https://img.shields.io/packagist/v/laravel/boost?v=1" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/boost"><img src="https://img.shields.io/packagist/l/laravel/boost?v=1" alt="License"></a>
 </p>
 
 ## Introduction
@@ -64,6 +64,7 @@ Laravel Boost includes AI guidelines for the following packages and frameworks. 
 | Core & Boost | core |
 | Laravel Framework | core, 10.x, 11.x, 12.x |
 | Livewire | core, 2.x, 3.x |
+| Filament | core, 4.x |
 | Flux UI | core, free, pro |
 | Herd | core |
 | Inertia Laravel | core, 1.x, 2.x |
@@ -83,6 +84,7 @@ Laravel Boost includes AI guidelines for the following packages and frameworks. 
 | Package | Versions Supported |
 |---------|-------------------|
 | Laravel Framework | 10.x, 11.x, 12.x |
+| Filament | 2.x, 3.x, 4.x |
 | Flux UI | 2.x Free, 2.x Pro |
 | Inertia | 1.x, 2.x |
 | Livewire | 1.x, 2.x, 3.x |
