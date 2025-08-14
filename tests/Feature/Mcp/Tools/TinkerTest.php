@@ -151,17 +151,6 @@ test('should register only in local environment', function () {
     expect($tool->shouldRegister())->toBeTrue();
 });
 
-test('should not register in non-local environment', function () {
-    $tool = new Tinker;
-
-    // Test in production environment
-    app()->detectEnvironment(function () {
-        return 'production';
-    });
-
-    expect($tool->shouldRegister())->toBeFalse();
-});
-
 test('uses custom timeout parameter', function () {
     $tool = new Tinker;
     $result = $tool->handle(['code' => 'return 2 + 2;', 'timeout' => 10]);

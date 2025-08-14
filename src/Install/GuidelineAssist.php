@@ -68,7 +68,7 @@ class GuidelineAssist
             $finder = Finder::create()
                 ->in($appPath)
                 ->files()
-                ->name('*.php');
+                ->name('/[A-Z].*\.php$/');
 
             foreach ($finder as $file) {
                 $relativePath = $file->getRelativePathname();
@@ -80,8 +80,14 @@ class GuidelineAssist
                 );
 
                 try {
+                    $path = $appPath.DIRECTORY_SEPARATOR.$relativePath;
+
+                    if (! $this->fileHasClassLike($path)) {
+                        continue;
+                    }
+
                     if (class_exists($className)) {
-                        self::$classes[$className] = $appPath.DIRECTORY_SEPARATOR.$relativePath;
+                        self::$classes[$className] = $path;
                     }
                 } catch (\Throwable) {
                     // Ignore exceptions and errors from class loading/reflection
@@ -96,6 +102,38 @@ class GuidelineAssist
         }
 
         return $classes;
+    }
+
+    public function fileHasClassLike(string $path): bool
+    {
+        static $cache = [];
+
+        if (isset($cache[$path])) {
+            return $cache[$path];
+        }
+
+        $code = file_get_contents($path);
+        if ($code === false) {
+            return $cache[$path] = false;
+        }
+
+        if (stripos($code, 'class') === false
+            && stripos($code, 'interface') === false
+            && stripos($code, 'trait') === false
+            && stripos($code, 'enum') === false) {
+            return $cache[$path] = false;
+        }
+
+        $tokens = token_get_all($code);
+        foreach ($tokens as $token) {
+            if (is_array($token)) {
+                if (in_array($token[0], [T_CLASS, T_INTERFACE, T_TRAIT, T_ENUM], true)) {
+                    return $cache[$path] = true;
+                }
+            }
+        }
+
+        return $cache[$path] = false;
     }
 
     public function shouldEnforceStrictTypes(): bool
