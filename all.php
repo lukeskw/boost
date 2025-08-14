@@ -60,6 +60,7 @@ $mockRoster = new class extends Roster
             $enumMapping = [
                 'php' => \Laravel\Roster\Enums\Packages::LARAVEL, // Use Laravel as placeholder for php
                 'laravel' => \Laravel\Roster\Enums\Packages::LARAVEL,
+                'filament' => \Laravel\Roster\Enums\Packages::FILAMENT,
                 'fluxui-free' => \Laravel\Roster\Enums\Packages::FLUXUI_FREE,
                 'fluxui-pro' => \Laravel\Roster\Enums\Packages::FLUXUI_PRO,
                 'inertia-laravel' => \Laravel\Roster\Enums\Packages::INERTIA_LARAVEL,
