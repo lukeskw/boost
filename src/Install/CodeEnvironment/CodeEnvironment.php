@@ -12,7 +12,6 @@ use Laravel\Boost\Contracts\McpClient;
 use Laravel\Boost\Install\Detection\DetectionStrategyFactory;
 use Laravel\Boost\Install\Enums\McpInstallationStrategy;
 use Laravel\Boost\Install\Enums\Platform;
-use Throwable;
 
 abstract class CodeEnvironment
 {
