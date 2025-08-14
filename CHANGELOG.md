@@ -1,6 +1,14 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/boost/compare/v1.0.14...main)
+## [Unreleased](https://github.com/laravel/boost/compare/v1.0.15...main)
+
+## [v1.0.15](https://github.com/laravel/boost/compare/v1.0.14...v1.0.15) - 2025-08-14
+
+### What's Changed
+
+* fixes #67 by only finding files that begin with an uppercase letter by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/116
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.0.14...v1.0.15
 
 ## [v1.0.14](https://github.com/laravel/boost/compare/v1.0.13...v1.0.14) - 2025-08-14
 
