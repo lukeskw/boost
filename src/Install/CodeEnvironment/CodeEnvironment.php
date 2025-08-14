@@ -40,6 +40,25 @@ abstract class CodeEnvironment
         return $this->useAbsolutePathForMcp;
     }
 
+    public function getPhpPath(): string
+    {
+        return $this->useAbsolutePathForMcp() ? PHP_BINARY : 'php';
+    }
+
+    public function getArtisanPath(): string
+    {
+        if (! $this->useAbsolutePathForMcp()) {
+            return './artisan';
+        }
+
+        // Try to get the base path from Laravel app, fallback to getcwd
+        try {
+            return base_path('artisan');
+        } catch (\Throwable) {
+            return getcwd().'/artisan';
+        }
+    }
+
     /**
      * Get the detection configuration for system-wide installation detection.
      *

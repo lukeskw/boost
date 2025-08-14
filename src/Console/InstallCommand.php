@@ -469,10 +469,10 @@ class InstallCommand extends Command
             $this->output->write("  {$ideDisplay}... ");
             $results = [];
 
-            $php = $this->getPhpPathForMcpClient($mcpClient);
+            $php = $mcpClient->getPhpPath();
             if ($this->shouldInstallMcp()) {
                 try {
-                    $artisan = $this->getArtisanPathForMcpClient($mcpClient);
+                    $artisan = $mcpClient->getArtisanPath();
                     $result = $mcpClient->installMcp('laravel-boost', $php, [$artisan, 'boost:mcp']);
 
                     if ($result) {
@@ -492,7 +492,7 @@ class InstallCommand extends Command
                 try {
                     $result = $mcpClient->installMcp(
                         key: 'herd',
-                        command: $this->getPhpPathForMcpClient($mcpClient),
+                        command: $mcpClient->getPhpPath(),
                         args: [$this->herd->mcpPath()],
                         env: ['SITE_PATH' => base_path()]
                     );
@@ -524,15 +524,6 @@ class InstallCommand extends Command
         }
     }
 
-    private function getPhpPathForMcpClient(McpClient $mcpClient): string
-    {
-        return $mcpClient->useAbsolutePathForMcp() ? PHP_BINARY : 'php';
-    }
-
-    private function getArtisanPathForMcpClient(McpClient $mcpClient): string
-    {
-        return $mcpClient->useAbsolutePathForMcp() ? base_path('artisan') : './artisan';
-    }
 
     /**
      * Is the project actually using localization for their new features?
