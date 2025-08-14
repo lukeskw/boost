@@ -13,14 +13,14 @@ use Throwable;
 
 class Tinker extends Tool
 {
-    public function shouldRegister(): bool
-    {
-        return app()->environment() === 'local';
-    }
-
     public function description(): string
     {
-        return 'Execute PHP code in the Laravel application context, similar to artisan tinker. Most useful for debugging issues, checking if functions exists, and testing code snippets. Returns the output of the code, as well as whatever is "returned" using "return".';
+        return <<<'DESCRIPTION'
+Execute PHP code in the Laravel application context, like artisan tinker.
+Use this for debugging issues, checking if functions exist, and testing code snippets.
+You should not create models directly without explicit user approval. Prefer Unit/Feature tests using factories for functionality testing.
+Returns the output of the code, as well as whatever is "returned" using "return".
+DESCRIPTION;
     }
 
     public function schema(ToolInputSchema $schema): ToolInputSchema
