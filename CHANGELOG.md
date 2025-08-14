@@ -1,6 +1,15 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/boost/compare/v1.0.15...main)
+## [Unreleased](https://github.com/laravel/boost/compare/v1.0.16...main)
+
+## [v1.0.16](https://github.com/laravel/boost/compare/v1.0.15...v1.0.16) - 2025-08-14
+
+### What's Changed
+
+* refactor: streamline path resolution and simplify the MCP client interface by [@pushpak1300](https://github.com/pushpak1300) in https://github.com/laravel/boost/pull/111
+* Fix PHPStorm using absolute paths by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/109
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.0.15...v1.0.16
 
 ## [v1.0.15](https://github.com/laravel/boost/compare/v1.0.14...v1.0.15) - 2025-08-14
 
