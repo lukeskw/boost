@@ -22,6 +22,16 @@ interface McpClient
     public function useAbsolutePathForMcp(): bool;
 
     /**
+     * Get the PHP executable path for this MCP client.
+     */
+    public function getPhpPath(): string;
+
+    /**
+     * Get the artisan path for this MCP client.
+     */
+    public function getArtisanPath(): string;
+
+    /**
      * Install an MCP server configuration in this IDE.
      *
      * @param string $key Server identifier/name
