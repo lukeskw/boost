@@ -5,4 +5,4 @@
 - Resource pages (List, Create, Edit) are auto-generated within the resource structure.
 - Forms use the `Forms\Components` namespace for form fields.
 - Tables use the `Tables\Columns` namespace for table columns.
-- Admin panel accessible at `/admin` by default.
+- Admin panel is accessible at `/admin` by default.
