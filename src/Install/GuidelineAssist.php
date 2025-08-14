@@ -68,7 +68,7 @@ class GuidelineAssist
             $finder = Finder::create()
                 ->in($appPath)
                 ->files()
-                ->name('/[A-Z]*.php/');
+                ->name('/[A-Z].*\.php$/');
 
             foreach ($finder as $file) {
                 $relativePath = $file->getRelativePathname();
