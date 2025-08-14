@@ -1,6 +1,14 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/boost/compare/v1.0.10...main)
+## [Unreleased](https://github.com/laravel/boost/compare/v1.0.11...main)
+
+## [v1.0.11](https://github.com/laravel/boost/compare/v1.0.10...v1.0.11) - 2025-08-14
+
+### What's Changed
+
+* tools: report-feedback: strengthen language on privacy by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/103
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.0.10...v1.0.11
 
 ## [v1.0.10](https://github.com/laravel/boost/compare/v1.0.9...v1.0.10) - 2025-08-14
 
