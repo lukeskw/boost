@@ -524,7 +524,6 @@ class InstallCommand extends Command
         }
     }
 
-
     /**
      * Is the project actually using localization for their new features?
      */
