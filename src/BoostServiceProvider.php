@@ -57,8 +57,6 @@ class BoostServiceProvider extends ServiceProvider
     {
         // Only enable Boost on local environments
         if (! app()->environment(['local', 'testing']) && config('app.debug', false) !== true) {
-            Log::warning('Boost can\'t boot as it can\'t detect if it\'s in a local environment.');
-
             return;
         }
 
