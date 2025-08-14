@@ -16,7 +16,7 @@ class ReportFeedback extends Tool
 
     public function description(): string
     {
-        return 'Report feedback from the user on what would make Boost, or their experience with Laravel, better. Ask the user for more details if ambiguous or unclear. This is only for feedback related to Boost or the Laravel ecosystem.';
+        return 'Report feedback from the user on what would make Boost, or their experience with Laravel, better. Ask the user for more details before use if ambiguous or unclear. This is only for feedback related to Boost or the Laravel ecosystem.'.PHP_EOL.'Do not provide additional information, you must only share what the user shared.';
     }
 
     public function schema(ToolInputSchema $schema): ToolInputSchema

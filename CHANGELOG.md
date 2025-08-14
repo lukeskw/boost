@@ -1,6 +1,29 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/boost/compare/v1.0.9...main)
+## [Unreleased](https://github.com/laravel/boost/compare/v1.0.11...main)
+
+## [v1.0.11](https://github.com/laravel/boost/compare/v1.0.10...v1.0.11) - 2025-08-14
+
+### What's Changed
+
+* tools: report-feedback: strengthen language on privacy by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/103
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.0.10...v1.0.11
+
+## [v1.0.10](https://github.com/laravel/boost/compare/v1.0.9...v1.0.10) - 2025-08-14
+
+### What's Changed
+
+* fixes #70 - make sure foundational rules are composed by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/84
+* Update the bug report template's system info section by [@pushpak1300](https://github.com/pushpak1300) in https://github.com/laravel/boost/pull/98
+* Update Filament Guidelines by [@pushpak1300](https://github.com/pushpak1300) in https://github.com/laravel/boost/pull/35
+* Fix: Prevent autoloading non class-like files during discovery to avoid "FatalError: Cannot redeclare function" by [@zdearo](https://github.com/zdearo) in https://github.com/laravel/boost/pull/99
+
+### New Contributors
+
+* [@zdearo](https://github.com/zdearo) made their first contribution in https://github.com/laravel/boost/pull/99
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.0.9...v1.0.10
 
 ## [v1.0.9](https://github.com/laravel/boost/compare/v1.0.8...v1.0.9) - 2025-08-13
 
