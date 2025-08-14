@@ -35,6 +35,22 @@ abstract class CodeEnvironment
         return $this->displayName();
     }
 
+    public function useAbsolutePathForMcp(): bool
+    {
+        return $this->useAbsolutePathForMcp;
+    }
+
+    public function getPhpPath(): string
+    {
+        return $this->useAbsolutePathForMcp() ? PHP_BINARY : 'php';
+    }
+
+    public function getArtisanPath(): string
+    {
+        return $this->useAbsolutePathForMcp() ? base_path('artisan') : './artisan';
+
+    }
+
     /**
      * Get the detection configuration for system-wide installation detection.
      *
