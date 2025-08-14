@@ -47,11 +47,7 @@ abstract class CodeEnvironment
 
     public function getArtisanPath(): string
     {
-        if (! $this->useAbsolutePathForMcp()) {
-            return './artisan';
-        }
-
-        return base_path('artisan');
+        return $this->useAbsolutePathForMcp() ? base_path('artisan') : './artisan';
 
     }
 
