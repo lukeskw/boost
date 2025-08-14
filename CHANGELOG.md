@@ -1,6 +1,14 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/boost/compare/v1.0.12...main)
+## [Unreleased](https://github.com/laravel/boost/compare/v1.0.13...main)
+
+## [v1.0.13](https://github.com/laravel/boost/compare/v1.0.12...v1.0.13) - 2025-08-14
+
+### What's Changed
+
+* Fix volt blade parsing by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/112
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.0.12...v1.0.13
 
 ## [v1.0.12](https://github.com/laravel/boost/compare/v1.0.11...v1.0.12) - 2025-08-14
 
