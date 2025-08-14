@@ -12,6 +12,7 @@ use Laravel\Boost\Contracts\McpClient;
 use Laravel\Boost\Install\Detection\DetectionStrategyFactory;
 use Laravel\Boost\Install\Enums\McpInstallationStrategy;
 use Laravel\Boost\Install\Enums\Platform;
+use Throwable;
 
 abstract class CodeEnvironment
 {
@@ -51,12 +52,8 @@ abstract class CodeEnvironment
             return './artisan';
         }
 
-        // Try to get the base path from Laravel app, fallback to getcwd
-        try {
-            return base_path('artisan');
-        } catch (\Throwable) {
-            return getcwd().'/artisan';
-        }
+        return base_path('artisan');
+
     }
 
     /**
