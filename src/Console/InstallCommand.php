@@ -462,17 +462,18 @@ class InstallCommand extends Command
             )->toArray()
         );
 
-        /** @var CodeEnvironment $mcpClient */
+        /** @var McpClient $mcpClient */
         foreach ($this->selectedTargetMcpClient as $mcpClient) {
             $ideName = $mcpClient->mcpClientName();
             $ideDisplay = str_pad($ideName, $longestIdeName);
             $this->output->write("  {$ideDisplay}... ");
             $results = [];
 
+            $php = $this->getPhpPathForMcpClient($mcpClient);
             if ($this->shouldInstallMcp()) {
                 try {
-                    $artisan = $mcpClient->useAbsolutePathForMcp ? base_path('artisan') : './artisan';
-                    $result = $mcpClient->installMcp('laravel-boost', 'php', [$artisan, 'boost:mcp']);
+                    $artisan = $this->getArtisanPathForMcpClient($mcpClient);
+                    $result = $mcpClient->installMcp('laravel-boost', $php, [$artisan, 'boost:mcp']);
 
                     if ($result) {
                         $results[] = $this->greenTick.' Boost';
@@ -491,7 +492,7 @@ class InstallCommand extends Command
                 try {
                     $result = $mcpClient->installMcp(
                         key: 'herd',
-                        command: 'php',
+                        command: $this->getPhpPathForMcpClient($mcpClient),
                         args: [$this->herd->mcpPath()],
                         env: ['SITE_PATH' => base_path()]
                     );
@@ -521,6 +522,16 @@ class InstallCommand extends Command
                 }
             }
         }
+    }
+
+    private function getPhpPathForMcpClient(McpClient $mcpClient): string
+    {
+        return $mcpClient->useAbsolutePathForMcp() ? PHP_BINARY : 'php';
+    }
+
+    private function getArtisanPathForMcpClient(McpClient $mcpClient): string
+    {
+        return $mcpClient->useAbsolutePathForMcp() ? base_path('artisan') : './artisan';
     }
 
     /**

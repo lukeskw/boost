@@ -35,6 +35,11 @@ abstract class CodeEnvironment
         return $this->displayName();
     }
 
+    public function useAbsolutePathForMcp(): bool
+    {
+        return $this->useAbsolutePathForMcp;
+    }
+
     /**
      * Get the detection configuration for system-wide installation detection.
      *

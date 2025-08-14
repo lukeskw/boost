@@ -17,6 +17,11 @@ interface McpClient
     public function mcpClientName(): ?string;
 
     /**
+     * Whether to use absolute paths for MCP commands.
+     */
+    public function useAbsolutePathForMcp(): bool;
+
+    /**
      * Install an MCP server configuration in this IDE.
      *
      * @param string $key Server identifier/name
