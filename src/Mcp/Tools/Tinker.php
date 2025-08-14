@@ -18,7 +18,7 @@ class Tinker extends Tool
         return <<<'DESCRIPTION'
 Execute PHP code in the Laravel application context, like artisan tinker.
 Use this for debugging issues, checking if functions exist, and testing code snippets.
-You should not create models directly without explicit user approval. Prefer Unit/Feature tests using factories for functionality testing.
+You should not create models directly without explicit user approval. Prefer Unit/Feature tests using factories for functionality testing. Prefer existing artisan commands over custom tinker code.
 Returns the output of the code, as well as whatever is "returned" using "return".
 DESCRIPTION;
     }
