@@ -492,7 +492,7 @@ class InstallCommand extends Command
                 try {
                     $result = $mcpClient->installMcp(
                         key: 'herd',
-                        command: $mcpClient->getPhpPath(),
+                        command: $php,
                         args: [$this->herd->mcpPath()],
                         env: ['SITE_PATH' => base_path()]
                     );
