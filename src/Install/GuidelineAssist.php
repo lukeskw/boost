@@ -112,7 +112,7 @@ class GuidelineAssist
             return $cache[$path];
         }
 
-        $code = @file_get_contents($path);
+        $code = file_get_contents($path);
         if ($code === false) {
             return $cache[$path] = false;
         }
