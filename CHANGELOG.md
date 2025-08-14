@@ -1,6 +1,18 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/boost/compare/v1.0.16...main)
+## [Unreleased](https://github.com/laravel/boost/compare/v1.0.17...main)
+
+## [v1.0.17](https://github.com/laravel/boost/compare/v1.0.16...v1.0.17) - 2025-08-14
+
+### What's Changed
+
+* Fix: Replace APP_DEBUG with environment-based gating by [@eduardocruz](https://github.com/eduardocruz) in https://github.com/laravel/boost/pull/90
+
+### New Contributors
+
+* [@eduardocruz](https://github.com/eduardocruz) made their first contribution in https://github.com/laravel/boost/pull/90
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.0.16...v1.0.17
 
 ## [v1.0.16](https://github.com/laravel/boost/compare/v1.0.15...v1.0.16) - 2025-08-14
 
