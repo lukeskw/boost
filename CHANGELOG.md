@@ -1,6 +1,14 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/boost/compare/v1.0.13...main)
+## [Unreleased](https://github.com/laravel/boost/compare/v1.0.14...main)
+
+## [v1.0.14](https://github.com/laravel/boost/compare/v1.0.13...v1.0.14) - 2025-08-14
+
+### What's Changed
+
+* Fixes #85 by adding verbatim to flux component example by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/114
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.0.13...v1.0.14
 
 ## [v1.0.13](https://github.com/laravel/boost/compare/v1.0.12...v1.0.13) - 2025-08-14
 
