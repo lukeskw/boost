@@ -1,6 +1,14 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/boost/compare/v1.0.11...main)
+## [Unreleased](https://github.com/laravel/boost/compare/v1.0.12...main)
+
+## [v1.0.12](https://github.com/laravel/boost/compare/v1.0.11...v1.0.12) - 2025-08-14
+
+### What's Changed
+
+* tool: tinker: try to nudge away from creating test users ahead of time by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/108
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.0.11...v1.0.12
 
 ## [v1.0.11](https://github.com/laravel/boost/compare/v1.0.10...v1.0.11) - 2025-08-14
 
