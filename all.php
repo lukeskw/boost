@@ -16,7 +16,7 @@ $app = Testbench::createFromConfig(new TestbenchConfig([
     'env' => [
         'APP_URL=http://localhost.test',
     ],
-]));
+]), options: ['enables_package_discoveries' => false]);
 
 // Create a mock Roster that returns ALL packages from .ai/ directory
 $mockRoster = new class extends Roster
