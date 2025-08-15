@@ -59,7 +59,7 @@ class InstallCommand extends Command
 
     private bool $enforceTests = true;
 
-    const MIN_TEST_COUNT = 2;
+    const MIN_TEST_COUNT = 6;
 
     private string $greenTick;
 
