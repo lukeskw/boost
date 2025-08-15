@@ -1,6 +1,59 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/boost/compare/v1.0.11...main)
+## [Unreleased](https://github.com/laravel/boost/compare/v1.0.17...main)
+
+## [v1.0.17](https://github.com/laravel/boost/compare/v1.0.16...v1.0.17) - 2025-08-14
+
+### What's Changed
+
+* Fix: Replace APP_DEBUG with environment-based gating by [@eduardocruz](https://github.com/eduardocruz) in https://github.com/laravel/boost/pull/90
+
+### New Contributors
+
+* [@eduardocruz](https://github.com/eduardocruz) made their first contribution in https://github.com/laravel/boost/pull/90
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.0.16...v1.0.17
+
+## [v1.0.16](https://github.com/laravel/boost/compare/v1.0.15...v1.0.16) - 2025-08-14
+
+### What's Changed
+
+* refactor: streamline path resolution and simplify the MCP client interface by [@pushpak1300](https://github.com/pushpak1300) in https://github.com/laravel/boost/pull/111
+* Fix PHPStorm using absolute paths by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/109
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.0.15...v1.0.16
+
+## [v1.0.15](https://github.com/laravel/boost/compare/v1.0.14...v1.0.15) - 2025-08-14
+
+### What's Changed
+
+* fixes #67 by only finding files that begin with an uppercase letter by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/116
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.0.14...v1.0.15
+
+## [v1.0.14](https://github.com/laravel/boost/compare/v1.0.13...v1.0.14) - 2025-08-14
+
+### What's Changed
+
+* Fixes #85 by adding verbatim to flux component example by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/114
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.0.13...v1.0.14
+
+## [v1.0.13](https://github.com/laravel/boost/compare/v1.0.12...v1.0.13) - 2025-08-14
+
+### What's Changed
+
+* Fix volt blade parsing by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/112
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.0.12...v1.0.13
+
+## [v1.0.12](https://github.com/laravel/boost/compare/v1.0.11...v1.0.12) - 2025-08-14
+
+### What's Changed
+
+* tool: tinker: try to nudge away from creating test users ahead of time by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/108
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.0.11...v1.0.12
 
 ## [v1.0.11](https://github.com/laravel/boost/compare/v1.0.10...v1.0.11) - 2025-08-14
 

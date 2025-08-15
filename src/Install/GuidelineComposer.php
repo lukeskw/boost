@@ -87,7 +87,7 @@ class GuidelineComposer
         $guidelines->put('foundation', $this->guideline('foundation'));
         $guidelines->put('boost', $this->guideline('boost/core'));
 
-        $guidelines->put('php', $this->guideline('php/base'));
+        $guidelines->put('php', $this->guideline('php/core'));
 
         // TODO: AI-48: Use composer target version, not PHP version. Production could be 8.1, but local is 8.4
         // $phpMajorMinor = PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;
