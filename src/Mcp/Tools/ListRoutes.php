@@ -24,7 +24,7 @@ class ListRoutes extends Tool
     {
         // Mirror the most common `route:list` options. All are optional.
         $schema->string('method')->description('Filter the routes by HTTP method (e.g., GET, POST, PUT, DELETE).')->required(false);
-        $schema->string('action')->description('Filter the routes by controller action (e.g., UserController@index).')->required(false);
+        $schema->string('action')->description('Filter the routes by controller action (e.g., UserController@index, ChatController, show).')->required(false);
         $schema->string('name')->description('Filter the routes by route name (no wildcards supported).')->required(false);
         $schema->string('domain')->description('Filter the routes by domain.')->required(false);
         $schema->string('path')->description('Only show routes matching the given path pattern.')->required(false);
