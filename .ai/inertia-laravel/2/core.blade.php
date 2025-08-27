@@ -21,4 +21,6 @@
     @else
         - This version of Inertia does NOT support `resetOnError`, `resetOnSuccess`, or `setDefaultsOnSuccess` on the `<Form>` component. Using these will cause errors.
    @endif
+@else
+    - Build forms using the `useForm` helper. Use the code examples and `search-docs` tool with the `useForm helper` query for guidance.
 @endif

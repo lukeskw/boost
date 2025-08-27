@@ -14,7 +14,7 @@ class Inertia
     public function gte(string $version): bool
     {
         return
-            $this->roster->usesVersion(Packages::INERTIA, $version, '>=') ||
+            $this->roster->usesVersion(Packages::INERTIA_LARAVEL, $version, '>=') ||
             $this->roster->usesVersion(Packages::INERTIA_REACT, $version, '>=') ||
             $this->roster->usesVersion(Packages::INERTIA_SVELTE, $version, '>=') ||
             $this->roster->usesVersion(Packages::INERTIA_VUE, $version, '>=');

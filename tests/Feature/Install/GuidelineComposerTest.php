@@ -25,13 +25,14 @@ test('includes Inertia React conditional guidelines based on version', function 
     $packages = new PackageCollection([
         new Package(Packages::LARAVEL, 'laravel/framework', '11.0.0'),
         new Package(Packages::INERTIA_REACT, 'inertiajs/inertia-react', $version),
+        new Package(Packages::INERTIA_LARAVEL, 'inertiajs/inertia-laravel', $shouldInclude212Features ? '2.1.2' : '2.1.0'),
     ]);
 
     $this->roster->shouldReceive('packages')->andReturn($packages);
     // Mock all Inertia package version checks
     $this->roster->shouldReceive('usesVersion')
-        ->with(Packages::INERTIA, '2.1.0', '>=')
-        ->andReturn(false);
+        ->with(Packages::INERTIA_LARAVEL, '2.1.0', '>=')
+        ->andReturn($shouldIncludeForm);
     $this->roster->shouldReceive('usesVersion')
         ->with(Packages::INERTIA_REACT, '2.1.0', '>=')
         ->andReturn($shouldIncludeForm);
@@ -43,8 +44,8 @@ test('includes Inertia React conditional guidelines based on version', function 
         ->andReturn(false);
 
     $this->roster->shouldReceive('usesVersion')
-        ->with(Packages::INERTIA, '2.1.2', '>=')
-        ->andReturn(false);
+        ->with(Packages::INERTIA_LARAVEL, '2.1.2', '>=')
+        ->andReturn($shouldInclude212Features);
     $this->roster->shouldReceive('usesVersion')
         ->with(Packages::INERTIA_REACT, '2.1.2', '>=')
         ->andReturn($shouldInclude212Features);
@@ -176,7 +177,7 @@ test('handles multiple package versions correctly', function () {
     $this->roster->shouldReceive('packages')->andReturn($packages);
     // Mock all Inertia package version checks for this test too
     $this->roster->shouldReceive('usesVersion')
-        ->with(Packages::INERTIA, '2.1.0', '>=')
+        ->with(Packages::INERTIA_LARAVEL, '2.1.0', '>=')
         ->andReturn(false);
     $this->roster->shouldReceive('usesVersion')
         ->with(Packages::INERTIA_REACT, '2.1.0', '>=')
