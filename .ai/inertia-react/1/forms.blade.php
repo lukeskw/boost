@@ -1,6 +1,6 @@
 ## Forms in Inertia
 
-- For form handling, use `router.post` and related methods. Do not use regular forms.
+- For form handling in Inertia pages, use `router.post` and related methods. Do not use regular forms.
 
 @verbatim
 <code-snippet name="Inertia React Form Example" lang="react">
