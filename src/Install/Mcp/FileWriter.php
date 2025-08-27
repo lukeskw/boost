@@ -179,8 +179,7 @@ class FileWriter
         $afterBrace = substr($content, $bracePosition + 1);
         $trimmed = preg_replace('/^\s*(?:\/\/.*$)?/m', '', $afterBrace);
 
-        // If next char is } (empty object) or nothing, no comma needed
-        return ! empty($trimmed) && $trimmed[0] !== '}';
+        return filled($trimmed) && ! Str::startsWith($trimmed, '}');
     }
 
     protected function findMatchingClosingBrace(string $content, int $openBracePos): int|false
