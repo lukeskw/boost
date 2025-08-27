@@ -1,4 +1,4 @@
-## Inertia Forms
+## Inertia + Svelte Forms
 
 - For form handling, use `router.post` and related methods. Do not use regular forms.
 

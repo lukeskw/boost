@@ -1,7 +1,7 @@
 @php
     /** @var \Laravel\Boost\Install\GuidelineAssist $assist */
 @endphp
-## Inertia Forms
+## Inertia + Svelte Forms
 
 - There are critical differences between Svelte 4 and 5, use the `search-docs` tool for up-to-date guidance.
 

@@ -1,4 +1,4 @@
-## Inertia Forms
+## Inertia + React Forms
 
 - For form handling in Inertia pages, use `router.post` and related methods. Do not use regular forms.
 
