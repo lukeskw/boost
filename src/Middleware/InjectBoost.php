@@ -36,12 +36,12 @@ class InjectBoost
 
     private function shouldInject(Response $response): bool
     {
-       $responseTypes = [
-           StreamedResponse::class,
-           BinaryFileResponse::class,
-           JsonResponse::class,
-           RedirectResponse::class,
-       ];
+        $responseTypes = [
+            StreamedResponse::class,
+            BinaryFileResponse::class,
+            JsonResponse::class,
+            RedirectResponse::class,
+        ];
         foreach ($responseTypes as $type) {
             if ($response instanceof $type) {
                 return false;
