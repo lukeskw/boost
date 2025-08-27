@@ -47,8 +47,7 @@ abstract class CodeEnvironment
 
     public function getArtisanPath(): string
     {
-        return $this->useAbsolutePathForMcp() ? base_path('artisan') : './artisan';
-
+        return $this->useAbsolutePathForMcp() ? base_path('artisan') : 'artisan';
     }
 
     /**
@@ -81,7 +80,7 @@ abstract class CodeEnvironment
         return $strategy->detect($config);
     }
 
-    public function IsAgent(): bool
+    public function isAgent(): bool
     {
         return $this->agentName() && $this instanceof Agent;
     }

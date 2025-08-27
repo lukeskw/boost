@@ -103,7 +103,7 @@ Sometimes you may need to manually register the Laravel Boost MCP server with yo
 
 <table>
 <tr><td><strong>Command</strong></td><td><code>php</code></td></tr>
-<tr><td><strong>Args</strong></td><td><code>./artisan boost:mcp</code></td></tr>
+<tr><td><strong>Args</strong></td><td><code>artisan boost:mcp</code></td></tr>
 </table>
 
 JSON Example:
@@ -113,7 +113,7 @@ JSON Example:
     "mcpServers": {
         "laravel-boost": {
             "command": "php",
-            "args": ["./artisan", "boost:mcp"]
+            "args": ["artisan", "boost:mcp"]
         }
     }
 }
