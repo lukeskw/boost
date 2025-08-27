@@ -50,19 +50,9 @@ class GuidelineComposer
      */
     public static function composeGuidelines(Collection $guidelines): string
     {
-        // We want to allow indentation in the guideline blade files
-        // But we don't want the indentation in the outputted file
-
         return str_replace("\n\n\n\n", "\n\n", trim($guidelines
             ->filter(fn ($content) => ! empty(trim($content)))
-            ->map(function ($content, $key) {
-                // Remove preceding indentation from `-  guidelines`
-                $content = collect(explode("\n", trim($content)))
-                    ->map(fn ($line) => preg_replace('/\s+-/', '-', $line))
-                    ->join("\n");
-
-                return "\n=== {$key} rules ===\n\n".trim($content);
-            })
+            ->map(fn ($content, $key) => "\n=== {$key} rules ===\n\n".trim($content))
             ->join("\n\n")));
     }
 
