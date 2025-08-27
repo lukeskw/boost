@@ -180,10 +180,6 @@ class BoostServiceProvider extends ServiceProvider
 
     private function hookIntoResponses(Router $router): void
     {
-        // In Kernel-based apps (pre-Laravel 11 bootstrap), middleware groups can be
-        // defined or overwritten later in the boot cycle, which could remove any
-        // middleware we push here if we do it too early. Deferring this until the
-        // application is fully booted ensures our middleware stays appended.
         $this->app->booted(function () use ($router) {
             $router->pushMiddlewareToGroup('web', InjectBoost::class);
         });
