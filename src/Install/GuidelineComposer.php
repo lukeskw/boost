@@ -24,7 +24,7 @@ class GuidelineComposer
     public function __construct(protected Roster $roster, protected Herd $herd)
     {
         $this->config = new GuidelineConfig;
-        $this->guidelineAssist = new GuidelineAssist;
+        $this->guidelineAssist = new GuidelineAssist($roster);
     }
 
     public function config(GuidelineConfig $config): self
@@ -50,9 +50,19 @@ class GuidelineComposer
      */
     public static function composeGuidelines(Collection $guidelines): string
     {
+        // We want to allow indentation in the guideline blade files
+        // But we don't want the indentation in the outputted file
+
         return trim($guidelines
             ->filter(fn ($content) => ! empty(trim($content)))
-            ->map(fn ($content, $key) => "\n=== {$key} rules ===\n\n".trim($content))
+            ->map(function ($content, $key) {
+                // Remove preceding indentation from `-  guidelines`
+                $content = collect(explode("\n", trim($content)))
+                    ->map(fn ($line) => preg_replace('/\s+-/', '-', $line))
+                    ->join("\n");
+
+                return "\n=== {$key} rules ===\n\n".trim($content);
+            })
             ->join("\n\n"));
     }
 
@@ -139,7 +149,7 @@ class GuidelineComposer
 
         return $guidelines
             ->whereNotNull()
-            ->where(fn ($guideline) => ! empty(trim($guideline)));
+            ->where(fn (string $guideline) => ! empty(trim($guideline)));
     }
 
     /**
