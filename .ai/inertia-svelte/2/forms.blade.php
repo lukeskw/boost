@@ -1,10 +1,12 @@
 @php
     /** @var \Laravel\Boost\Install\GuidelineAssist $assist */
 @endphp
-## Forms in Inertia
+## Inertia Forms
+
 - There are critical differences between Svelte 4 and 5, use the `search-docs` tool for up-to-date guidance.
+
 @if($assist->inertia()->hasFormComponent())
-@boostsnippet("Example form using the `<Form>` component", "svelte5")
+@boostsnippet("`<Form>` Component Example", "svelte5")
 <Form action="/users" method="post">
     {#snippet children({
     errors,
@@ -41,7 +43,7 @@
 
 @if($assist->inertia()->hasFormComponent() === false)
 {{-- Inertia 2.0.x, not 2.1.0 or higher. So they still need to use 'useForm' --}}
-@boostsnippet("Inertia React useForm example", "svelte")
+@boostsnippet("Inertia Svelte useForm Example", "svelte")
 <script>
     import { useForm } from '@inertiajs/svelte'
 

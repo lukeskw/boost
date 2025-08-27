@@ -1,10 +1,10 @@
 @php
     /** @var \Laravel\Boost\Install\GuidelineAssist $assist */
 @endphp
-## Forms in Inertia
+## Inertia Forms
 
 @if($assist->inertia()->hasFormComponent())
-@boostsnippet("Example form using the `<Form>` component", "vue")
+@boostsnippet("`<Form>` Component Example", "vue")
 <Form
     action="/users"
     method="post"
@@ -41,7 +41,7 @@
 
 @if($assist->inertia()->hasFormComponent() === false)
 {{-- Inertia 2.0.x, not 2.1.0 or higher. So they still need to use 'useForm' --}}
-@boostsnippet("Inertia React useForm example", "vue")
+@boostsnippet("Inertia Vue useForm example", "vue")
 <script setup>
     import { useForm } from '@inertiajs/vue3'
 
