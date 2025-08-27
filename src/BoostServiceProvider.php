@@ -166,6 +166,22 @@ class BoostServiceProvider extends ServiceProvider
     private function registerBladeDirectives(BladeCompiler $bladeCompiler): void
     {
         $bladeCompiler->directive('boostJs', fn () => '<?php echo \\Laravel\\Boost\\Services\\BrowserLogger::getScript(); ?>');
+
+        $bladeCompiler->directive('boostsnippet', function (string $expression) {
+            preg_match('/^(.*?),\s*(.*?)$/', $expression, $matches);
+            $name = isset($matches[1]) ? trim($matches[1], '\'"` ') : '';
+            $lang = isset($matches[2]) ? trim($matches[2], '\'"` ') : 'html';
+            $name = str_replace('___SINGLE_BACKTICK___', '`', $name);
+
+            return "<?php \$__snippetStack[] = ['name' => '{$name}', 'lang' => '{$lang}']; ob_start(); ?>";
+        });
+
+        $bladeCompiler->directive('endboostsnippet', function () {
+            return '<?php $__snippetContent = ob_get_clean(); $__snippet = array_pop($__snippetStack); ?>'
+                .'<code-snippet name="<?php echo $__snippet[\'name\']; ?>" lang="<?php echo $__snippet[\'lang\']; ?>">'."\n"
+                .'<?php echo $__snippetContent; ?>'
+                .'</code-snippet>'."\n\n";
+        });
     }
 
     private static function mapJsTypeToPsr3Level(string $type): string
