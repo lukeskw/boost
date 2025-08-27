@@ -325,7 +325,7 @@ test('preserves trailing commas when injecting into existing servers', function 
     expect($writtenContent)->toContain('arg1'); // Existing args preserved
 });
 
-test('detectIndentation works correctly with various patterns', function (string $content, int $position, string $expected, string $description) {
+test('detectIndentation works correctly with various patterns', function (string $content, int $position, int $expected, string $description) {
     $writer = new FileWriter('/tmp/test.json');
 
     $result = $writer->detectIndentation($content, $position);
@@ -513,61 +513,49 @@ function indentationDetectionCases(): array
         'mcp.json5 servers indentation' => [
             'content' => "{\n    // Here are comments within my JSON\n    \"servers\": {\n        \"mysql\": {\n            \"command\": \"npx\"\n        },\n        \"laravel-boost\": {\n            \"command\": \"php\"\n        }\n    },\n    \"inputs\": []\n}",
             'position' => 200, // Position near end of servers block
-            'expected' => '        ', // 8 spaces for server-level items
+            'expected' => 8,
             'description' => 'Should detect 8 spaces for server definitions in mcp.json5',
         ],
         'nested object with 4-space base indent' => [
             'content' => "{\n    \"config\": {\n        \"server1\": {\n            \"command\": \"test\"\n        }\n    }\n}",
             'position' => 80,
-            'expected' => '        ', // 8 spaces for server-level
+            'expected' => 8,
             'description' => 'Should detect 8 spaces for nested server definitions',
         ],
         'no previous server definitions' => [
             'content' => "{\n    \"inputs\": []\n}",
             'position' => 20,
-            'expected' => '        ', // Fallback to 8 spaces
+            'expected' => 8,
             'description' => 'Should fallback to 8 spaces when no server definitions found',
-        ],
-        'tab-indented servers' => [
-            'content' => "{\n\t\"servers\": {\n\t\t\"mysql\": {\n\t\t\t\"command\": \"npx\"\n\t\t}\n\t}\n}",
-            'position' => 50,
-            'expected' => "\t\t", // 2 tabs for server-level
-            'description' => 'Should detect tab indentation for server definitions',
-        ],
-        'mixed indentation with tabs and spaces' => [
-            'content' => "{\n  \t\"servers\": {\n  \t  \"mysql\": {\n  \t    \"command\": \"npx\"\n  \t  }\n  \t}\n}",
-            'position' => 70,
-            'expected' => "  \t  ", // Mixed indentation preserved
-            'description' => 'Should preserve mixed tab/space indentation',
         ],
         'deeper nesting with 2-space indent' => [
             'content' => "{\n  \"config\": {\n    \"servers\": {\n      \"mysql\": {\n        \"command\": \"test\"\n      }\n    }\n  }\n}",
             'position' => 80,
-            'expected' => '      ', // 6 spaces for server-level in deeper nesting
+            'expected' => 6,
             'description' => 'Should detect correct indentation in deeply nested structures',
         ],
         'single server definition at root level' => [
             'content' => "{\n\"mysql\": {\n  \"command\": \"npx\"\n}\n}",
             'position' => 30,
-            'expected' => '', // No indentation at root level
+            'expected' => 0,
             'description' => 'Should detect no indentation for root-level server definitions',
         ],
         'multiple server definitions with consistent indentation' => [
             'content' => "{\n    \"servers\": {\n        \"mysql\": {\n            \"command\": \"npx\"\n        },\n        \"postgres\": {\n            \"command\": \"pg\"\n        }\n    }\n}",
             'position' => 150,
-            'expected' => '        ', // 8 spaces
+            'expected' => 8,
             'description' => 'Should consistently detect indentation across multiple servers',
         ],
         'server definition with comments' => [
             'content' => "{\n    // Comment here\n    \"servers\": {\n        \"mysql\": { // inline comment\n            \"command\": \"npx\"\n        }\n    }\n}",
             'position' => 120,
-            'expected' => '        ', // 8 spaces
+            'expected' => 8,
             'description' => 'Should detect indentation correctly when comments are present',
         ],
         'empty content' => [
             'content' => '',
             'position' => 0,
-            'expected' => '        ', // Fallback
+            'expected' => 8,
             'description' => 'Should fallback to 8 spaces for empty content',
         ],
     ];

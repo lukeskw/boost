@@ -152,7 +152,7 @@ class FileWriter
         return $this->writeFile($newContent);
     }
 
-    protected function generateServerJson(string $key, array $serverConfig, int $baseIndent = 8): string
+    protected function generateServerJson(string $key, array $serverConfig, int $baseIndent = 0): string
     {
         $json = json_encode($serverConfig, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
