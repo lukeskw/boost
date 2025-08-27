@@ -61,15 +61,15 @@ test('includes Inertia React conditional guidelines based on version', function 
     // Use test markers to verify conditional logic without depending on actual content
     if ($shouldIncludeForm) {
         expect($guidelines)
-            ->toContain('Example form using the `<Form>` component');
+            ->toContain('`<Form>` Component Example');
 
         if ($shouldInclude212Features) {
             expect($guidelines)
                 ->toContain('form component resetting')
-                ->not->toContain('does NOT support');
+                ->not->toContain('does not support');
         } else {
             expect($guidelines)
-                ->toContain('does NOT support')
+                ->toContain('does not support')
                 ->not->toContain('form component resetting');
         }
     } else {
