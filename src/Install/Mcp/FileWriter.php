@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Laravel\Boost\Install\Mcp;
 
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class FileWriter
 {
@@ -63,7 +64,7 @@ class FileWriter
     protected function updatePlainJsonFile(string $content): bool
     {
         $config = json_decode($content, true);
-        if ($config === null) {
+        if (json_last_error() !== JSON_ERROR_NONE) {
             return false;
         }
 
@@ -223,16 +224,15 @@ class FileWriter
         $trimmed = preg_replace('/\s+|\/\/.*$/m', '', $innerContent);
 
         // If empty or ends with opening brace, no comma needed
-        if (empty($trimmed) || substr($trimmed, -1) === '{') {
+        if (blank($trimmed) || Str::endsWith($trimmed, '{')) {
             return false;
         }
 
         // If ends with comma, no additional comma needed
-        if (substr($trimmed, -1) === ',') {
+        if (Str::endsWith($trimmed, ',')) {
             return false;
         }
 
-        // Otherwise, we need a comma
         return true;
     }
 
