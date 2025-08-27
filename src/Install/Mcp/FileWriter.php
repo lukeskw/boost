@@ -162,17 +162,13 @@ class FileWriter
         }
 
         // Apply indentation to each line of the JSON
-        $lines = explode("\n", $json);
-        $indentedLines = [];
         $baseIndent = str_repeat(' ', $baseIndent);
-
-        foreach ($lines as $i => $line) {
-            if ($i === 0) {
-                $indentedLines[] = $baseIndent.'"'.$key.'": '.$line;
-            } else {
-                $indentedLines[] = $baseIndent.$line;
-            }
-        }
+        $lines = explode("\n", $json);
+        $firstLine = array_shift($lines);
+        $indentedLines = [
+            "{$baseIndent}\"{$key}\": {$firstLine}",
+            ...array_map(fn ($line) => $baseIndent.$line, $lines),
+        ];
 
         return "\n".implode("\n", $indentedLines);
     }
