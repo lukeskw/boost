@@ -13,14 +13,8 @@ class ToolExecutor
 {
     public function __construct()
     {
-        //
     }
 
-    /**
-     * Execute a tool with the given arguments.
-     *
-     * @param array<string, mixed> $arguments
-     */
     public function execute(string $toolClass, array $arguments = []): ToolResult
     {
         if (! ToolRegistry::isToolAllowed($toolClass)) {
@@ -34,11 +28,6 @@ class ToolExecutor
         return $this->executeInline($toolClass, $arguments);
     }
 
-    /**
-     * Execute tool in a separate process for isolation.
-     *
-     * @param array<string, mixed> $arguments
-     */
     protected function executeInProcess(string $toolClass, array $arguments): ToolResult
     {
         $command = [
@@ -77,14 +66,10 @@ class ToolExecutor
         }
     }
 
-    /**
-     * Execute tool inline (current process).
-     *
-     * @param array<string, mixed> $arguments
-     */
     protected function executeInline(string $toolClass, array $arguments): ToolResult
     {
         try {
+            /** @var \Laravel\Mcp\Server\Tool $tool */
             $tool = app($toolClass);
 
             return $tool->handle($arguments);
@@ -93,22 +78,15 @@ class ToolExecutor
         }
     }
 
-    /**
-     * Check if process isolation should be used.
-     */
     protected function shouldUseProcessIsolation(): bool
     {
-        // Never use process isolation in testing environment
         if (app()->environment('testing')) {
             return false;
         }
 
-        return config('boost.process_isolation.enabled', false);
+        return config('boost.process_isolation.enabled', true);
     }
 
-    /**
-     * Get the execution timeout.
-     */
     protected function getTimeout(): int
     {
         return config('boost.process_isolation.timeout', 180);
