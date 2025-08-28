@@ -1,6 +1,20 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/boost/compare/v1.0.19...main)
+## [Unreleased](https://github.com/laravel/boost/compare/v1.0.20...main)
+
+## [v1.0.20](https://github.com/laravel/boost/compare/v1.0.19...v1.0.20) - 2025-08-28
+
+### What's Changed
+
+* fix: defer InjectBoost middleware registration until app is booted by [@Sairahcaz](https://github.com/Sairahcaz) in https://github.com/laravel/boost/pull/172
+* feat: add robust MCP file configuration writer by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/204
+* Feat: Detect env changes by default, fixes 130 by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/217
+
+### New Contributors
+
+* [@Sairahcaz](https://github.com/Sairahcaz) made their first contribution in https://github.com/laravel/boost/pull/172
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.0.19...v1.0.20
 
 ## [v1.0.19](https://github.com/laravel/boost/compare/v1.0.18...v1.0.19) - 2025-08-27
 
