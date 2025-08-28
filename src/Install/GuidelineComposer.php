@@ -171,12 +171,7 @@ class GuidelineComposer
             return [];
         }
 
-        $guidelines = [];
-        foreach ($finder as $file) {
-            $guidelines[] = $this->guideline($file->getRealPath());
-        }
-
-        return $guidelines;
+        return array_map(fn ($file) => $this->guideline($file->getRealPath()), iterator_to_array($finder));
     }
 
     /**
