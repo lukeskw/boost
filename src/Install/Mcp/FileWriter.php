@@ -15,6 +15,8 @@ class FileWriter
 
     protected array $serversToAdd = [];
 
+    protected int $defaultIndentation = 8;
+
     public function __construct(string $filePath)
     {
         $this->filePath = $filePath;
@@ -28,8 +30,8 @@ class FileWriter
     }
 
     /**
-     * Add a new MCP server to the configuration while preserving JSON5 formatting.
-     *
+     * @param string $key MCP Server Name
+     * @param string $command
      * @param array<int, string> $args
      * @param array<string, string> $env
      */
@@ -313,7 +315,7 @@ class FileWriter
         }
 
         // Fallback: assume 8 spaces (2 levels of 4-space indentation typical for JSON)
-        return 8;
+        return $this->defaultIndentation;
     }
 
     /**
