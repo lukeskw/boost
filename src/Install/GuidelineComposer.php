@@ -14,7 +14,7 @@ class GuidelineComposer
 {
     protected string $userGuidelineDir = '.ai/guidelines';
 
-    /** @var Collection<string, string> */
+    /** @var Collection<string, array> */
     protected Collection $guidelines;
 
     protected GuidelineConfig $config;
@@ -71,7 +71,7 @@ class GuidelineComposer
     }
 
     /**
-     * @return Collection<string, string>
+     * @return Collection<string, array>
      */
     public function guidelines(): Collection
     {
@@ -85,7 +85,7 @@ class GuidelineComposer
     /**
      * Key is the 'guideline key' and value is the rendered blade.
      *
-     * @return \Illuminate\Support\Collection<string, string>
+     * @return \Illuminate\Support\Collection<string, array>
      */
     protected function find(): Collection
     {
