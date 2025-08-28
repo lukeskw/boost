@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Laravel\Boost\Mcp;
 
+use Dotenv\Dotenv;
+use Illuminate\Support\Env;
 use Laravel\Mcp\Server\Tools\ToolResult;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Exception\ProcessTimedOutException;
@@ -32,8 +34,19 @@ class ToolExecutor
     {
         $command = $this->buildCommand($toolClass, $arguments);
 
-        $process = new Process($command);
-        $process->setTimeout($this->getTimeout());
+        // We need to 'unset' env vars that will be passed from the parent process to the child process, stopping the child process from reading .env and getting updated values
+        $env = (Dotenv::create(
+            Env::getRepository(),
+            app()->environmentPath(),
+            app()->environmentFile()
+        ))->safeLoad();
+        $cleanEnv = array_fill_keys(array_keys($env), false);
+
+        $process = new Process(
+            command: $command,
+            env: $cleanEnv,
+            timeout: $this->getTimeout()
+        );
 
         try {
             $process->mustRun();
@@ -45,9 +58,7 @@ class ToolExecutor
                 return ToolResult::error('Invalid JSON output from tool process: '.json_last_error_msg());
             }
 
-            // Reconstruct ToolResult from the JSON output
             return $this->reconstructToolResult($decoded);
-
         } catch (ProcessTimedOutException $e) {
             $process->stop();
 
