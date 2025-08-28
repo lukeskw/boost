@@ -101,11 +101,18 @@ class FileWriter
             return false;
         }
 
+        // Filter out servers that already exist
+        $serversToAdd = $this->filterExistingServers($content, $openBracePos, $closeBracePos);
+
+        if (empty($serversToAdd)) {
+            return true;
+        }
+
         // Detect indentation from surrounding content
         $indentLength = $this->detectIndentation($content, $closeBracePos);
 
         $serverJsonParts = [];
-        foreach ($this->serversToAdd as $key => $serverConfig) {
+        foreach ($serversToAdd as $key => $serverConfig) {
             $serverJsonParts[] = $this->generateServerJson($key, $serverConfig, $indentLength);
         }
         $serversJson = implode(','."\n", $serverJsonParts);
@@ -128,6 +135,28 @@ class FileWriter
         }
 
         return $this->writeFile($newContent);
+    }
+
+    protected function filterExistingServers(string $content, int $openBracePos, int $closeBracePos): array
+    {
+        $configContent = substr($content, $openBracePos + 1, $closeBracePos - $openBracePos - 1);
+        $filteredServers = [];
+
+        foreach ($this->serversToAdd as $key => $serverConfig) {
+            if (! $this->serverExistsInContent($configContent, $key)) {
+                $filteredServers[$key] = $serverConfig;
+            }
+        }
+
+        return $filteredServers;
+    }
+
+    protected function serverExistsInContent(string $content, string $serverKey): bool
+    {
+        $quotedPattern = '/["\']'.preg_quote($serverKey, '/').'["\']\\s*:/';
+        $unquotedPattern = '/(?<=^|\\s|,|{)'.preg_quote($serverKey, '/').'\\s*:/m';
+
+        return preg_match($quotedPattern, $content) || preg_match($unquotedPattern, $content);
     }
 
     protected function injectNewConfigKey(string $content): bool
