@@ -30,13 +30,7 @@ class ToolExecutor
 
     protected function executeInProcess(string $toolClass, array $arguments): ToolResult
     {
-        $command = [
-            PHP_BINARY,
-            base_path('artisan'),
-            'boost:execute-tool',
-            $toolClass,
-            base64_encode(json_encode($arguments)),
-        ];
+        $command = $this->buildCommand($toolClass, $arguments);
 
         $process = new Process($command);
         $process->setTimeout($this->getTimeout());
@@ -134,5 +128,23 @@ class ToolExecutor
         }
 
         return ToolResult::text('');
+    }
+
+    /**
+     * Build the command array for executing a tool in a subprocess.
+     *
+     * @param string $toolClass
+     * @param array<string, mixed> $arguments
+     * @return array<string>
+     */
+    protected function buildCommand(string $toolClass, array $arguments): array
+    {
+        return [
+            PHP_BINARY,
+            base_path('artisan'),
+            'boost:execute-tool',
+            $toolClass,
+            base64_encode(json_encode($arguments)),
+        ];
     }
 }
