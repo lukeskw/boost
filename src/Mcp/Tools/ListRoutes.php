@@ -58,8 +58,11 @@ class ListRoutes extends Tool
         ];
 
         foreach ($optionMap as $argKey => $cliOption) {
-            if (array_key_exists($argKey, $arguments) && ! empty($arguments[$argKey]) && $arguments[$argKey] !== '*') {
-                $options['--'.$cliOption] = $arguments[$argKey];
+            if (! empty($arguments[$argKey] ?? '')) {
+                $sanitizedValue = $this->sanitizeWildcards($arguments[$argKey], $argKey);
+                if ($sanitizedValue !== '') {
+                    $options['--'.$cliOption] = $sanitizedValue;
+                }
             }
         }
 
@@ -76,6 +79,15 @@ class ListRoutes extends Tool
         }
 
         return ToolResult::text($routesOutput);
+    }
+
+    private function sanitizeWildcards(string $value, string $parameter): string
+    {
+        if (in_array($parameter, ['path', 'except_path'])) {
+            return $value;
+        }
+
+        return str_replace(['*', '?'], '', $value);
     }
 
     /**
