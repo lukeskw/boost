@@ -39,8 +39,10 @@ test('it returns structured database schema', function () {
     $tool = new DatabaseSchema;
     $response = $tool->handle([]);
 
+    expect($response)->isToolResult()
+        ->toolHasNoError();
+
     $responseArray = $response->toArray();
-    expect($responseArray['isError'])->toBeFalse();
 
     $schemaArray = json_decode($responseArray['content'][0]['text'], true);
 

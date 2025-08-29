@@ -16,7 +16,7 @@ test('executes simple php code', function () {
     $tool = new Tinker;
     $result = $tool->handle(['code' => 'return 2 + 2;']);
 
-    expect($result)->toBeInstanceOf(ToolResult::class);
+    expect($result)->isToolResult();
 
     $data = getToolResultData($result);
     expect($data['result'])->toBe(4)
@@ -27,7 +27,7 @@ test('executes code with output', function () {
     $tool = new Tinker;
     $result = $tool->handle(['code' => 'echo "Hello World"; return "test";']);
 
-    expect($result)->toBeInstanceOf(ToolResult::class);
+    expect($result)->isToolResult();
 
     $data = getToolResultData($result);
     expect($data['result'])->toBe('test')
@@ -39,7 +39,7 @@ test('accesses laravel facades', function () {
     $tool = new Tinker;
     $result = $tool->handle(['code' => 'return config("app.name");']);
 
-    expect($result)->toBeInstanceOf(ToolResult::class);
+    expect($result)->isToolResult();
 
     $data = getToolResultData($result);
     expect($data['result'])->toBeString()
@@ -51,7 +51,7 @@ test('creates objects', function () {
     $tool = new Tinker;
     $result = $tool->handle(['code' => 'return new stdClass();']);
 
-    expect($result)->toBeInstanceOf(ToolResult::class);
+    expect($result)->isToolResult();
 
     $data = getToolResultData($result);
     expect($data['type'])->toBe('object')
@@ -62,7 +62,7 @@ test('handles syntax errors', function () {
     $tool = new Tinker;
     $result = $tool->handle(['code' => 'invalid syntax here']);
 
-    expect($result)->toBeInstanceOf(ToolResult::class);
+    expect($result)->isToolResult();
 
     $resultArray = $result->toArray();
     expect($resultArray['isError'])->toBeFalse();
@@ -77,7 +77,7 @@ test('handles runtime errors', function () {
     $tool = new Tinker;
     $result = $tool->handle(['code' => 'throw new Exception("Test error");']);
 
-    expect($result)->toBeInstanceOf(ToolResult::class);
+    expect($result)->isToolResult();
 
     $resultArray = $result->toArray();
     expect($resultArray['isError'])->toBeFalse();
@@ -92,7 +92,7 @@ test('captures multiple outputs', function () {
     $tool = new Tinker;
     $result = $tool->handle(['code' => 'echo "First"; echo "Second"; return "done";']);
 
-    expect($result)->toBeInstanceOf(ToolResult::class);
+    expect($result)->isToolResult();
 
     $data = getToolResultData($result);
     expect($data['result'])->toBe('done')
@@ -103,7 +103,7 @@ test('executes code with different return types', function (string $code, mixed 
     $tool = new Tinker;
     $result = $tool->handle(['code' => $code]);
 
-    expect($result)->toBeInstanceOf(ToolResult::class);
+    expect($result)->isToolResult();
 
     $data = getToolResultData($result);
     expect($data['result'])->toBe($expectedResult)
@@ -122,7 +122,7 @@ test('handles empty code', function () {
     $tool = new Tinker;
     $result = $tool->handle(['code' => '']);
 
-    expect($result)->toBeInstanceOf(ToolResult::class);
+    expect($result)->isToolResult();
 
     $data = getToolResultData($result);
     expect($data['result'])->toBeFalse()
@@ -133,7 +133,7 @@ test('handles code with no return statement', function () {
     $tool = new Tinker;
     $result = $tool->handle(['code' => '$x = 5;']);
 
-    expect($result)->toBeInstanceOf(ToolResult::class);
+    expect($result)->isToolResult();
 
     $data = getToolResultData($result);
     expect($data['result'])->toBeNull()
@@ -155,7 +155,7 @@ test('uses custom timeout parameter', function () {
     $tool = new Tinker;
     $result = $tool->handle(['code' => 'return 2 + 2;', 'timeout' => 10]);
 
-    expect($result)->toBeInstanceOf(ToolResult::class);
+    expect($result)->isToolResult();
 
     $data = getToolResultData($result);
     expect($data['result'])->toBe(4)
@@ -166,7 +166,7 @@ test('uses default timeout when not specified', function () {
     $tool = new Tinker;
     $result = $tool->handle(['code' => 'return 2 + 2;']);
 
-    expect($result)->toBeInstanceOf(ToolResult::class);
+    expect($result)->isToolResult();
 
     $data = getToolResultData($result);
     expect($data['result'])->toBe(4)
@@ -187,7 +187,7 @@ test('times out when code takes too long', function () {
 
     $result = $tool->handle(['code' => $slowCode, 'timeout' => 1]);
 
-    expect($result)->toBeInstanceOf(ToolResult::class);
+    expect($result)->isToolResult();
 
     $data = getToolResultData($result);
     expect($data)->toHaveKey('error')
