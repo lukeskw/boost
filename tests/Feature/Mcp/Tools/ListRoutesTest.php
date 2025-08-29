@@ -98,25 +98,6 @@ test('it sanitizes method parameter wildcards and filters correctly', function (
         ->and($output)->not->toContain('admin.dashboard');
 });
 
-test('it preserves wildcards in path parameters', function () {
-    $tool = new ListRoutes;
-
-    $result = $tool->handle(['path' => '/admin/*']);
-    expect($result)->toBeInstanceOf(ToolResult::class)
-        ->and($result->toArray()['isError'])->toBeFalse();
-
-    $output = $result->toArray()['content'][0]['text'];
-    expect($output)->not->toContain('Failed to list routes');
-
-    $result = $tool->handle(['except_path' => '/nonexistent/*']);
-    expect($result)->toBeInstanceOf(ToolResult::class)
-        ->and($result->toArray()['isError'])->toBeFalse();
-
-    $output = $result->toArray()['content'][0]['text'];
-    expect($output)->toContain('admin.dashboard')
-        ->and($output)->toContain('user.profile');
-});
-
 test('it handles edge cases and empty results correctly', function () {
     $tool = new ListRoutes;
 
