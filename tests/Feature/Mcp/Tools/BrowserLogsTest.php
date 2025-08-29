@@ -205,8 +205,8 @@ HTML;
     $content = $result->getContent();
     expect($content)->toContain('browser-logger-active')
         ->and($content)->toContain('</head>')
+        // Should not inject twice
         ->and(substr_count($content, 'browser-logger-active'))->toBe(1);
-    // Should not inject twice
 });
 
 test('InjectBoost middleware does not inject into non-HTML responses', function () {
