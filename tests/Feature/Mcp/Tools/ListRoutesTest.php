@@ -28,7 +28,7 @@ beforeEach(function () {
     })->name('api.posts.index');
 
     Route::put('/api/v1/posts/{id}', function ($id) {
-        return "update post $id";
+        return 'update post';
     })->name('api.posts.update');
 });
 
