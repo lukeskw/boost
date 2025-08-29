@@ -32,9 +32,7 @@ expect()->extend('toolTextContains', function (mixed ...$needles) {
 expect()->extend('toolTextDoesNotContain', function (mixed ...$needles) {
     /** @var ToolResult $this->value */
     $output = implode('', array_column($this->value->toArray()['content'], 'text'));
-    foreach ($needles as $needle) {
-        expect($output)->not->toContain($needle);
-    }
+    expect($output)->not->toContain(...func_get_args());
 
     return $this;
 });
