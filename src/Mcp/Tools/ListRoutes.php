@@ -58,9 +58,9 @@ class ListRoutes extends Tool
         ];
 
         foreach ($optionMap as $argKey => $cliOption) {
-            if (! empty($arguments[$argKey] ?? '')) {
+            if (! empty($arguments[$argKey])) {
                 $sanitizedValue = $this->sanitizeWildcards($arguments[$argKey], $argKey);
-                if ($sanitizedValue !== '') {
+                if (filled($sanitizedValue)) {
                     $options['--'.$cliOption] = $sanitizedValue;
                 }
             }
