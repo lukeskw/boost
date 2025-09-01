@@ -19,13 +19,10 @@ test('it returns database connections', function () {
 
     expect($result)->isToolResult()
         ->toolHasNoError()
-        ->toolJsonContent(function ($content) {
-            expect($content['default_connection'])->toBe('mysql')
-                ->and($content['connections'])->toHaveCount(3)
-                ->and($content['connections'])->toContain('mysql')
-                ->and($content['connections'])->toContain('pgsql')
-                ->and($content['connections'])->toContain('sqlite');
-        });
+        ->toolJsonContentToMatchArray([
+            'default_connection' => 'mysql',
+            'connections' => ['mysql', 'pgsql', 'sqlite'],
+        ]);
 });
 
 test('it returns empty connections when none configured', function () {
@@ -36,8 +33,8 @@ test('it returns empty connections when none configured', function () {
 
     expect($result)->isToolResult()
         ->toolHasNoError()
-        ->toolJsonContent(function ($content) {
-            expect($content['default_connection'])->toBe('mysql')
-                ->and($content['connections'])->toHaveCount(0);
-        });
+        ->toolJsonContentToMatchArray([
+            'default_connection' => 'mysql',
+            'connections' => [],
+        ]);
 });

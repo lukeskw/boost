@@ -58,6 +58,15 @@ expect()->extend('toolJsonContent', function (callable $callback) {
     return $this;
 });
 
+expect()->extend('toolJsonContentToMatchArray', function (array $expectedArray) {
+    /** @var ToolResult $this->value */
+    $data = $this->value->toArray();
+    $content = json_decode($data['content'][0]['text'], true);
+    expect($content)->toMatchArray($expectedArray);
+
+    return $this;
+});
+
 function fixture(string $name): string
 {
     return file_get_contents(\Pest\testDirectory('fixtures/'.$name));

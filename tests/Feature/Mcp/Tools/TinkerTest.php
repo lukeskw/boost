@@ -9,10 +9,10 @@ test('executes simple php code', function () {
     $result = $tool->handle(['code' => 'return 2 + 2;']);
 
     expect($result)->isToolResult()
-        ->toolJsonContent(function ($data) {
-            expect($data['result'])->toBe(4)
-                ->and($data['type'])->toBe('integer');
-        });
+        ->toolJsonContentToMatchArray([
+            'result' => 4,
+            'type' => 'integer',
+        ]);
 });
 
 test('executes code with output', function () {
@@ -20,11 +20,11 @@ test('executes code with output', function () {
     $result = $tool->handle(['code' => 'echo "Hello World"; return "test";']);
 
     expect($result)->isToolResult()
-        ->toolJsonContent(function ($data) {
-            expect($data['result'])->toBe('test')
-                ->and($data['output'])->toBe('Hello World')
-                ->and($data['type'])->toBe('string');
-        });
+        ->toolJsonContentToMatchArray([
+            'result' => 'test',
+            'output' => 'Hello World',
+            'type' => 'string',
+        ]);
 });
 
 test('accesses laravel facades', function () {
@@ -32,11 +32,10 @@ test('accesses laravel facades', function () {
     $result = $tool->handle(['code' => 'return config("app.name");']);
 
     expect($result)->isToolResult()
-        ->toolJsonContent(function ($data) {
-            expect($data['result'])->toBeString()
-                ->and($data['result'])->toBe(config('app.name'))
-                ->and($data['type'])->toBe('string');
-        });
+        ->toolJsonContentToMatchArray([
+            'result' => config('app.name'),
+            'type' => 'string',
+        ]);
 });
 
 test('creates objects', function () {
@@ -44,10 +43,10 @@ test('creates objects', function () {
     $result = $tool->handle(['code' => 'return new stdClass();']);
 
     expect($result)->isToolResult()
-        ->toolJsonContent(function ($data) {
-            expect($data['type'])->toBe('object')
-                ->and($data['class'])->toBe('stdClass');
-        });
+        ->toolJsonContentToMatchArray([
+            'type' => 'object',
+            'class' => 'stdClass',
+        ]);
 });
 
 test('handles syntax errors', function () {
@@ -56,10 +55,11 @@ test('handles syntax errors', function () {
 
     expect($result)->isToolResult()
         ->toolHasNoError()
+        ->toolJsonContentToMatchArray([
+            'type' => 'ParseError',
+        ])
         ->toolJsonContent(function ($data) {
-            expect($data)->toHaveKey('error')
-                ->and($data)->toHaveKey('type')
-                ->and($data['type'])->toBe('ParseError');
+            expect($data)->toHaveKey('error');
         });
 });
 
@@ -69,10 +69,12 @@ test('handles runtime errors', function () {
 
     expect($result)->isToolResult()
         ->toolHasNoError()
+        ->toolJsonContentToMatchArray([
+            'type' => 'Exception',
+            'error' => 'Test error',
+        ])
         ->toolJsonContent(function ($data) {
-            expect($data)->toHaveKey('error')
-                ->and($data['type'])->toBe('Exception')
-                ->and($data['error'])->toBe('Test error');
+            expect($data)->toHaveKey('error');
         });
 });
 
@@ -81,10 +83,10 @@ test('captures multiple outputs', function () {
     $result = $tool->handle(['code' => 'echo "First"; echo "Second"; return "done";']);
 
     expect($result)->isToolResult()
-        ->toolJsonContent(function ($data) {
-            expect($data['result'])->toBe('done')
-                ->and($data['output'])->toBe('FirstSecond');
-        });
+        ->toolJsonContentToMatchArray([
+            'result' => 'done',
+            'output' => 'FirstSecond',
+        ]);
 });
 
 test('executes code with different return types', function (string $code, mixed $expectedResult, string $expectedType) {
@@ -92,10 +94,10 @@ test('executes code with different return types', function (string $code, mixed 
     $result = $tool->handle(['code' => $code]);
 
     expect($result)->isToolResult()
-        ->toolJsonContent(function ($data) use ($expectedResult, $expectedType) {
-            expect($data['result'])->toBe($expectedResult)
-                ->and($data['type'])->toBe($expectedType);
-        });
+        ->toolJsonContentToMatchArray([
+            'result' => $expectedResult,
+            'type' => $expectedType,
+        ]);
 })->with([
     'integer' => ['return 42;', 42, 'integer'],
     'string' => ['return "hello";', 'hello', 'string'],
@@ -111,10 +113,10 @@ test('handles empty code', function () {
     $result = $tool->handle(['code' => '']);
 
     expect($result)->isToolResult()
-        ->toolJsonContent(function ($data) {
-            expect($data['result'])->toBeFalse()
-                ->and($data['type'])->toBe('boolean');
-        });
+        ->toolJsonContentToMatchArray([
+            'result' => false,
+            'type' => 'boolean',
+        ]);
 });
 
 test('handles code with no return statement', function () {
@@ -122,10 +124,10 @@ test('handles code with no return statement', function () {
     $result = $tool->handle(['code' => '$x = 5;']);
 
     expect($result)->isToolResult()
-        ->toolJsonContent(function ($data) {
-            expect($data['result'])->toBeNull()
-                ->and($data['type'])->toBe('NULL');
-        });
+        ->toolJsonContentToMatchArray([
+            'result' => null,
+            'type' => 'NULL',
+        ]);
 });
 
 test('should register only in local environment', function () {
@@ -144,10 +146,10 @@ test('uses custom timeout parameter', function () {
     $result = $tool->handle(['code' => 'return 2 + 2;', 'timeout' => 10]);
 
     expect($result)->isToolResult()
-        ->toolJsonContent(function ($data) {
-            expect($data['result'])->toBe(4)
-                ->and($data['type'])->toBe('integer');
-        });
+        ->toolJsonContentToMatchArray([
+            'result' => 4,
+            'type' => 'integer',
+        ]);
 });
 
 test('uses default timeout when not specified', function () {
@@ -155,10 +157,10 @@ test('uses default timeout when not specified', function () {
     $result = $tool->handle(['code' => 'return 2 + 2;']);
 
     expect($result)->isToolResult()
-        ->toolJsonContent(function ($data) {
-            expect($data['result'])->toBe(4)
-                ->and($data['type'])->toBe('integer');
-        });
+        ->toolJsonContentToMatchArray([
+            'result' => 4,
+            'type' => 'integer',
+        ]);
 });
 
 test('times out when code takes too long', function () {

@@ -29,22 +29,27 @@ test('it returns application info with packages', function () {
 
     expect($result)->isToolResult()
         ->toolHasNoError()
-        ->toolJsonContent(function ($content) {
-            expect($content['php_version'])->toBe(PHP_VERSION)
-                ->and($content['laravel_version'])->toBe(app()->version())
-                ->and($content['database_engine'])->toBe(config('database.default'))
-                ->and($content['packages'])->toHaveCount(2)
-                ->and($content['packages'][0]['roster_name'])->toBe('LARAVEL')
-                ->and($content['packages'][0]['package_name'])->toBe('laravel/framework')
-                ->and($content['packages'][0]['version'])->toBe('11.0.0')
-                ->and($content['packages'][1]['roster_name'])->toBe('PEST')
-                ->and($content['packages'][1]['package_name'])->toBe('pestphp/pest')
-                ->and($content['packages'][1]['version'])->toBe('2.0.0')
-                ->and($content['models'])->toBeArray()
-                ->and($content['models'])->toHaveCount(2)
-                ->and($content['models'])->toContain('App\\Models\\User')
-                ->and($content['models'])->toContain('App\\Models\\Post');
-        });
+        ->toolJsonContentToMatchArray([
+            'php_version' => PHP_VERSION,
+            'laravel_version' => app()->version(),
+            'database_engine' => config('database.default'),
+            'packages' => [
+                [
+                    'roster_name' => 'LARAVEL',
+                    'package_name' => 'laravel/framework',
+                    'version' => '11.0.0',
+                ],
+                [
+                    'roster_name' => 'PEST',
+                    'package_name' => 'pestphp/pest',
+                    'version' => '2.0.0',
+                ],
+            ],
+            'models' => [
+                'App\\Models\\User',
+                'App\\Models\\Post',
+            ],
+        ]);
 });
 
 test('it returns application info with no packages', function () {
@@ -59,12 +64,11 @@ test('it returns application info with no packages', function () {
 
     expect($result)->isToolResult()
         ->toolHasNoError()
-        ->toolJsonContent(function ($content) {
-            expect($content['php_version'])->toBe(PHP_VERSION)
-                ->and($content['laravel_version'])->toBe(app()->version())
-                ->and($content['database_engine'])->toBe(config('database.default'))
-                ->and($content['packages'])->toHaveCount(0)
-                ->and($content['models'])->toBeArray()
-                ->and($content['models'])->toHaveCount(0);
-        });
+        ->toolJsonContentToMatchArray([
+            'php_version' => PHP_VERSION,
+            'laravel_version' => app()->version(),
+            'database_engine' => config('database.default'),
+            'packages' => [],
+            'models' => [],
+        ]);
 });

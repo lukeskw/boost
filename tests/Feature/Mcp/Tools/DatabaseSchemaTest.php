@@ -41,28 +41,21 @@ test('it returns structured database schema', function () {
 
     expect($response)->isToolResult()
         ->toolHasNoError()
+        ->toolJsonContentToMatchArray([
+            'engine' => 'sqlite',
+        ])
         ->toolJsonContent(function ($schemaArray) {
-            expect($schemaArray)->toHaveKey('engine')
-                ->and($schemaArray['engine'])->toBe('sqlite')
-                ->and($schemaArray)->toHaveKey('tables')
+            expect($schemaArray)->toHaveKey('tables')
                 ->and($schemaArray['tables'])->toHaveKey('examples');
 
             $exampleTable = $schemaArray['tables']['examples'];
-            expect($exampleTable)->toHaveKey('columns')
-                ->and($exampleTable['columns'])->toHaveKey('id')
-                ->and($exampleTable['columns'])->toHaveKey('name')
+            expect($exampleTable)->toHaveKeys(['columns', 'indexes', 'foreign_keys', 'triggers', 'check_constraints'])
+                ->and($exampleTable['columns'])->toHaveKeys(['id', 'name'])
                 ->and($exampleTable['columns']['id']['type'])->toBe('integer')
                 ->and($exampleTable['columns']['name']['type'])->toBe('varchar')
-                ->and($exampleTable)->toHaveKey('indexes')
-                ->and($exampleTable)->toHaveKey('foreign_keys')
-                ->and($exampleTable)->toHaveKey('triggers')
-                ->and($exampleTable)->toHaveKey('check_constraints');
+                ->and($schemaArray)->toHaveKey('global')
+                ->and($schemaArray['global'])->toHaveKeys(['views', 'stored_procedures', 'functions', 'sequences']);
 
-            expect($schemaArray)->toHaveKey('global')
-                ->and($schemaArray['global'])->toHaveKey('views')
-                ->and($schemaArray['global'])->toHaveKey('stored_procedures')
-                ->and($schemaArray['global'])->toHaveKey('functions')
-                ->and($schemaArray['global'])->toHaveKey('sequences');
         });
 });
 
