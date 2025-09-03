@@ -1,6 +1,17 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/boost/compare/v1.0.20...main)
+## [Unreleased](https://github.com/laravel/boost/compare/v1.0.21...main)
+
+## [v1.0.21](https://github.com/laravel/boost/compare/v1.0.20...v1.0.21) - 2025-09-03
+
+### What's Changed
+
+* Fix random 'parse error' when running test suite by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/223
+* Clarify ListRoutes name parameter description for better tool calling by [@pushpak1300](https://github.com/pushpak1300) in https://github.com/laravel/boost/pull/182
+* Streamline ToolResult assertions in tests  by [@pushpak1300](https://github.com/pushpak1300) in https://github.com/laravel/boost/pull/225
+* Allow guideline overriding by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/219
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.0.20...v1.0.21
 
 ## [v1.0.20](https://github.com/laravel/boost/compare/v1.0.19...v1.0.20) - 2025-08-28
 
