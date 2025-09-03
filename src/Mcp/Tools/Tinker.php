@@ -30,7 +30,7 @@ DESCRIPTION;
             ->description('PHP code to execute (without opening <?php tags)')
             ->required()
             ->integer('timeout')
-            ->description('Maximum execution time in seconds (default: 30)');
+            ->description('Maximum execution time in seconds (default: 180)');
     }
 
     /**
@@ -42,25 +42,7 @@ DESCRIPTION;
     {
         $code = str_replace(['<?php', '?>'], '', (string) Arr::get($arguments, 'code'));
 
-        $timeout = min(180, (int) (Arr::get($arguments, 'timeout', 30)));
-
-        // When process isolation is enabled, the ToolExecutor handles timeouts
-        if (! config('boost.process_isolation.enabled', false)) {
-            // On Windows: set_time_limit causes uncatchable fatal errors that crash the MCP server
-            // On Unix: set_time_limit works alongside PCNTL for redundant timeout protection
-            set_time_limit($timeout);
-        }
-
         ini_set('memory_limit', '128M');
-
-        // Use PCNTL alarm for timeout control if available (Unix only)
-        if (function_exists('pcntl_async_signals') && function_exists('pcntl_signal')) {
-            pcntl_async_signals(true);
-            pcntl_signal(SIGALRM, function () {
-                throw new Exception('Code execution timed out');
-            });
-            pcntl_alarm($timeout);
-        }
 
         ob_start();
 
@@ -94,11 +76,6 @@ DESCRIPTION;
         } finally {
 
             ob_end_clean();
-
-            // Clean up PCNTL alarm
-            if (function_exists('pcntl_alarm')) {
-                pcntl_alarm(0);
-            }
         }
     }
 }
