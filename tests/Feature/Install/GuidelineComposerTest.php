@@ -298,3 +298,36 @@ test('non-empty custom guidelines override Boost guidelines', function () {
         ->toContain('.ai/custom-rule')
         ->toContain('.ai/project-specific');
 });
+
+test('excludes PHPUnit guidelines when Pest is present due to package priority', function () {
+    $packages = new PackageCollection([
+        new Package(Packages::LARAVEL, 'laravel/framework', '11.0.0'),
+        new Package(Packages::PEST, 'pestphp/pest', '3.0.0'),
+        new Package(Packages::PHPUNIT, 'phpunit/phpunit', '10.0.0'),
+    ]);
+
+    $this->roster->shouldReceive('packages')->andReturn($packages);
+    $this->roster->shouldReceive('uses')->with(Packages::PEST)->andReturn(true);
+
+    $guidelines = $this->composer->compose();
+
+    expect($guidelines)
+        ->toContain('=== pest/core rules ===')
+        ->not->toContain('=== phpunit/core rules ===');
+});
+
+test('includes PHPUnit guidelines when Pest is not present', function () {
+    $packages = new PackageCollection([
+        new Package(Packages::LARAVEL, 'laravel/framework', '11.0.0'),
+        new Package(Packages::PHPUNIT, 'phpunit/phpunit', '10.0.0'),
+    ]);
+
+    $this->roster->shouldReceive('packages')->andReturn($packages);
+    $this->roster->shouldReceive('uses')->with(Packages::PEST)->andReturn(false);
+
+    $guidelines = $this->composer->compose();
+
+    expect($guidelines)
+        ->toContain('=== phpunit/core rules ===')
+        ->not->toContain('=== pest/core rules ===');
+});

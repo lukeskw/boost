@@ -1,6 +1,43 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/boost/compare/v1.1.0...main)
+## [Unreleased](https://github.com/laravel/boost/compare/v1.1.4...main)
+
+## [v1.1.4](https://github.com/laravel/boost/compare/v1.1.3...v1.1.4) - 2025-09-04
+
+### What's Changed
+
+* feat: add windows to tests CI check by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/244
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.1.3...v1.1.4
+
+## [v1.1.3](https://github.com/laravel/boost/compare/v1.1.2...v1.1.3) - 2025-09-04
+
+### What's Changed
+
+* fix: package priorities should work on php8.1 by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/243
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.1.2...v1.1.3
+
+## [v1.1.2](https://github.com/laravel/boost/compare/v1.1.1...v1.1.2) - 2025-09-04
+
+### What's Changed
+
+* feat: add package priority guideline inclusion by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/242
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.1.1...v1.1.2
+
+## [v1.1.1](https://github.com/laravel/boost/compare/v1.1.0...v1.1.1) - 2025-09-04
+
+### What's Changed
+
+* Add strict types declaration in Inertia.php by [@felipeArnold](https://github.com/felipeArnold) in https://github.com/laravel/boost/pull/229
+* feat: update roster requirement, fixes #237 now phpunit will be detected by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/239
+
+### New Contributors
+
+* [@felipeArnold](https://github.com/felipeArnold) made their first contribution in https://github.com/laravel/boost/pull/229
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.1.0...v1.1.1
 
 ## [v1.1.0](https://github.com/laravel/boost/compare/v1.0.21...v1.1.0) - 2025-09-04
 

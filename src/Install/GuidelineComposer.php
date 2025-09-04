@@ -6,6 +6,7 @@ namespace Laravel\Boost\Install;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
+use Laravel\Roster\Enums\Packages;
 use Laravel\Roster\Roster;
 use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
 use Symfony\Component\Finder\Finder;
@@ -21,8 +22,19 @@ class GuidelineComposer
 
     protected GuidelineAssist $guidelineAssist;
 
+    /**
+     * Package priority system to handle conflicts between packages.
+     * When a higher-priority package is present, lower-priority packages are excluded from guidelines.
+     *
+     * @var array<string, string[]>
+     */
+    protected array $packagePriorities;
+
     public function __construct(protected Roster $roster, protected Herd $herd)
     {
+        $this->packagePriorities = [
+            Packages::PEST->value => [Packages::PHPUNIT->value],
+        ];
         $this->config = new GuidelineConfig;
         $this->guidelineAssist = new GuidelineAssist($roster);
     }
@@ -118,6 +130,11 @@ class GuidelineComposer
         // Add all core and version specific docs for Roster supported packages
         // We don't add guidelines for packages unsupported by Roster right now
         foreach ($this->roster->packages() as $package) {
+            // Skip packages that should be excluded due to priority rules
+            if ($this->shouldExcludePackage($package->package()->value)) {
+                continue;
+            }
+
             $guidelineDir = str_replace('_', '-', strtolower($package->name()));
 
             $guidelines->put(
@@ -150,6 +167,23 @@ class GuidelineComposer
 
         return $guidelines
             ->where(fn (array $guideline) => ! empty(trim($guideline['content'])));
+    }
+
+    /**
+     * Determines if a package should be excluded from guidelines based on priority rules.
+     */
+    protected function shouldExcludePackage(string $packageName): bool
+    {
+        foreach ($this->packagePriorities as $priorityPackage => $excludedPackages) {
+            if (in_array($packageName, $excludedPackages)) {
+                $priorityEnum = Packages::from($priorityPackage);
+                if ($this->roster->uses($priorityEnum)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -262,7 +296,8 @@ class GuidelineComposer
         }
 
         // The path is not a custom guideline, check if the user has an override for this
-        $relativePath = ltrim(str_replace([realpath(__DIR__.'/../../'), '.ai/'], '', $path), '/');
+        $basePath = realpath(__DIR__.'/../../');
+        $relativePath = ltrim(str_replace([$basePath, '.ai'.DIRECTORY_SEPARATOR, '.ai/'], '', $path), '/\\');
         $customPath = $this->prependUserGuidelinePath($relativePath);
 
         return file_exists($customPath) ? $customPath : $path;
