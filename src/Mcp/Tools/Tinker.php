@@ -42,7 +42,7 @@ DESCRIPTION;
     {
         $code = str_replace(['<?php', '?>'], '', (string) Arr::get($arguments, 'code'));
 
-        ini_set('memory_limit', '128M');
+        ini_set('memory_limit', '256M');
 
         ob_start();
 
