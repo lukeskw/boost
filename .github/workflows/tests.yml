@@ -15,6 +15,9 @@ permissions:
 jobs:
   tests:
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
 
     strategy:
       fail-fast: true
@@ -33,7 +36,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: dom, curl, libxml, mbstring, zip, fileinfo
+          extensions: dom, curl, libxml, mbstring, zip, fileinfo, sqlite, pdo_sqlite
           ini-values: error_reporting=E_ALL
           tools: composer:v2.8
           coverage: none
@@ -46,7 +49,6 @@ jobs:
           ssh-keyscan github.com >> ~/.ssh/known_hosts
 
       - name: Install dependencies
-        shell: bash
         run: |
           composer update --prefer-dist --no-interaction --no-progress --with='illuminate/contracts:^${{ matrix.laravel }}'
 
@@ -54,6 +56,9 @@ jobs:
         run: vendor/bin/pest
   test-l10:
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
 
     strategy:
       fail-fast: true
