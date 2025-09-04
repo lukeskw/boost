@@ -187,7 +187,7 @@ class FileWriter
     protected function generateServerJson(string $key, array $serverConfig, int $baseIndent = 0): string
     {
         $json = json_encode($serverConfig, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-        
+
         // Normalize line endings to Unix style
         $json = str_replace("\r\n", "\n", $json);
 
@@ -382,7 +382,7 @@ class FileWriter
     protected function writeJsonConfig(array $config): bool
     {
         $json = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-        
+
         // Normalize line endings to Unix style
         if ($json) {
             $json = str_replace("\r\n", "\n", $json);
