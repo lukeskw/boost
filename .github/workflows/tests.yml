@@ -47,7 +47,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer update --prefer-dist --no-interaction --no-progress --with="illuminate/contracts:^${{ matrix.laravel }}"
+          composer update --prefer-dist --no-interaction --no-progress --with="illuminate/contracts:^${{ matrix.laravel }}.0"
 
       - name: Execute tests
         run: vendor/bin/pest
@@ -85,7 +85,7 @@ jobs:
           
       - name: Install dependencies
         run: |
-          composer update --prefer-dist --no-interaction --no-progress --with="illuminate/contracts:^${{ matrix.laravel }}"
+          composer update --prefer-dist --no-interaction --no-progress --with="illuminate/contracts:^${{ matrix.laravel }}.0"
 
       - name: Execute tests
         run: vendor/bin/pest
