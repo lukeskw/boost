@@ -1,6 +1,14 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/boost/compare/v1.0.21...main)
+## [Unreleased](https://github.com/laravel/boost/compare/v1.1.0...main)
+
+## [v1.1.0](https://github.com/laravel/boost/compare/v1.0.21...v1.1.0) - 2025-09-04
+
+### What's Changed
+
+* Always-on process isolation: eliminate conditional complexity by [@andreilungeanu](https://github.com/andreilungeanu) in https://github.com/laravel/boost/pull/184
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.0.21...v1.1.0
 
 ## [v1.0.21](https://github.com/laravel/boost/compare/v1.0.20...v1.0.21) - 2025-09-03
 
