@@ -35,7 +35,7 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: dom, curl, libxml, mbstring, zip, fileinfo
           ini-values: error_reporting=E_ALL
-          tools: composer:v2
+          tools: composer:v2.8
           coverage: none
 
       - name: Setup SSH Keys
@@ -73,7 +73,7 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: dom, curl, libxml, mbstring, zip, fileinfo
           ini-values: error_reporting=E_ALL
-          tools: composer:v2
+          tools: composer:v2.8
           coverage: none
 
       - name: Setup SSH Keys
