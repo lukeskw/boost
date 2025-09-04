@@ -63,9 +63,7 @@ DESCRIPTION;
             }
 
             return ToolResult::json($response);
-
         } catch (Throwable $e) {
-
             return ToolResult::json([
                 'error' => $e->getMessage(),
                 'type' => get_class($e),
@@ -74,7 +72,6 @@ DESCRIPTION;
             ]);
 
         } finally {
-
             ob_end_clean();
         }
     }
