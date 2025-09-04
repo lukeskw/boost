@@ -331,4 +331,3 @@ test('includes PHPUnit guidelines when Pest is not present', function () {
         ->toContain('=== phpunit/core rules ===')
         ->not->toContain('=== pest/core rules ===');
 });
-
