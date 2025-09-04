@@ -1,7 +1,6 @@
 <?php
 
 use Laravel\Boost\Mcp\ToolExecutor;
-use Laravel\Boost\Mcp\Tools\ApplicationInfo;
 use Laravel\Boost\Mcp\Tools\GetConfig;
 use Laravel\Boost\Mcp\Tools\Tinker;
 use Laravel\Mcp\Server\Tools\ToolResult;
@@ -136,14 +135,14 @@ function buildSubprocessCommand(string $toolClass, array $arguments): array
 test('respects custom timeout parameter', function () {
     $executor = Mockery::mock(ToolExecutor::class)->makePartial()
         ->shouldAllowMockingProtectedMethods();
-    
+
     $executor->shouldReceive('buildCommand')
         ->andReturnUsing(fn ($toolClass, $arguments) => buildSubprocessCommand($toolClass, $arguments));
 
     // Test with custom timeout - should succeed with fast code
     $result = $executor->execute(Tinker::class, [
         'code' => 'return "timeout test";',
-        'timeout' => 30
+        'timeout' => 30,
     ]);
 
     expect($result->isError)->toBeFalse();
@@ -151,21 +150,21 @@ test('respects custom timeout parameter', function () {
 
 test('clamps timeout values correctly', function () {
     $executor = new ToolExecutor();
-    
+
     // Test timeout clamping using reflection to access protected method
     $reflection = new ReflectionClass($executor);
     $method = $reflection->getMethod('getTimeout');
     $method->setAccessible(true);
-    
+
     // Test default
     expect($method->invoke($executor, []))->toBe(180);
-    
+
     // Test custom value
     expect($method->invoke($executor, ['timeout' => 60]))->toBe(60);
-    
+
     // Test minimum clamp
     expect($method->invoke($executor, ['timeout' => 0]))->toBe(1);
-    
+
     // Test maximum clamp
     expect($method->invoke($executor, ['timeout' => 1000]))->toBe(600);
 });
