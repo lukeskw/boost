@@ -1,6 +1,19 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/boost/compare/v1.1.0...main)
+## [Unreleased](https://github.com/laravel/boost/compare/v1.1.1...main)
+
+## [v1.1.1](https://github.com/laravel/boost/compare/v1.1.0...v1.1.1) - 2025-09-04
+
+### What's Changed
+
+* Add strict types declaration in Inertia.php by [@felipeArnold](https://github.com/felipeArnold) in https://github.com/laravel/boost/pull/229
+* feat: update roster requirement, fixes #237 now phpunit will be detected by [@ashleyhindle](https://github.com/ashleyhindle) in https://github.com/laravel/boost/pull/239
+
+### New Contributors
+
+* [@felipeArnold](https://github.com/felipeArnold) made their first contribution in https://github.com/laravel/boost/pull/229
+
+**Full Changelog**: https://github.com/laravel/boost/compare/v1.1.0...v1.1.1
 
 ## [v1.1.0](https://github.com/laravel/boost/compare/v1.0.21...v1.1.0) - 2025-09-04
 
